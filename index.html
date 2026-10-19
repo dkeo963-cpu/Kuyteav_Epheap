@@ -320,13 +320,13 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាពទិ១ណា</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
 
   <div id="store-closed-banner" class="closed-banner" style="display: none;">
-    🔒 ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកុម្ម៉ង់បានទេនៅពេលនេះ។
+    🔒 ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកម្មង់បានទេនៅពេលនេះ។
   </div>
 
   <div id="delivery-limit-banner" class="delivery-limit-banner" style="display: none;">
@@ -334,7 +334,7 @@
   </div>
 
   <div id="no-username-banner" class="username-warning">
-    ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ! សូមដាក់ Telegram Username ជាមុនសិន ទើបអាចធ្វើការកុម្ម៉ង់បាន។
+    ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ! សូមដាក់ Telegram Username ជាមុនសិន ទើបអាចធ្វើការកម្មង់បាន។
   </div>
 
   <div class="banner-container">
@@ -368,7 +368,7 @@
   <div id="video-modal" class="modal-overlay">
     <div class="modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">🎥 វីដេអូបង្រៀនពីរបៀបកុម្ម៉ង់ហូប</h3>
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">🎥 វីដេអូបង្រៀនពីរបៀបកម្មង់</h3>
         <button onclick="closeVideoModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer;">✕</button>
       </div>
 
@@ -473,7 +473,7 @@
 
   <div class="cart-trigger-bar">
     <button id="trigger-btn" class="trigger-btn" onclick="openCartDrawer()" disabled>
-      <span>🛒 មើលការកុម្ម៉ង់</span>
+      <span>🛒 មើលការកម្មង់</span>
       <span id="trigger-total">$0.00</span>
     </button>
   </div>
@@ -482,14 +482,14 @@
     <div class="cart-drawer-card">
       <div class="modal-top-nav">
         <button class="back-btn" onclick="closeCartDrawer()">← ត្រឡប់ក្រោយ</button>
-        <div class="drawer-title">🛒 មើលការកុម្ម៉ង់</div>
+        <div class="drawer-title">🛒 មើលការកម្មង់</div>
         <div style="width: 60px;"></div>
       </div>
 
       <div id="drawer-cart-items"></div>
 
       <div class="section-label">ព័ត៌មានអតិថិជន</div>
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Telegram Username (Locked)</label>
+      <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">Telegram username</label>
       <input type="text" id="input-username" class="custom-input" readonly placeholder="មិនមាន Username">
 
       <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub); margin-top: 8px; display: block;">ឈ្មោះអតិថិជន *</label>
@@ -499,7 +499,7 @@
       <input type="tel" id="input-phone" class="custom-input" placeholder="012 345 678">
 
       <!-- Order Type -->
-      <div class="section-label">ប្រភេទការកុម្ម៉ង់</div>
+      <div class="section-label">ប្រភេទការកម្មង់</div>
       <div class="toggle-grid">
         <div class="toggle-item active" onclick="setOrderType('takeaway', this)">ទៅយក (Pick Up)</div>
         <div class="toggle-item" id="delivery-toggle-btn" onclick="setOrderType('delivery', this)">ដឹកជញ្ជូន (Delivery)</div>
@@ -541,7 +541,7 @@
       <textarea id="input-remark" class="custom-input" rows="2" placeholder="ចំណាំបន្ថែម..."></textarea>
 
       <button id="send-order-btn" class="submit-order-btn" onclick="sendOrder()">
-        ធ្វើការកុម្ម៉ង់ • <span id="final-total">$0.00</span>
+        ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>
       </button>
     </div>
   </div>
@@ -1117,7 +1117,7 @@
           const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
 
           if (distance > MAX_DELIVERY_KM) {
-            status.innerText = `× ទីតាំងរបស់អ្នកឆ្ងាយពេក (${distance.toFixed(1)}គីឡូម៉ែត្រ)! ហាងកំណត់សេវាដឹកត្រឹម ៥គីឡូម៉ែត្រប៉ុណ្ណោះ មិនអាចកុម្ម៉ង់បានទេ។`;
+            status.innerText = `× ទីតាំងរបស់អ្នកឆ្ងាយពេក (${distance.toFixed(1)}គីឡូម៉ែត្រ)! ហាងកំណត់សេវាដឹកត្រឹម ៥គីឡូម៉ែត្រប៉ុណ្ណោះ មិនអាចកម្មង់បានទេ។`;
             addressInput.value = "";
             gpsLink = "";
             isLocationPinned = false;
@@ -1198,7 +1198,7 @@
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true;
-      btn.innerText = "កំពុងផ្ញើទិន្នន័យការកុម្ម៉ង់...";
+      btn.innerText = "កំពុងផ្ញើទិន្នន័យការកម្មង់...";
 
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1226,7 +1226,7 @@
           throw new Error(errorMsg);
         }
 
-        alert("ការកុម្ម៉ង់ត្រូវបានផ្ញើជោគជ័យ!");
+        alert("ការកម្មង់ត្រូវបានផ្ញើជោគជ័យ!");
         
         cart = [];
         document.getElementById('input-phone').value = "";
@@ -1255,7 +1255,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
       } catch (err) {
-        alert("កំហុសក្នុងការកុម្ម៉ង់: " + (err.message || err));
+        alert("កំហុសក្នុងការកម្មង់: " + (err.message || err));
       } finally {
         btn.disabled = false;
         updateCartState();
