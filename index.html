@@ -314,7 +314,7 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាព1</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
@@ -532,38 +532,6 @@
 
       <button id="send-order-btn" class="submit-order-btn" onclick="sendOrder()">
         ធ្វើការកុម្ម៉ង់ • <span id="final-total">$0.00</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- PAYMENT LINK MODAL -->
-  <div id="payment-modal" class="modal-overlay">
-    <div class="modal-card" style="text-align: center;">
-      <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; color: var(--aba-blue);">💳 ទូទាត់ប្រាក់តាម ABA Pay</h3>
-      <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 16px;">
-        សូមចុចលើតំណខាងក្រោមដើម្បីបើកកម្មវិធី ABA Pay របស់អ្នកជាមួយចំនួនទឹកប្រាក់ជាក់លាក់។
-      </p>
-
-      <div style="background: #f8fafc; padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-bottom: 16px;">
-        <div style="font-size: 0.85rem; color: var(--text-sub);">ទឹកប្រាក់សរុបត្រូវបង់៖</div>
-        <div id="pay-modal-amount" style="font-size: 1.5rem; font-weight: 800; color: var(--accent-red); margin: 4px 0;">$0.00</div>
-      </div>
-
-      <!-- Clickable Link for the user -->
-      <a id="pay-link-anchor" href="#" target="_blank" rel="noopener noreferrer" style="display: block; background: var(--aba-blue); color: #ffffff; padding: 14px; border-radius: var(--radius-md); font-weight: 800; font-size: 1rem; text-decoration: none; margin-bottom: 12px; box-shadow: var(--shadow-sm);">
-        🔗 ចុចទីនេះដើម្បីបង់ប្រាក់តាម ABA Pay ↗
-      </a>
-
-      <p style="font-size: 0.78rem; color: var(--text-sub); line-height: 1.4; margin-bottom: 16px;">
-        បន្ទាប់ពីបង់ប្រាក់រួចរាល់ សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់ និងបញ្ជូនការកុម្ម៉ង់ទៅហាង៖
-      </p>
-
-      <button id="verify-payment-btn" onclick="verifyPayment()" style="width: 100%; padding: 14px; background: var(--accent-green); color: #fff; border: none; font-weight: 800; border-radius: var(--radius-md); font-size: 1rem; cursor: pointer; margin-bottom: 8px;">
-        ✓ ខ្ញុំបានបង់ប្រាក់រួច • ផ្ទៀងផ្ទាត់ និងបញ្ជូន
-      </button>
-
-      <button onclick="closePaymentModal()" style="width: 100%; padding: 10px; background: transparent; color: var(--text-sub); border: none; font-weight: 700; cursor: pointer;">
-        បោះបង់
       </button>
     </div>
   </div>
@@ -1146,7 +1114,7 @@
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true;
-      btn.innerText = "កំពុងរៀបចំការទូទាត់...";
+      btn.innerText = "កំពុងភ្ជាប់ទៅកាន់ ABA Pay...";
 
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1172,35 +1140,34 @@
           telegram_message: data.telegram_message
         };
 
-        // Construct exact amount static link
+        // Construct exact amount link automatically
         const exactAmount = data.grand_total;
         const exactPayLink = `https://link.payway.com.kh/ABAPAYrM547709W?amount=${exactAmount}`;
 
-        // Populate modal elements
-        document.getElementById('pay-modal-amount').innerText = `$${exactAmount}`;
-        const linkAnchor = document.getElementById('pay-link-anchor');
-        linkAnchor.href = exactPayLink;
+        // Transform button to Verify Payment button
+        btn.innerText = "🔍 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់ (Verify Payment)";
+        btn.style.background = "var(--accent-green)";
+        btn.onclick = verifyPayment;
 
-        // Close cart drawer and open payment modal
-        closeCartDrawer();
-        document.getElementById('payment-modal').style.display = 'flex';
+        // AUTOMATICALLY REDIRECT DIRECTLY TO ABA APP / LINK
+        if (window.Telegram?.WebApp?.openLink) {
+          window.Telegram.WebApp.openLink(exactPayLink);
+        } else {
+          window.location.href = exactPayLink;
+        }
 
       } catch (err) {
         alert("កំហុស៖ " + (err.message || err));
+        btn.innerText = "ធ្វើការកុម្ម៉ង់ • " + document.getElementById('final-total').innerText;
       } finally {
         btn.disabled = false;
-        updateCartState();
       }
-    }
-
-    function closePaymentModal() {
-      document.getElementById('payment-modal').style.display = 'none';
     }
 
     async function verifyPayment() {
       if (!currentPendingOrder) return;
 
-      const btn = document.getElementById('verify-payment-btn');
+      const btn = document.getElementById('send-order-btn');
       btn.disabled = true;
       btn.innerText = "កំពុងផ្ទៀងផ្ទាត់ជាមួយ ABA...";
 
@@ -1222,7 +1189,6 @@
         // Clear cart & reset UI
         cart = [];
         currentPendingOrder = null;
-        closePaymentModal();
         
         document.getElementById('input-phone').value = "";
         document.getElementById('input-remark').value = "";
@@ -1245,6 +1211,12 @@
         document.getElementById('delivery-fee-row').style.display = 'none';
         document.getElementById('gps-btn').disabled = true;
 
+        // Reset button state
+        btn.innerText = "ធ្វើការកុម្ម៉ង់ • $0.00";
+        btn.style.background = "var(--accent-red)";
+        btn.onclick = sendOrder;
+
+        closeCartDrawer();
         updateCartState();
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -1252,7 +1224,9 @@
         alert("❌ " + (err.message || err));
       } finally {
         btn.disabled = false;
-        btn.innerText = "✓ ខ្ញុំបានបង់ប្រាក់រួច • ផ្ទៀងផ្ទាត់ និងបញ្ជូន";
+        if (currentPendingOrder) {
+          btn.innerText = "🔍 ផ្ទៀងផ្ទាត់ការបង់ប្រាក់ (Verify Payment)";
+        }
       }
     }
   </script>
