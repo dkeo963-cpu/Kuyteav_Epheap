@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>តូបគុយទាវ អ៊ីភាពទី១</title>
+  <title>តូបគុយទាវ អ៊ីភាព</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -314,7 +314,7 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាពទី១</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
@@ -537,8 +537,8 @@
   </div>
 
   <script>
-    const STORE_LAT = 11.5304027;
-    const STORE_LNG = 104.8043686;
+    const STORE_LAT = 10.58662;
+    const STORE_LNG = 103.7631;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -589,7 +589,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let IS_STORE_OPEN = true;
+    let IS_STORE_OPEN = false;
     let menuItems = [];
     let currentCategory = 'all';
     let activeModalItem = null;
@@ -620,10 +620,14 @@
           .eq('key', 'is_store_open')
           .single();
 
-        if (!error && data) {
+        if (error || !data) {
+          IS_STORE_OPEN = true;
+        } else {
           IS_STORE_OPEN = data.value;
         }
-      } catch (e) {}
+      } catch (e) {
+        IS_STORE_OPEN = true;
+      }
 
       const badge = document.getElementById('status-badge');
       const closedBanner = document.getElementById('store-closed-banner');
@@ -747,7 +751,7 @@
             </div>
             <div style="display: flex; align-items: center;">
               <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
-              <button class="add-btn" ${!IS_STORE_OPEN || !isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
+              <button class="add-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
             </div>
           </div>
         `;
@@ -810,11 +814,6 @@
     function closeImageModal() { document.getElementById('image-viewer-modal').style.display = 'none'; }
 
     function openSizeModal(itemKey) {
-      if (!IS_STORE_OPEN) {
-        alert("ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន!");
-        return;
-      }
-
       activeModalItem = menuItems.find(i => i.item_key === itemKey);
       if (!activeModalItem || activeModalItem.is_available === false) {
         alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!");
@@ -887,11 +886,6 @@
     }
 
     function confirmAddToCart() {
-      if (!IS_STORE_OPEN) {
-        alert("ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន!");
-        return;
-      }
-
       if (!activeModalItem || !selectedSize) return;
 
       const stockLimit = activeModalItem.stock_quantity !== undefined ? Number(activeModalItem.stock_quantity) : 50;
@@ -960,10 +954,10 @@
     function updateCartState() {
       const triggerBtn = document.getElementById('trigger-btn');
       
-      if (cart.length === 0 || !IS_STORE_OPEN) {
+      if (cart.length === 0) {
         document.getElementById('trigger-total').innerText = '$0.00';
         triggerBtn.disabled = true;
-        if (cart.length === 0) closeCartDrawer();
+        closeCartDrawer();
         return;
       }
 
@@ -982,10 +976,6 @@
     }
 
     function openCartDrawer() {
-      if (!IS_STORE_OPEN) {
-        alert("ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន!");
-        return;
-      }
       renderCartDrawer();
       document.getElementById('cart-drawer').style.display = 'flex';
     }
@@ -1111,11 +1101,6 @@
     }
 
     async function sendOrder() {
-      if (!IS_STORE_OPEN) {
-        alert("ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកុម្ម៉ង់បានទេ។");
-        return;
-      }
-
       const usernameVal = document.getElementById('input-username').value.trim();
       const customerNameVal = document.getElementById('input-customer-name').value.trim();
       const phoneVal = document.getElementById('input-phone').value.trim();
