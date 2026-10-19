@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>តូបគុយទាវ អ៊ីភាព</title>
+  <title>តូបគុយទាវ អ៊ីភាពទី១</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -582,7 +582,6 @@
       }
       
       checkStoreStatus();
-      initRealtimeListener();
       initBanners();
     });
 
@@ -590,7 +589,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let IS_STORE_OPEN = false;
+    let IS_STORE_OPEN = true;
     let menuItems = [];
     let currentCategory = 'all';
     let activeModalItem = null;
@@ -603,21 +602,6 @@
 
     let activeImagesList = [];
     let currentSlideIndex = 0;
-
-    // Realtime Listener to auto-reload user page when store status changes in backend
-    function initRealtimeListener() {
-      supabaseClient
-        .channel('app_settings_realtime')
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'app_settings', filter: 'key=eq.is_store_open' },
-          (payload) => {
-            // Automatically reload the page when store status updates in Supabase
-            window.location.reload();
-          }
-        )
-        .subscribe();
-    }
 
     function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
@@ -636,14 +620,10 @@
           .eq('key', 'is_store_open')
           .single();
 
-        if (error || !data) {
-          IS_STORE_OPEN = true;
-        } else {
+        if (!error && data) {
           IS_STORE_OPEN = data.value;
         }
-      } catch (e) {
-        IS_STORE_OPEN = true;
-      }
+      } catch (e) {}
 
       const badge = document.getElementById('status-badge');
       const closedBanner = document.getElementById('store-closed-banner');
@@ -907,6 +887,11 @@
     }
 
     function confirmAddToCart() {
+      if (!IS_STORE_OPEN) {
+        alert("ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន!");
+        return;
+      }
+
       if (!activeModalItem || !selectedSize) return;
 
       const stockLimit = activeModalItem.stock_quantity !== undefined ? Number(activeModalItem.stock_quantity) : 50;
