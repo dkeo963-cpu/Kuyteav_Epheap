@@ -314,7 +314,7 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាពទី១</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
@@ -537,8 +537,8 @@
   </div>
 
   <script>
-    const STORE_LAT = 11.5304027;
-    const STORE_LNG = 104.8043686;
+    const STORE_LAT = 10.58662;
+    const STORE_LNG = 103.7631;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -582,6 +582,7 @@
       }
       
       checkStoreStatus();
+      initRealtimeListener();
       initBanners();
     });
 
@@ -602,6 +603,21 @@
 
     let activeImagesList = [];
     let currentSlideIndex = 0;
+
+    // Realtime Listener to auto-reload user page when store status changes in backend
+    function initRealtimeListener() {
+      supabaseClient
+        .channel('app_settings_realtime')
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'app_settings', filter: 'key=eq.is_store_open' },
+          (payload) => {
+            // Automatically reload the page when store status updates in Supabase
+            window.location.reload();
+          }
+        )
+        .subscribe();
+    }
 
     function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
@@ -878,14 +894,12 @@
 
     function closeSizeModal() { document.getElementById('size-modal').style.display = 'none'; }
 
-    // Helper to compare options safely
     function isSameOptions(opt1, opt2) {
       const o1 = (opt1 && Object.keys(opt1).length > 0) ? opt1 : null;
       const o2 = (opt2 && Object.keys(opt2).length > 0) ? opt2 : null;
       return JSON.stringify(o1) === JSON.stringify(o2);
     }
 
-    // Get total quantity of a specific item across all sizes and option variations in cart
     function getTotalQtyInCart(itemKey) {
       return cart
         .filter(c => c.id === itemKey)
