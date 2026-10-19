@@ -1140,7 +1140,9 @@
           throw new Error(errorMsg);
         }
 
-        alert("ការកុម្ម៉ង់ត្រូវបានផ្ញើជោគជ័យ!");
+        const payUrl = data?.pay_url;
+
+        alert("ការកុម្ម៉ង់ត្រូវបានផ្ញើជោគជ័យ! កំពុងបើកកម្មវិធី ABA Pay...");
         
         // សម្អាតទិន្នន័យទាំងអស់ក្រោយបញ្ជាទិញជោគជ័យ
         cart = [];
@@ -1149,7 +1151,6 @@
         document.getElementById('input-address').value = "";
         document.getElementById('gps-status').innerText = "";
         
-        // Reset ប្រភេទការកុម្ម៉ង់មកជា Takeaway វិញ និងសម្អាត GPS ទាំងស្រុង
         selectedOrderType = 'takeaway';
         clientLat = null;
         clientLng = null;
@@ -1169,6 +1170,15 @@
         closeCartDrawer();
         updateCartState();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Open ABA app / checkout link directly
+        if (payUrl) {
+          if (window.Telegram?.WebApp?.openLink) {
+            window.Telegram.WebApp.openLink(payUrl);
+          } else {
+            window.location.href = payUrl;
+          }
+        }
 
       } catch (err) {
         alert("កំហុសក្នុងការកុម្ម៉ង់: " + (err.message || err));
