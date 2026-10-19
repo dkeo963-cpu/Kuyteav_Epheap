@@ -54,6 +54,12 @@
       text-align: center; margin-bottom: 16px; font-size: 0.9rem;
     }
 
+    .delivery-limit-banner {
+      background: #fffbeb; border: 1px solid #fde68a; color: #b45309;
+      padding: 12px 16px; border-radius: var(--radius-md); font-weight: 700;
+      text-align: center; margin-bottom: 16px; font-size: 0.9rem; display: none;
+    }
+
     .username-warning {
       background: #fffbeb; border: 1px solid #fde68a; color: #b45309;
       padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700;
@@ -314,13 +320,17 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាពទិ១ណា</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
 
   <div id="store-closed-banner" class="closed-banner" style="display: none;">
     🔒 ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកុម្ម៉ង់បានទេនៅពេលនេះ។
+  </div>
+
+  <div id="delivery-limit-banner" class="delivery-limit-banner" style="display: none;">
+    🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល <span id="banner-wait-time">១៥</span> នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។
   </div>
 
   <div id="no-username-banner" class="username-warning">
@@ -405,8 +415,8 @@
           សេវាកម្មរចនាប្លង់ស្ថាបត្យកម្ម 3D Rendering គណនាប្លង់រចនាសម្ព័ន្ធ និងប្រព័ន្ធវិស្វកម្ម MEP យ៉ាងប្រណិតនិងមានស្តង់ដារខ្ពស់។
         </p>
         <a href="https://auraarchitecturemalin.com" target="_blank" rel="noopener noreferrer" style="font-size: 0.82rem; font-weight: 700; color: var(--accent-green); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-  🌐 ចូលមើលគេហទំព័រ: auraarchitecturemalin.com ↗
-</a>
+          🌐 ចូលមើលគេហទំព័រ: auraarchitecturemalin.com ↗
+        </a>
       </div>
 
       <button onclick="closeInfoModal()" style="width: 100%; padding: 14px; background: var(--accent-blue); color: #fff; border: none; font-weight: 800; border-radius: var(--radius-md); cursor: pointer;">បិទ</button>
@@ -492,7 +502,7 @@
       <div class="section-label">ប្រភេទការកុម្ម៉ង់</div>
       <div class="toggle-grid">
         <div class="toggle-item active" onclick="setOrderType('takeaway', this)">ទៅយក (Pick Up)</div>
-        <div class="toggle-item" onclick="setOrderType('delivery', this)">ដឹកជញ្ជូន (Delivery)</div>
+        <div class="toggle-item" id="delivery-toggle-btn" onclick="setOrderType('delivery', this)">ដឹកជញ្ជូន (Delivery)</div>
       </div>
 
       <!-- Address Input & GPS Location Pinning -->
@@ -582,6 +592,7 @@
       }
       
       checkStoreStatus();
+      checkDeliveryStatus();
       initBanners();
     });
 
@@ -590,6 +601,8 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let IS_STORE_OPEN = false;
+    let IS_DELIVERY_AVAILABLE = true;
+    let ESTIMATED_WAIT_MINUTES = 15;
     let menuItems = [];
     let currentCategory = 'all';
     let activeModalItem = null;
@@ -643,6 +656,38 @@
       }
 
       loadMenu();
+    }
+
+    async function checkDeliveryStatus() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('delivery_status')
+          .select('is_delivery_available, estimated_wait_minutes')
+          .eq('id', 1)
+          .single();
+
+        if (!error && data) {
+          IS_DELIVERY_AVAILABLE = data.is_delivery_available;
+          ESTIMATED_WAIT_MINUTES = data.estimated_wait_minutes || 15;
+        }
+      } catch (e) {
+        IS_DELIVERY_AVAILABLE = true;
+      }
+
+      const deliveryLimitBanner = document.getElementById('delivery-limit-banner');
+      const waitTimeSpan = document.getElementById('banner-wait-time');
+      const deliveryToggleBtn = document.getElementById('delivery-toggle-btn');
+
+      if (!IS_DELIVERY_AVAILABLE) {
+        deliveryLimitBanner.style.display = 'block';
+        waitTimeSpan.innerText = ESTIMATED_WAIT_MINUTES;
+        deliveryToggleBtn.style.opacity = '0.4';
+        deliveryToggleBtn.style.cursor = 'not-allowed';
+      } else {
+        deliveryLimitBanner.style.display = 'none';
+        deliveryToggleBtn.style.opacity = '1';
+        deliveryToggleBtn.style.cursor = 'pointer';
+      }
     }
 
     const bannerImages = ["./images/1.png", "./images/2.png", "./images/1.png"];
@@ -1020,7 +1065,14 @@
       }).join('');
     }
 
-    function setOrderType(type, element) {
+    async function setOrderType(type, element) {
+      await checkDeliveryStatus();
+
+      if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
+        alert(`អស់ជើងដឹកជញ្ជូន សូមរង់ចាំ រយះពេល ${ESTIMATED_WAIT_MINUTES}នាទីទៀត`);
+        return;
+      }
+
       element.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
       element.classList.add('active');
       selectedOrderType = type;
@@ -1101,6 +1153,12 @@
     }
 
     async function sendOrder() {
+      await checkDeliveryStatus();
+      if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
+        alert(`អស់ជើងដឹកជញ្ជូន សូមរង់ចាំ រយះពេល ${ESTIMATED_WAIT_MINUTES}នាទីទៀត`);
+        return;
+      }
+
       const usernameVal = document.getElementById('input-username').value.trim();
       const customerNameVal = document.getElementById('input-customer-name').value.trim();
       const phoneVal = document.getElementById('input-phone').value.trim();
