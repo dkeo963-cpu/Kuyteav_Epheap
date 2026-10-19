@@ -314,7 +314,7 @@
   <div class="top-header">
     <div>
       <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-      <div class="shop-title">តូបគុយទាវ អ៊ីភាពa</div>
+      <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
     </div>
     <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
   </div>
@@ -536,9 +536,9 @@
     </div>
   </div>
 
-<script>
-    const STORE_LAT = 10.58662;
-    const STORE_LNG = 103.7631;
+  <script>
+    const STORE_LAT = 11.5304027;
+    const STORE_LNG = 104.8043686;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -878,19 +878,38 @@
 
     function closeSizeModal() { document.getElementById('size-modal').style.display = 'none'; }
 
+    // Helper to compare options safely
+    function isSameOptions(opt1, opt2) {
+      const o1 = (opt1 && Object.keys(opt1).length > 0) ? opt1 : null;
+      const o2 = (opt2 && Object.keys(opt2).length > 0) ? opt2 : null;
+      return JSON.stringify(o1) === JSON.stringify(o2);
+    }
+
+    // Get total quantity of a specific item across all sizes and option variations in cart
+    function getTotalQtyInCart(itemKey) {
+      return cart
+        .filter(c => c.id === itemKey)
+        .reduce((sum, c) => sum + c.quantity, 0);
+    }
+
     function confirmAddToCart() {
       if (!activeModalItem || !selectedSize) return;
 
       const stockLimit = activeModalItem.stock_quantity !== undefined ? Number(activeModalItem.stock_quantity) : 50;
-      
-      const optionKey = selectedOptions ? JSON.stringify(selectedOptions) : '';
-      const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize && JSON.stringify(c.options) === optionKey);
+      const totalInCartForThisDish = getTotalQtyInCart(activeModalItem.item_key);
 
-      const currentQtyInCart = existing ? existing.quantity : 0;
-      if (currentQtyInCart + 1 > stockLimit) {
-        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកត្រឹមតែ ${stockLimit} ចានប៉ុណ្ណោះ!`);
+      if (totalInCartForThisDish + 1 > stockLimit) {
+        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ចានប៉ុណ្ណោះ!`);
         return;
       }
+
+      const normalizedOptions = (selectedOptions && Object.keys(selectedOptions).length > 0) ? { ...selectedOptions } : null;
+
+      const existing = cart.find(c => 
+        c.id === activeModalItem.item_key && 
+        c.size === selectedSize && 
+        isSameOptions(c.options, normalizedOptions)
+      );
 
       if (existing) {
         existing.quantity += 1;
@@ -898,7 +917,7 @@
         cart.push({
           id: activeModalItem.item_key,
           size: selectedSize,
-          options: selectedOptions ? { ...selectedOptions } : null,
+          options: normalizedOptions,
           quantity: 1
         });
       }
@@ -912,9 +931,12 @@
       const product = menuItems.find(m => m.item_key === cartItem.id);
       const stockLimit = product && product.stock_quantity !== undefined ? Number(product.stock_quantity) : 50;
 
-      if (delta > 0 && cartItem.quantity + delta > stockLimit) {
-        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកត្រឹមតែ ${stockLimit} ចានប៉ុណ្ណោះ!`);
-        return;
+      if (delta > 0) {
+        const totalInCartForThisDish = getTotalQtyInCart(cartItem.id);
+        if (totalInCartForThisDish + delta > stockLimit) {
+          alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ចានប៉ុណ្ណោះ!`);
+          return;
+        }
       }
 
       cartItem.quantity += delta;
@@ -977,10 +999,12 @@
         const product = menuItems.find(m => m.item_key === c.id);
         const itemPrice = parseFloat(product?.sizes[c.size] || 0) * c.quantity;
         const stockLimit = product && product.stock_quantity !== undefined ? Number(product.stock_quantity) : 50;
-        const isMaxed = c.quantity >= stockLimit;
+        
+        const totalInCartForThisDish = getTotalQtyInCart(c.id);
+        const isMaxed = totalInCartForThisDish >= stockLimit;
         
         let optionStr = "";
-        if (c.options) {
+        if (c.options && Object.keys(c.options).length > 0) {
           const opts = [];
           if (c.options.sugar) opts.push(`ស្ករ:${c.options.sugar}`);
           if (c.options.ice) opts.push(`ទឹកកក:${c.options.ice}`);
