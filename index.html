@@ -541,7 +541,7 @@
     <div class="modal-card" style="text-align: center;">
       <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; color: var(--aba-blue);">💳 ទូទាត់ប្រាក់តាម ABA Pay</h3>
       <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 16px;">
-        សូមចុចលើតំណខាងក្រោមដើម្បីបើកកម្មវិធី ABA Pay របស់អ្នកផ្ទៀងផ្ទាត់ទឹកប្រាក់។
+        សូមចុចលើតំណខាងក្រោមដើម្បីបើកកម្មវិធី ABA Pay របស់អ្នកជាមួយចំនួនទឹកប្រាក់ជាក់លាក់។
       </p>
 
       <div style="background: #f8fafc; padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-bottom: 16px;">
@@ -1146,7 +1146,7 @@
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true;
-      btn.innerText = "កំពុងបង្កើតតំណទូទាត់ ABA...";
+      btn.innerText = "កំពុងរៀបចំការទូទាត់...";
 
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1165,17 +1165,21 @@
           }
         });
 
-        if (error || !data.success) throw new Error(error?.message || "Failed to generate payment link");
+        if (error || !data.success) throw new Error(error?.message || "Failed to process order");
 
         currentPendingOrder = {
           tran_id: data.tran_id,
           telegram_message: data.telegram_message
         };
 
-        // Populate Payment Modal with exact amount and link
-        document.getElementById('pay-modal-amount').innerText = `$${data.grand_total}`;
+        // Construct exact amount static link
+        const exactAmount = data.grand_total;
+        const exactPayLink = `https://link.payway.com.kh/ABAPAYrM547709W?amount=${exactAmount}`;
+
+        // Populate modal elements
+        document.getElementById('pay-modal-amount').innerText = `$${exactAmount}`;
         const linkAnchor = document.getElementById('pay-link-anchor');
-        linkAnchor.href = data.pay_url;
+        linkAnchor.href = exactPayLink;
 
         // Close cart drawer and open payment modal
         closeCartDrawer();
