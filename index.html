@@ -1112,7 +1112,7 @@
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true;
-      btn.innerText = "កំពុងផ្ញើទិន្នន័យការកុម្ម៉ង់...";
+      btn.innerText = "កំពុងបង្កើតតំណទូទាត់ ABA...";
 
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1131,57 +1131,63 @@
           }
         });
 
-        if (error) {
-          let errorMsg = error.message;
-          try {
-            const parsed = JSON.parse(error.message);
-            if (parsed.error) errorMsg = parsed.error;
-          } catch(e) {}
-          throw new Error(errorMsg);
+        if (error || !data.success) throw new Error(error?.message || "Failed to generate payment link");
+
+        const payUrl = data.pay_url;
+        const pendingTelegramMessage = data.telegram_message;
+
+        // Open ABA App / Link for payment
+        if (window.Telegram?.WebApp?.openLink) {
+          window.Telegram.WebApp.openLink(payUrl);
+        } else {
+          window.open(payUrl, '_blank');
         }
 
-        const payUrl = data?.pay_url;
+        // Prompt user after payment completion to send the order to Telegram
+        setTimeout(async () => {
+          const userHasPaid = confirm("តើអ្នកបានទូទាត់ប្រាក់រួចរាល់ហើយ ឬនៅ? ចុច 'OK' ដើម្បីបញ្ជូនការកុម្ម៉ង់ទៅកាន់ហាង។");
+          
+          if (userHasPaid) {
+            await supabaseClient.functions.invoke('smart-function', {
+              body: {
+                action: 'send_telegram_notification',
+                telegramMessage: pendingTelegramMessage
+              }
+            });
 
-        alert("ការកុម្ម៉ង់ត្រូវបានផ្ញើជោគជ័យ! កំពុងបើកកម្មវិធី ABA Pay...");
-        
-        // សម្អាតទិន្នន័យទាំងអស់ក្រោយបញ្ជាទិញជោគជ័យ
-        cart = [];
-        document.getElementById('input-phone').value = "";
-        document.getElementById('input-remark').value = "";
-        document.getElementById('input-address').value = "";
-        document.getElementById('gps-status').innerText = "";
-        
-        selectedOrderType = 'takeaway';
-        clientLat = null;
-        clientLng = null;
-        currentDeliveryFee = 0.00;
-        isLocationPinned = false;
-        gpsLink = "";
+            alert("ការកុម្មង់ និងការទូទាត់របស់អ្នកត្រូវបានបញ្ជូនជោគជ័យ!");
+            
+            // Clear cart & reset UI
+            cart = [];
+            document.getElementById('input-phone').value = "";
+            document.getElementById('input-remark').value = "";
+            document.getElementById('input-address').value = "";
+            document.getElementById('gps-status').innerText = "";
+            
+            selectedOrderType = 'takeaway';
+            clientLat = null;
+            clientLng = null;
+            currentDeliveryFee = 0.00;
+            isLocationPinned = false;
+            gpsLink = "";
 
-        const toggleItems = document.querySelectorAll('.toggle-grid .toggle-item');
-        if (toggleItems.length >= 2) {
-          toggleItems[0].classList.add('active');
-          toggleItems[1].classList.remove('active');
-        }
-        
-        document.getElementById('delivery-fee-row').style.display = 'none';
-        document.getElementById('gps-btn').disabled = true;
+            const toggleItems = document.querySelectorAll('.toggle-grid .toggle-item');
+            if (toggleItems.length >= 2) {
+              toggleItems[0].classList.add('active');
+              toggleItems[1].classList.remove('active');
+            }
+            
+            document.getElementById('delivery-fee-row').style.display = 'none';
+            document.getElementById('gps-btn').disabled = true;
 
-        closeCartDrawer();
-        updateCartState();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // Open ABA app / checkout link directly
-        if (payUrl) {
-          if (window.Telegram?.WebApp?.openLink) {
-            window.Telegram.WebApp.openLink(payUrl);
-          } else {
-            window.location.href = payUrl;
+            closeCartDrawer();
+            updateCartState();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
-        }
+        }, 1500);
 
       } catch (err) {
-        alert("កំហុសក្នុងការកុម្ម៉ង់: " + (err.message || err));
+        alert("កំហុស៖ " + (err.message || err));
       } finally {
         btn.disabled = false;
         updateCartState();
