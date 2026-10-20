@@ -42,7 +42,6 @@
     .top-promo-badge {
       background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
     }
-    .top-promo-banner a { color: #b45309; text-decoration: underline; cursor: pointer; }
 
     /* ---------- Header ---------- */
     .top { position: sticky; top: 0; z-index: 50; background: var(--ink); color: #fff; padding: 11px 0; }
@@ -60,7 +59,6 @@
     }
     .hours-badge.open { background: var(--ok-l); color: var(--ok); }
 
-    /* ---------- Banners ---------- */
     .closed-banner, .delivery-limit-banner, .username-warning {
       padding: 11px 14px; border-radius: var(--r); font-weight: 700; text-align: center;
       margin-bottom: 12px; font-size: 13px;
@@ -76,7 +74,6 @@
     .banner-slide { min-width: 100%; height: 100%; }
     .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* ---------- Search + categories ---------- */
     .search-input {
       width: 100%; height: 44px; border: 1px solid var(--line); border-radius: var(--r-s);
       padding: 0 14px 0 40px; font-size: 14px; background: var(--surface) no-repeat 13px center;
@@ -100,7 +97,6 @@
     .category-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .category-card.active .category-name { color: var(--brand); }
 
-    /* ---------- Food list ---------- */
     #food-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
     #food-list > div:not(.food-card) { grid-column: 1 / -1; text-align: center; color: var(--sub); padding: 30px 0; }
     @media (min-width: 700px) { #food-list { grid-template-columns: 1fr 1fr; } }
@@ -132,7 +128,6 @@
     .add-btn:active { transform: scale(.94); background: var(--brand-d); }
     .add-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; }
 
-    /* ---------- Bottom links ---------- */
     .bottom-icons-bar { display: flex; gap: 8px; margin: 22px 0 10px; }
     .icon-action-btn {
       flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 6px;
@@ -251,7 +246,7 @@
   <!-- Top Promotion Banner Container -->
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
     <span class="top-promo-badge" id="promo-badge-text">Free Delivery</span>
-    <span id="promo-msg-text">we will free delivery for more than 10items for you at every products</span>
+    <span id="promo-msg-text">we will free delivery for more than 10 items for you</span>
   </div>
 
   <header class="top">
@@ -448,7 +443,7 @@
         noUsernameBanner.style.display = 'none';
       } else {
         usernameInput.value = "";
-        noUsernameBanner.placeholder = "គ្មាន Username";
+        usernameInput.placeholder = "គ្មាន Username";
         noUsernameBanner.style.display = 'block';
       }
 
@@ -491,50 +486,41 @@
       iframe.src = iframe.src;
     }
 
-async function checkPromoBanner() {
-  try {
-    const { data, error } = await supabaseClient
-      .from('app_settings')
-      .select('key, value')
-      .in('key', ['promo_active', 'promo_text', 'promo_badge']);
-    
-    if (!error && data) {
-      const activeItem = data.find(i => i.key === 'promo_active');
-      const textItem = data.find(i => i.key === 'promo_text');
-      const badgeItem = data.find(i => i.key === 'promo_badge');
-
-      const bannerEl = document.getElementById('top-promo-banner');
-      
-      // Check if active is true (handling both boolean and string formats from database)
-      const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
-
-      if (isActive && bannerEl) {
-        bannerEl.style.display = 'flex';
+    async function checkPromoBanner() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_settings')
+          .select('key, value')
+          .in('key', ['promo_active', 'promo_text', 'promo_badge']);
         
-        // Helper to unwrap JSON string quotes if supabase returns them with extra quotes
-        const cleanVal = (val, fallback) => {
-          if (val === undefined || val === null) return fallback;
-          let str = typeof val === 'string' ? val : JSON.stringify(val);
-          // Remove wrapping quotes if present
-          if (str.startsWith('"') && str.endsWith('"')) {
-            try { str = JSON.parse(str); } catch(e) {}
+        if (!error && data) {
+          const activeItem = data.find(i => i.key === 'promo_active');
+          const textItem = data.find(i => i.key === 'promo_text');
+          const badgeItem = data.find(i => i.key === 'promo_badge');
+
+          const bannerEl = document.getElementById('top-promo-banner');
+          const cleanVal = (val, fallback) => {
+            if (val === undefined || val === null) return fallback;
+            let str = typeof val === 'string' ? val : JSON.stringify(val);
+            if (str.startsWith('"') && str.endsWith('"')) {
+              try { str = JSON.parse(str); } catch(e) {}
+            }
+            return str || fallback;
+          };
+
+          const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
+          if (isActive && bannerEl) {
+            bannerEl.style.display = 'flex';
+            document.getElementById('promo-msg-text').innerText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
+            document.getElementById('promo-badge-text').innerText = cleanVal(badgeItem?.value, "Free Delivery");
+          } else if (bannerEl) {
+            bannerEl.style.display = 'none';
           }
-          return str || fallback;
-        };
-
-        const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you at every product check it now 🎉");
-        const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
-
-        document.getElementById('promo-msg-text').innerText = msgText;
-        document.getElementById('promo-badge-text').innerText = badgeText;
-      } else if (bannerEl) {
-        bannerEl.style.display = 'none';
+        }
+      } catch (e) {
+        console.error("Promo banner check failed", e);
       }
     }
-  } catch (e) {
-    console.error("Promo banner check failed", e);
-  }
-}
 
     async function checkStoreStatus() {
       try {
@@ -564,6 +550,19 @@ async function checkPromoBanner() {
           ESTIMATED_WAIT_MINUTES = data.estimated_wait_minutes || 15;
         }
       } catch (e) { IS_DELIVERY_AVAILABLE = true; }
+
+      const deliveryLimitBanner = document.getElementById('delivery-limit-banner');
+      const waitTimeSpan = document.getElementById('banner-wait-time');
+      const deliveryToggleBtn = document.getElementById('delivery-toggle-btn');
+
+      if (!IS_DELIVERY_AVAILABLE) {
+        deliveryLimitBanner.style.display = 'block';
+        waitTimeSpan.innerText = ESTIMATED_WAIT_MINUTES;
+        deliveryToggleBtn.style.opacity = '0.4';
+      } else {
+        deliveryLimitBanner.style.display = 'none';
+        deliveryToggleBtn.style.opacity = '1';
+      }
     }
 
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner3.png"];
@@ -713,7 +712,11 @@ async function checkPromoBanner() {
       document.getElementById('summary-grandtotal').innerText = `$${grandTotal.toFixed(2)}`;
     }
 
-    function openCartDrawer() { renderCartDrawer(); document.getElementById('cart-drawer').style.display = 'flex'; }
+    function openCartDrawer() { 
+      checkDeliveryStatus(); 
+      renderCartDrawer(); 
+      document.getElementById('cart-drawer').style.display = 'flex'; 
+    }
     function closeCartDrawer() { document.getElementById('cart-drawer').style.display = 'none'; }
 
     function renderCartDrawer() {
@@ -740,7 +743,13 @@ async function checkPromoBanner() {
 
     async function setOrderType(type, element) {
       await checkDeliveryStatus();
-      if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) { alert(`អស់ជើងដឹកជញ្ជូន`); return; }
+      
+      // Forces an immediate popup alert when user tries to pick delivery while it's closed
+      if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
+        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។`);
+        return;
+      }
+
       element.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
       element.classList.add('active');
       selectedOrderType = type;
@@ -767,6 +776,12 @@ async function checkPromoBanner() {
     }
 
     async function sendOrder() {
+      await checkDeliveryStatus();
+      if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
+        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
+        return;
+      }
+
       const usernameVal = document.getElementById('input-username').value.trim();
       const customerNameVal = document.getElementById('input-customer-name').value.trim();
       const phoneVal = document.getElementById('input-phone').value.trim();
