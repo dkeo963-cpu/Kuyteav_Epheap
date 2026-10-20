@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ផ្ទាំងគ្រប់គ្រង - តូបគុយទាវ អ៊ីភាព</title>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      --bg-light: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --accent-blue: #0284c7;
+      --accent-green: #16a34a;
+      --accent-red: #ef4444;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 -8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      margin: 0;
+      padding: 16px;
+      user-select: none;
+    }
+
+    /* Modal Backdrop Blur */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 16px;
+    }
+
+    /* Switch Style */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1; transition: .3s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--accent-green); }
+    input:checked + .slider:before { transform: translateX(22px); }
+  </style>
+</head>
+<body class="max-w-5xl mx-auto">
+
+  <!-- Header Bar -->
+  <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">⚙️</span>
+        <h1 class="text-xl font-extrabold text-slate-900">ផ្ទាំងគ្រប់គ្រងហាង (Admin Dashboard)</h1>
+      </div>
+      <p class="text-xs text-slate-500 mt-1">តូបគុយទាវ អ៊ីភាព • គ្រប់គ្រងស្តុក និងការបើកបិទហាង</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="fetchData()" class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 transition">
+        <span>🔄</span> ធ្វើបច្ចុប្បន្នភាព
+      </button>
+      <a href="index.html" target="_blank" class="flex items-center gap-1.5 px-3 py-2 bg-sky-50 text-sky-700 hover:bg-sky-100 text-xs font-bold rounded-xl border border-sky-200 transition">
+        <span>👁️</span> មើលហាង (App) ↗
+      </a>
+    </div>
+  </header>
+
+  <!-- Store Settings Section -->
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- Store Status Switch -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+      <div>
+        <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1">ស្ថានភាពហាង (Store Status)</div>
+        <div id="store-status-text" class="text-base font-bold text-slate-800">កំពុងទាញយក...</div>
+        <div class="text-xs text-slate-500 mt-0.5">បើក/បិទ ដំណើរការទទួលការកម្មង់</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="store-toggle" onchange="toggleStoreStatus(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Delivery Status Control -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <div class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-1">សេវាដឹកជញ្ជូន (Delivery)</div>
+          <div id="delivery-status-text" class="text-base font-bold text-slate-800">កំពុងទាញយក...</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="delivery-toggle" onchange="toggleDeliveryStatus(this.checked)">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+        <span class="text-xs font-bold text-slate-600 whitespace-nowrap">រយះពេលរង់ចាំ (នាទី):</span>
+        <input type="number" id="wait-time-input" class="w-20 px-2 py-1 text-sm font-bold bg-slate-50 border border-slate-300 rounded-lg text-center focus:outline-none focus:border-sky-500" min="1" max="180" placeholder="15">
+        <button onclick="saveWaitTime()" class="px-3 py-1 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg transition">រក្សាទុក</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inventory Management Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <div>
+      <h2 class="text-lg font-bold text-slate-900">📦 គ្រប់គ្រងបញ្ជីម្ហូប និងស្តុក</h2>
+      <p class="text-xs text-slate-500">កែប្រែតម្លៃ, បន្ថែម/បន្ថយស្តុក, និងបិទ/បើកមុខម្ហូប</p>
+    </div>
+    <button onclick="openAddItemModal()" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-1.5">
+      <span>➕</span> បន្ថែមមុខម្ហូបថ្មី
+    </button>
+  </div>
+
+  <!-- Filters & Search -->
+  <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-3">
+    <!-- Category Pills -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 flex-1">
+      <button onclick="setCategoryFilter('all')" class="cat-pill active px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white whitespace-nowrap" data-cat="all">ទាំងអស់</button>
+      <button onclick="setCategoryFilter('kuy_teav')" class="cat-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-cat="kuy_teav">🍜 គុយទាវ</button>
+      <button onclick="setCategoryFilter('rice')" class="cat-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-cat="rice">🍚 បាយ</button>
+      <button onclick="setCategoryFilter('other')" class="cat-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-cat="other">🍛 នំបាញ់ចុក</button>
+      <button onclick="setCategoryFilter('drinks')" class="cat-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-cat="drinks">🧋 ភេសជ្ជៈ</button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative w-full sm:w-64">
+      <input type="text" id="admin-search" oninput="renderMenuList()" placeholder="ស្វែងរកឈ្មោះម្ហូប..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500">
+      <span class="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+    </div>
+  </div>
+
+  <!-- Menu Grid -->
+  <div id="admin-food-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="col-span-full text-center py-12 text-slate-400 font-medium">កំពុងទាញយកទិន្នន័យមុខម្ហូប...</div>
+  </div>
+
+
+  <!-- Add / Edit Item Modal -->
+  <div id="item-modal" class="modal-overlay">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <h3 id="modal-heading" class="font-bold text-slate-800 text-base">បន្ថែមមុខម្ហូបថ្មី</h3>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <input type="hidden" id="edit-original-id">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Item Key (អក្សរកាត់/Unique Key) *</label>
+          <input type="text" id="form-key" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500" placeholder="e.g. kuy_teav_special">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ឈ្មោះភាសាខ្មែរ *</label>
+            <input type="text" id="form-name-kh" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500" placeholder="e.g. គុយទាវពិសេស">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ឈ្មោះអង់គ្លេស *</label>
+            <input type="text" id="form-name-en" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500" placeholder="e.g. Special Noodle">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ប្រភេទ (Category) *</label>
+            <select id="form-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500">
+              <option value="kuy_teav">គុយទាវ (kuy_teav)</option>
+              <option value="rice">បាយ (rice)</option>
+              <option value="other">នំបាញ់ចុក (other)</option>
+              <option value="drinks">ភេសជ្ជៈ (drinks)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ស្តុកដំបូង (Stock) *</label>
+            <input type="number" id="form-stock" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-sky-500" value="50">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">ទំហំ និងតម្លៃ (JSON Format) *</label>
+          <input type="text" id="form-sizes" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-xs focus:outline-none focus:border-sky-500" value='{"normal": 2.50}'>
+          <p class="text-[10px] text-slate-400 mt-1">ឧទាហរណ៍៖ {"normal": 2.50, "special": 3.00}</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">ផ្លូវរូបភាព / Image URLs (JSON Array) *</label>
+          <input type="text" id="form-images" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-xs focus:outline-none focus:border-sky-500" value='["./images/1.png"]'>
+          <p class="text-[10px] text-slate-400 mt-1">ឧទាហរណ៍៖ ["./images/1.png", "./images/banner1.png"]</p>
+        </div>
+
+        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <span class="text-xs font-bold text-slate-700">បង្ហាញស្លាក "ពេញនិយម" (Popular)</span>
+          <label class="switch">
+            <input type="checkbox" id="form-popular">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex gap-2">
+        <button onclick="saveItem()" class="flex-1 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-sm transition">រក្សាទុក</button>
+        <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition">បោះបង់</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Supabase Integration Script -->
+  <script>
+    const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let menuItems = [];
+    let activeCategory = 'all';
+
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchData();
+    });
+
+    async function fetchData() {
+      await Promise.all([
+        fetchStoreSettings(),
+        fetchDeliverySettings(),
+        fetchMenu()
+      ]);
+    }
+
+    // 1. Store Status Switch Logic
+    async function fetchStoreSettings() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'is_store_open')
+          .single();
+
+        const statusText = document.getElementById('store-status-text');
+        const toggle = document.getElementById('store-toggle');
+
+        if (error || !data) {
+          statusText.innerText = "បើកដំណើរការ (Open)";
+          statusText.className = "text-base font-bold text-emerald-600";
+          toggle.checked = true;
+        } else {
+          const isOpen = data.value;
+          toggle.checked = isOpen;
+          statusText.innerText = isOpen ? "បើកដំណើរការ (Open)" : "បិទហាង (Closed)";
+          statusText.className = isOpen ? "text-base font-bold text-emerald-600" : "text-base font-bold text-rose-600";
+        }
+      } catch (e) {
+        console.error("Store settings error:", e);
+      }
+    }
+
+    async function toggleStoreStatus(isOpen) {
+      const statusText = document.getElementById('store-status-text');
+      statusText.innerText = isOpen ? "កំពុងរក្សាទុក..." : "កំពុងរក្សាទុក...";
+
+      const { error } = await supabaseClient
+        .from('app_settings')
+        .upsert({ key: 'is_store_open', value: isOpen });
+
+      if (error) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពហាង: " + error.message);
+        fetchStoreSettings();
+      } else {
+        fetchStoreSettings();
+      }
+    }
+
+    // 2. Delivery Status Control Logic
+    async function fetchDeliverySettings() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('delivery_status')
+          .select('is_delivery_available, estimated_wait_minutes')
+          .eq('id', 1)
+          .single();
+
+        const statusText = document.getElementById('delivery-status-text');
+        const toggle = document.getElementById('delivery-toggle');
+        const waitInput = document.getElementById('wait-time-input');
+
+        if (!error && data) {
+          toggle.checked = data.is_delivery_available;
+          statusText.innerText = data.is_delivery_available ? "មានសេវាដឹក (Available)" : "ផ្អាកដឹកបណ្តោះអាសន្ន (Paused)";
+          statusText.className = data.is_delivery_available ? "text-base font-bold text-emerald-600" : "text-base font-bold text-amber-600";
+          waitInput.value = data.estimated_wait_minutes || 15;
+        }
+      } catch (e) {
+        console.error("Delivery status error:", e);
+      }
+    }
+
+    async function toggleDeliveryStatus(isAvailable) {
+      const { error } = await supabaseClient
+        .from('delivery_status')
+        .update({ is_delivery_available: isAvailable })
+        .eq('id', 1);
+
+      if (error) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពសេវាដឹក: " + error.message);
+        fetchDeliverySettings();
+      } else {
+        fetchDeliverySettings();
+      }
+    }
+
+    async function saveWaitTime() {
+      const minutes = parseInt(document.getElementById('wait-time-input').value) || 15;
+      
+      const { error } = await supabaseClient
+        .from('delivery_status')
+        .update({ estimated_wait_minutes: minutes })
+        .eq('id', 1);
+
+      if (error) {
+        alert("មានបញ្ហាក្នុងការរក្សាទុករយះពេលរង់ចាំ: " + error.message);
+      } else {
+        alert(`បានផ្លាស់ប្តូររយះពេលរង់ចាំទៅ ${minutes} នាទី!`);
+        fetchDeliverySettings();
+      }
+    }
+
+    // 3. Menu Items Logic
+    async function fetchMenu() {
+      const container = document.getElementById('admin-food-grid');
+      container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">កំពុងទាញយកទិន្នន័យមុខម្ហូប...</div>`;
+
+      const { data, error } = await supabaseClient.from('menu_items').select('*');
+      if (error) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500 font-medium">កំហុសទាញយកទិន្នន័យ: ${error.message}</div>`;
+        return;
+      }
+
+      menuItems = data || [];
+      renderMenuList();
+    }
+
+    function setCategoryFilter(cat) {
+      activeCategory = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        if (btn.dataset.cat === cat) {
+          btn.className = "cat-pill active px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-600 text-white whitespace-nowrap";
+        } else {
+          btn.className = "cat-pill px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap";
+        }
+      });
+      renderMenuList();
+    }
+
+    function getItemCoverImage(item) {
+      if (Array.isArray(item.images) && item.images.length > 0) return item.images[0];
+      if (item.image_url) return item.image_url;
+      return `./images/${item.item_key}.png`;
+    }
+
+    function renderMenuList() {
+      const container = document.getElementById('admin-food-grid');
+      const search = document.getElementById('admin-search').value.toLowerCase();
+
+      const filtered = menuItems.filter(item => {
+        const matchesCat = activeCategory === 'all' || item.category === activeCategory;
+        const matchesSearch = item.name_kh.toLowerCase().includes(search) || item.name_en.toLowerCase().includes(search);
+        return matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 font-medium">មិនមានមុខម្ហូបនោះទេ</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const stock = item.stock_quantity !== undefined ? item.stock_quantity : 0;
+        const isAvailable = item.is_available !== false;
+        const coverImg = getItemCoverImage(item);
+
+        return `
+          <div class="bg-white rounded-2xl border ${isAvailable ? 'border-slate-200' : 'border-rose-200 bg-rose-50/20'} p-4 shadow-sm flex flex-col justify-between">
+            <div>
+              <!-- Top Row: Cover, Name, Stock -->
+              <div class="flex items-start gap-3">
+                <div class="w-16 h-16 rounded-xl bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0 flex items-center justify-center text-2xl">
+                  <img src="${coverImg}" alt="${item.name_kh}" class="w-full h-full object-cover" onerror="this.outerHTML='<span>${item.icon || '🍜'}</span>'">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-1">
+                    <h3 class="font-extrabold text-slate-900 text-sm truncate">${item.name_kh}</h3>
+                    ${item.is_popular ? '<span class="bg-rose-100 text-rose-600 text-[10px] font-extrabold px-1.5 py-0.5 rounded">Popular</span>' : ''}
+                  </div>
+                  <div class="text-xs text-slate-500 truncate">${item.name_en}</div>
+                  <div class="text-[11px] font-bold text-sky-600 mt-1 uppercase">${item.category}</div>
+                </div>
+              </div>
+
+              <!-- Stock Controller & Availability Toggle -->
+              <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] font-extrabold text-slate-400 uppercase">ចំនួនក្នុងស្តុក</div>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <button onclick="updateStock('${item.id}', ${stock - 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">-</button>
+                    <span class="font-extrabold text-sm text-slate-800 w-8 text-center">${stock}</span>
+                    <button onclick="updateStock('${item.id}', ${stock + 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">+</button>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <div class="text-[10px] font-extrabold text-slate-400 uppercase mb-1">ស្ថានភាពស្តុក</div>
+                  <label class="switch">
+                    <input type="checkbox" ${isAvailable ? 'checked' : ''} onchange="toggleItemAvailability('${item.id}', this.checked)">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button onclick="openEditItemModal('${item.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">✏️ កែប្រែ</button>
+              <button onclick="deleteItem('${item.id}', '${item.name_kh}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition">🗑️ លុប</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function updateStock(itemId, newStock) {
+      if (newStock < 0) return;
+      
+      const { error } = await supabaseClient
+        .from('menu_items')
+        .update({ stock_quantity: newStock })
+        .eq('id', itemId);
+
+      if (error) {
+        alert("មិនអាចផ្លាស់ប្តូរស្តុកបានទេ: " + error.message);
+      } else {
+        const item = menuItems.find(m => m.id === itemId);
+        if (item) item.stock_quantity = newStock;
+        renderMenuList();
+      }
+    }
+
+    async function toggleItemAvailability(itemId, isAvailable) {
+      const { error } = await supabaseClient
+        .from('menu_items')
+        .update({ is_available: isAvailable })
+        .eq('id', itemId);
+
+      if (error) {
+        alert("កំហុសក្នុងការកែប្រែ: " + error.message);
+        fetchMenu();
+      } else {
+        const item = menuItems.find(m => m.id === itemId);
+        if (item) item.is_available = isAvailable;
+        renderMenuList();
+      }
+    }
+
+    // Modal Control & CRUD Operations
+    function openAddItemModal() {
+      document.getElementById('modal-heading').innerText = "បន្ថែមមុខម្ហូបថ្មី";
+      document.getElementById('edit-original-id').value = "";
+      document.getElementById('form-key').value = "";
+      document.getElementById('form-name-kh').value = "";
+      document.getElementById('form-name-en').value = "";
+      document.getElementById('form-category').value = "kuy_teav";
+      document.getElementById('form-stock').value = "50";
+      document.getElementById('form-sizes').value = '{"normal": 2.50}';
+      document.getElementById('form-images').value = '["./images/1.png"]';
+      document.getElementById('form-popular').checked = false;
+
+      document.getElementById('item-modal').style.display = 'flex';
+    }
+
+    function openEditItemModal(itemId) {
+      const item = menuItems.find(m => m.id === itemId);
+      if (!item) return;
+
+      document.getElementById('modal-heading').innerText = "កែប្រែមុខម្ហូប";
+      document.getElementById('edit-original-id').value = item.id;
+      document.getElementById('form-key').value = item.item_key || "";
+      document.getElementById('form-name-kh').value = item.name_kh || "";
+      document.getElementById('form-name-en').value = item.name_en || "";
+      document.getElementById('form-category').value = item.category || "kuy_teav";
+      document.getElementById('form-stock').value = item.stock_quantity !== undefined ? item.stock_quantity : 50;
+      document.getElementById('form-sizes').value = JSON.stringify(item.sizes || { normal: 2.50 });
+      document.getElementById('form-images').value = JSON.stringify(item.images || [item.image_url || "./images/1.png"]);
+      document.getElementById('form-popular').checked = !!item.is_popular;
+
+      document.getElementById('item-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('item-modal').style.display = 'none';
+    }
+
+    async function saveItem() {
+      const editId = document.getElementById('edit-original-id').value;
+      const itemKey = document.getElementById('form-key').value.trim();
+      const nameKh = document.getElementById('form-name-kh').value.trim();
+      const nameEn = document.getElementById('form-name-en').value.trim();
+      const category = document.getElementById('form-category').value;
+      const stock = parseInt(document.getElementById('form-stock').value) || 0;
+      const isPopular = document.getElementById('form-popular').checked;
+
+      let sizesObj = {};
+      let imagesArr = [];
+
+      try {
+        sizesObj = JSON.parse(document.getElementById('form-sizes').value);
+      } catch (e) {
+        alert("ទម្រង់ Size JSON មិនត្រឹមត្រូវ! ឧទាហរណ៍៖ {\"normal\": 2.50}");
+        return;
+      }
+
+      try {
+        imagesArr = JSON.parse(document.getElementById('form-images').value);
+      } catch (e) {
+        alert("ទម្រង់ Image Array មិនត្រឹមត្រូវ! ឧទាហរណ៍៖ [\"./images/1.png\"]");
+        return;
+      }
+
+      if (!itemKey || !nameKh || !nameEn) {
+        alert("សូមបំពេញប្រអប់ផ្កាយ (*) ទាំងអស់!");
+        return;
+      }
+
+      const payload = {
+        item_key: itemKey,
+        name_kh: nameKh,
+        name_en: nameEn,
+        category: category,
+        stock_quantity: stock,
+        sizes: sizesObj,
+        images: imagesArr,
+        is_popular: isPopular,
+        is_available: true
+      };
+
+      if (editId) {
+        payload.id = editId;
+      }
+
+      const { error } = await supabaseClient
+        .from('menu_items')
+        .upsert(payload);
+
+      if (error) {
+        alert("កំហុសក្នុងការរក្សាទុក: " + error.message);
+      } else {
+        alert("បានរក្សាទុកមុខម្ហូបជោគជ័យ!");
+        closeModal();
+        fetchMenu();
+      }
+    }
+
+    async function deleteItem(itemId, nameKh) {
+      if (!confirm(`តើអ្នកពិតជាចង់លុបមុខម្ហូប "${nameKh}" នេះមែនទេ?`)) return;
+
+      const { error } = await supabaseClient
+        .from('menu_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) {
+        alert("មិនអាចលុបបានទេ: " + error.message);
+      } else {
+        fetchMenu();
+      }
+    }
+  </script>
+</body>
+</html>
