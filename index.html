@@ -686,7 +686,7 @@
       }
     }
 
-    const bannerImages = ["./images/1.png", "./images/2.png", "./images/1.png"];
+    const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner3.png"];
 
     function initBanners() {
       const slider = document.getElementById('banner-slider');
@@ -701,7 +701,7 @@
         setInterval(() => {
           currentIndex = (currentIndex + 1) % bannerImages.length;
           slider.style.transform = `translateX(-${currentIndex * 100}%)`;
-        }, 3500);
+        }, 6000);
       }
     }
 
