@@ -255,6 +255,24 @@
       ]);
     }
 
+    // Helper function for direct fetch calls to Edge Function
+    async function callEdgeFunction(payload) {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/update-settings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Edge Function error');
+      }
+      return data;
+    }
+
     // 1. Store Status Switch Logic
     async function fetchStoreSettings() {
       try {
@@ -286,18 +304,15 @@
       const statusText = document.getElementById('store-status-text');
       statusText.innerText = "កំពុងរក្សាទុក...";
 
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'update_setting',
           key: 'is_store_open',
           value: isOpen
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពហាង: " + (error?.message || data?.error));
+        });
         fetchStoreSettings();
-      } else {
+      } catch (e) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពហាង: " + e.message);
         fetchStoreSettings();
       }
     }
@@ -327,17 +342,14 @@
     }
 
     async function toggleDeliveryStatus(isAvailable) {
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'update_delivery',
           updates: { is_delivery_available: isAvailable }
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពសេវាដឹក: " + (error?.message || data?.error));
+        });
         fetchDeliverySettings();
-      } else {
+      } catch (e) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពសេវាដឹក: " + e.message);
         fetchDeliverySettings();
       }
     }
@@ -345,18 +357,15 @@
     async function saveWaitTime() {
       const minutes = parseInt(document.getElementById('wait-time-input').value) || 15;
       
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'update_delivery',
           updates: { estimated_wait_minutes: minutes }
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("មានបញ្ហាក្នុងការរក្សាទុករយះពេលរង់ចាំ: " + (error?.message || data?.error));
-      } else {
+        });
         alert(`បានផ្លាស់ប្តូររយះពេលរង់ចាំទៅ ${minutes} នាទី!`);
         fetchDeliverySettings();
+      } catch (e) {
+        alert("មានបញ្ហាក្នុងការរក្សាទុករយះពេលរង់ចាំ: " + e.message);
       }
     }
 
@@ -465,39 +474,33 @@
     async function updateStock(itemKey, newStock) {
       if (newStock < 0) return;
       
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'update_stock',
           match: { item_key: itemKey },
           updates: { stock_quantity: newStock }
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("មិនអាចផ្លាស់ប្តូរស្តុកបានទេ: " + (error?.message || data?.error));
-      } else {
+        });
         const item = menuItems.find(m => m.item_key === itemKey);
         if (item) item.stock_quantity = newStock;
         renderMenuList();
+      } catch (e) {
+        alert("មិនអាចផ្លាស់ប្តូរស្តុកបានទេ: " + e.message);
       }
     }
 
     async function toggleItemAvailability(itemKey, isAvailable) {
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'update_stock',
           match: { item_key: itemKey },
           updates: { is_available: isAvailable }
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("កំហុសក្នុងការកែប្រែ: " + (error?.message || data?.error));
-        fetchMenu();
-      } else {
+        });
         const item = menuItems.find(m => m.item_key === itemKey);
         if (item) item.is_available = isAvailable;
         renderMenuList();
+      } catch (e) {
+        alert("កំហុសក្នុងការកែប្រែ: " + e.message);
+        fetchMenu();
       }
     }
 
@@ -524,7 +527,7 @@
       document.getElementById('modal-heading').innerText = "កែប្រែមុខម្ហូប";
       document.getElementById('edit-original-id').value = item.item_key;
       document.getElementById('form-key').value = item.item_key || "";
-      document.getElementById('form-key').disabled = true; // Key shouldn't change on edit
+      document.getElementById('form-key').disabled = true;
       document.getElementById('form-name-kh').value = item.name_kh || "";
       document.getElementById('form-name-en').value = item.name_en || "";
       document.getElementById('form-category').value = item.category || "kuy_teav";
@@ -584,38 +587,31 @@
         is_available: true
       };
 
-      const actionType = editKey ? 'update_stock' : 'add_item';
       const bodyData = editKey 
         ? { action: 'update_stock', match: { item_key: itemKey }, updates: payload }
         : { action: 'add_item', updates: payload };
 
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: bodyData
-      });
-
-      if (error || (data && data.error)) {
-        alert("កំហុសក្នុងការរក្សាទុក: " + (error?.message || data?.error));
-      } else {
+      try {
+        await callEdgeFunction(bodyData);
         alert("បានរក្សាទុកមុខម្ហូបជោគជ័យ!");
         closeModal();
         fetchMenu();
+      } catch (e) {
+        alert("កំហុសក្នុងការរក្សាទុក: " + e.message);
       }
     }
 
     async function deleteItem(itemKey, nameKh) {
       if (!confirm(`តើអ្នកពិតជាចង់លុបមុខម្ហូប "${nameKh}" នេះមែនទេ?`)) return;
 
-      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
-        body: {
+      try {
+        await callEdgeFunction({
           action: 'delete_item',
           match: { item_key: itemKey }
-        }
-      });
-
-      if (error || (data && data.error)) {
-        alert("មិនអាចលុបបានទេ: " + (error?.message || data?.error));
-      } else {
+        });
         fetchMenu();
+      } catch (e) {
+        alert("មិនអាចលុបបានទេ: " + e.message);
       }
     }
   </script>
