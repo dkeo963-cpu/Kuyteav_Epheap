@@ -284,14 +284,18 @@
 
     async function toggleStoreStatus(isOpen) {
       const statusText = document.getElementById('store-status-text');
-      statusText.innerText = isOpen ? "កំពុងរក្សាទុក..." : "កំពុងរក្សាទុក...";
+      statusText.innerText = "កំពុងរក្សាទុក...";
 
-      const { error } = await supabaseClient
-        .from('app_settings')
-        .upsert({ key: 'is_store_open', value: isOpen });
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'update_setting',
+          key: 'is_store_open',
+          value: isOpen
+        }
+      });
 
-      if (error) {
-        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពហាង: " + error.message);
+      if (error || (data && data.error)) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពហាង: " + (error?.message || data?.error));
         fetchStoreSettings();
       } else {
         fetchStoreSettings();
@@ -323,13 +327,15 @@
     }
 
     async function toggleDeliveryStatus(isAvailable) {
-      const { error } = await supabaseClient
-        .from('delivery_status')
-        .update({ is_delivery_available: isAvailable })
-        .eq('id', 1);
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'update_delivery',
+          updates: { is_delivery_available: isAvailable }
+        }
+      });
 
-      if (error) {
-        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពសេវាដឹក: " + error.message);
+      if (error || (data && data.error)) {
+        alert("មានបញ្ហាក្នុងការប្តូរស្ថានភាពសេវាដឹក: " + (error?.message || data?.error));
         fetchDeliverySettings();
       } else {
         fetchDeliverySettings();
@@ -339,13 +345,15 @@
     async function saveWaitTime() {
       const minutes = parseInt(document.getElementById('wait-time-input').value) || 15;
       
-      const { error } = await supabaseClient
-        .from('delivery_status')
-        .update({ estimated_wait_minutes: minutes })
-        .eq('id', 1);
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'update_delivery',
+          updates: { estimated_wait_minutes: minutes }
+        }
+      });
 
-      if (error) {
-        alert("មានបញ្ហាក្នុងការរក្សាទុករយះពេលរង់ចាំ: " + error.message);
+      if (error || (data && data.error)) {
+        alert("មានបញ្ហាក្នុងការរក្សាទុករយះពេលរង់ចាំ: " + (error?.message || data?.error));
       } else {
         alert(`បានផ្លាស់ប្តូររយះពេលរង់ចាំទៅ ${minutes} នាទី!`);
         fetchDeliverySettings();
@@ -428,16 +436,16 @@
                 <div>
                   <div class="text-[10px] font-extrabold text-slate-400 uppercase">ចំនួនក្នុងស្តុក</div>
                   <div class="flex items-center gap-1.5 mt-1">
-                    <button onclick="updateStock('${item.id}', ${stock - 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">-</button>
+                    <button onclick="updateStock('${item.item_key}', ${stock - 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">-</button>
                     <span class="font-extrabold text-sm text-slate-800 w-8 text-center">${stock}</span>
-                    <button onclick="updateStock('${item.id}', ${stock + 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">+</button>
+                    <button onclick="updateStock('${item.item_key}', ${stock + 1})" class="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center border border-slate-200">+</button>
                   </div>
                 </div>
 
                 <div class="text-right">
                   <div class="text-[10px] font-extrabold text-slate-400 uppercase mb-1">ស្ថានភាពស្តុក</div>
                   <label class="switch">
-                    <input type="checkbox" ${isAvailable ? 'checked' : ''} onchange="toggleItemAvailability('${item.id}', this.checked)">
+                    <input type="checkbox" ${isAvailable ? 'checked' : ''} onchange="toggleItemAvailability('${item.item_key}', this.checked)">
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -446,42 +454,48 @@
 
             <!-- Action Buttons -->
             <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-              <button onclick="openEditItemModal('${item.id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">✏️ កែប្រែ</button>
-              <button onclick="deleteItem('${item.id}', '${item.name_kh}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition">🗑️ លុប</button>
+              <button onclick="openEditItemModal('${item.item_key}')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition">✏️ កែប្រែ</button>
+              <button onclick="deleteItem('${item.item_key}', '${item.name_kh}')" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-lg transition">🗑️ លុប</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    async function updateStock(itemId, newStock) {
+    async function updateStock(itemKey, newStock) {
       if (newStock < 0) return;
       
-      const { error } = await supabaseClient
-        .from('menu_items')
-        .update({ stock_quantity: newStock })
-        .eq('id', itemId);
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'update_stock',
+          match: { item_key: itemKey },
+          updates: { stock_quantity: newStock }
+        }
+      });
 
-      if (error) {
-        alert("មិនអាចផ្លាស់ប្តូរស្តុកបានទេ: " + error.message);
+      if (error || (data && data.error)) {
+        alert("មិនអាចផ្លាស់ប្តូរស្តុកបានទេ: " + (error?.message || data?.error));
       } else {
-        const item = menuItems.find(m => m.id === itemId);
+        const item = menuItems.find(m => m.item_key === itemKey);
         if (item) item.stock_quantity = newStock;
         renderMenuList();
       }
     }
 
-    async function toggleItemAvailability(itemId, isAvailable) {
-      const { error } = await supabaseClient
-        .from('menu_items')
-        .update({ is_available: isAvailable })
-        .eq('id', itemId);
+    async function toggleItemAvailability(itemKey, isAvailable) {
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'update_stock',
+          match: { item_key: itemKey },
+          updates: { is_available: isAvailable }
+        }
+      });
 
-      if (error) {
-        alert("កំហុសក្នុងការកែប្រែ: " + error.message);
+      if (error || (data && data.error)) {
+        alert("កំហុសក្នុងការកែប្រែ: " + (error?.message || data?.error));
         fetchMenu();
       } else {
-        const item = menuItems.find(m => m.id === itemId);
+        const item = menuItems.find(m => m.item_key === itemKey);
         if (item) item.is_available = isAvailable;
         renderMenuList();
       }
@@ -503,13 +517,14 @@
       document.getElementById('item-modal').style.display = 'flex';
     }
 
-    function openEditItemModal(itemId) {
-      const item = menuItems.find(m => m.id === itemId);
+    function openEditItemModal(itemKey) {
+      const item = menuItems.find(m => m.item_key === itemKey);
       if (!item) return;
 
       document.getElementById('modal-heading').innerText = "កែប្រែមុខម្ហូប";
-      document.getElementById('edit-original-id').value = item.id;
+      document.getElementById('edit-original-id').value = item.item_key;
       document.getElementById('form-key').value = item.item_key || "";
+      document.getElementById('form-key').disabled = true; // Key shouldn't change on edit
       document.getElementById('form-name-kh').value = item.name_kh || "";
       document.getElementById('form-name-en').value = item.name_en || "";
       document.getElementById('form-category').value = item.category || "kuy_teav";
@@ -522,11 +537,12 @@
     }
 
     function closeModal() {
+      document.getElementById('form-key').disabled = false;
       document.getElementById('item-modal').style.display = 'none';
     }
 
     async function saveItem() {
-      const editId = document.getElementById('edit-original-id').value;
+      const editKey = document.getElementById('edit-original-id').value;
       const itemKey = document.getElementById('form-key').value.trim();
       const nameKh = document.getElementById('form-name-kh').value.trim();
       const nameEn = document.getElementById('form-name-en').value.trim();
@@ -568,16 +584,17 @@
         is_available: true
       };
 
-      if (editId) {
-        payload.id = editId;
-      }
+      const actionType = editKey ? 'update_stock' : 'add_item';
+      const bodyData = editKey 
+        ? { action: 'update_stock', match: { item_key: itemKey }, updates: payload }
+        : { action: 'add_item', updates: payload };
 
-      const { error } = await supabaseClient
-        .from('menu_items')
-        .upsert(payload);
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: bodyData
+      });
 
-      if (error) {
-        alert("កំហុសក្នុងការរក្សាទុក: " + error.message);
+      if (error || (data && data.error)) {
+        alert("កំហុសក្នុងការរក្សាទុក: " + (error?.message || data?.error));
       } else {
         alert("បានរក្សាទុកមុខម្ហូបជោគជ័យ!");
         closeModal();
@@ -585,16 +602,18 @@
       }
     }
 
-    async function deleteItem(itemId, nameKh) {
+    async function deleteItem(itemKey, nameKh) {
       if (!confirm(`តើអ្នកពិតជាចង់លុបមុខម្ហូប "${nameKh}" នេះមែនទេ?`)) return;
 
-      const { error } = await supabaseClient
-        .from('menu_items')
-        .delete()
-        .eq('id', itemId);
+      const { data, error } = await supabaseClient.functions.invoke('update-settings', {
+        body: {
+          action: 'delete_item',
+          match: { item_key: itemKey }
+        }
+      });
 
-      if (error) {
-        alert("មិនអាចលុបបានទេ: " + error.message);
+      if (error || (data && data.error)) {
+        alert("មិនអាចលុបបានទេ: " + (error?.message || data?.error));
       } else {
         fetchMenu();
       }
