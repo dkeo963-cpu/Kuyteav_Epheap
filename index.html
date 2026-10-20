@@ -35,15 +35,17 @@
 
     /* ---------- Header ---------- */
     .top { position: sticky; top: 0; z-index: 50; background: var(--ink); color: #fff; padding: 11px 0; }
-    .top .wrap { display: flex; align-items: center; gap: 10px; }
+    .top .wrap { display: flex; flex-direction: column; gap: 6px; }
+    .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
     .top-l { flex: 1; min-width: 0; }
     .greeting { font-size: 11px; font-weight: 500; opacity: .65; }
     .shop-title { font-size: 30px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     main.wrap { padding-top: 14px; }
 
     .hours-badge {
-      flex-shrink: 0; font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 99px;
-      background: var(--bad-l); color: var(--bad);
+      font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 99px;
+      background: var(--bad-l); color: var(--bad); width: fit-content;
+      margin-left: auto; /* Pushes the badge to the right side */
     }
     .hours-badge.open { background: var(--ok-l); color: var(--ok); }
 
@@ -265,11 +267,13 @@
 
   <header class="top">
     <div class="wrap">
-      <div class="top-l">
-        <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-        <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
-      </div>
       <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
+      <div class="top-row-main">
+        <div class="top-l">
+          <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
+          <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+        </div>
+      </div>
     </div>
   </header>
 
