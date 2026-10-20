@@ -491,31 +491,50 @@
       iframe.src = iframe.src;
     }
 
-    async function checkPromoBanner() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('app_settings')
-          .select('value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge']);
-        
-        if (!error && data) {
-          const activeItem = data.find(i => i.key === 'promo_active');
-          const textItem = data.find(i => i.key === 'promo_text');
-          const badgeItem = data.find(i => i.key === 'promo_badge');
+async function checkPromoBanner() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('app_settings')
+      .select('key, value')
+      .in('key', ['promo_active', 'promo_text', 'promo_badge']);
+    
+    if (!error && data) {
+      const activeItem = data.find(i => i.key === 'promo_active');
+      const textItem = data.find(i => i.key === 'promo_text');
+      const badgeItem = data.find(i => i.key === 'promo_badge');
 
-          const bannerEl = document.getElementById('top-promo-banner');
-          if (activeItem && activeItem.value === true) {
-            bannerEl.style.display = 'flex';
-            if (textItem) document.getElementById('promo-msg-text').innerText = textItem.value;
-            if (badgeItem) document.getElementById('promo-badge-text').innerText = badgeItem.value;
-          } else {
-            bannerEl.style.display = 'none';
+      const bannerEl = document.getElementById('top-promo-banner');
+      
+      // Check if active is true (handling both boolean and string formats from database)
+      const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
+
+      if (isActive && bannerEl) {
+        bannerEl.style.display = 'flex';
+        
+        // Helper to unwrap JSON string quotes if supabase returns them with extra quotes
+        const cleanVal = (val, fallback) => {
+          if (val === undefined || val === null) return fallback;
+          let str = typeof val === 'string' ? val : JSON.stringify(val);
+          // Remove wrapping quotes if present
+          if (str.startsWith('"') && str.endsWith('"')) {
+            try { str = JSON.parse(str); } catch(e) {}
           }
-        }
-      } catch (e) {
-        console.error("Promo banner check failed", e);
+          return str || fallback;
+        };
+
+        const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you at every product check it now 🎉");
+        const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
+
+        document.getElementById('promo-msg-text').innerText = msgText;
+        document.getElementById('promo-badge-text').innerText = badgeText;
+      } else if (bannerEl) {
+        bannerEl.style.display = 'none';
       }
     }
+  } catch (e) {
+    console.error("Promo banner check failed", e);
+  }
+}
 
     async function checkStoreStatus() {
       try {
