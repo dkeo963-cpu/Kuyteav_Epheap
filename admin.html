@@ -551,8 +551,13 @@ $("store-toggle").addEventListener("change", async e => {
 });
 
 $("delivery-toggle").addEventListener("change", async e => {
-  const { error } = await admin({ action: "update_delivery", updates: { is_delivery_available: e.target.checked } });
-  if (error) toast(error, "err"); else toast("បានកែប្រែសេវាដឹកជញ្ជូន", "ok");
+  const want = e.target.checked;
+  const { error } = await admin({ action: "update_delivery", updates: { is_delivery_available: want } });
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(want ? "បានបើកសេវាដឹកជញ្ជូន" : "បានផ្អាកសេវាដឹកជញ្ជូន", "ok");
+  }
   loadDelivery();
 });
 
@@ -560,7 +565,11 @@ $("wait-save").addEventListener("click", async () => {
   let m = parseInt($("wait-input").value, 10);
   if (!m || m < 1 || m > 180) { toast("សូមបញ្ចូលចន្លោះ 1 – 180 នាទី", "err"); return; }
   const { error } = await admin({ action: "update_delivery", updates: { estimated_wait_minutes: m } });
-  if (error) toast(error, "err"); else toast(`រយៈពេលរង់ចាំ ${m} នាទី`, "ok");
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(`បានរក្សាុករយៈពេលរង់ចាំ ${m} នាទី`, "ok");
+  }
   loadDelivery();
 });
 
