@@ -42,7 +42,6 @@
       background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
     }
 
-    /* UPDATED HEADER BAR STYLING */
     .top { 
       position: sticky; 
       top: 0; 
@@ -929,7 +928,18 @@
         }
 
         alert("ការកម្មង់បានជោគជ័យ!");
+        
+        // RESET CART & CLEAR GPS LOCATION INFORMATION UPON SUCCESSFUL ORDER
         cart = []; 
+        clientLat = null;
+        clientLng = null;
+        gpsLink = "";
+        isLocationPinned = false;
+        currentDeliveryFee = 0.00;
+        
+        document.getElementById('input-address').value = "";
+        document.getElementById('gps-status').innerText = "";
+        
         closeCartDrawer(); 
         updateCartState();
       } catch (err) { 
