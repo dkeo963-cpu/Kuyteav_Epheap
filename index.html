@@ -565,33 +565,23 @@
     </div>
   </div>
 
-  <!-- KHQR PAYMENT MODAL (scan with ABA app) -->
+  <!-- ABA PAYMENT MODAL -->
   <div id="aba-modal" class="modal-overlay" style="z-index: 900;">
-    <div class="modal-card" style="text-align: center; padding: 22px 16px;">
-      <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800;">ការកម្មង់បានជោគជ័យ!</h3>
-      <p style="color: var(--sub); margin: 0 0 12px 0; font-size: 13px;">
-        ស្កែន KHQR ដោយ ABA Mobile ដើម្បីទូទាត់ <b id="modal-pay-total" style="color: var(--brand); font-size: 16px;">$0.00</b>
+    <div class="modal-card" style="text-align: center; padding: 24px 16px;">
+      <div style="font-size: 42px; margin-bottom: 8px;">💳</div>
+      <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800;">ការកម្មង់បានជោគជ័យ!</h3>
+      <p style="color: var(--sub); margin-bottom: 20px; font-size: 14px;">
+        ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b> តាម ABA Mobile
       </p>
-      <div id="khqr-box" style="display:none; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; margin: 0 auto 12px; width: fit-content;">
-        <div id="khqr-canvas" style="width:220px; height:220px; display:flex; align-items:center; justify-content:center;"></div>
-        <div style="font-size:11px; color:var(--sub); margin-top:6px;">KHQR • ABA / Bakong / ធនាគារទាំងអស់</div>
-      </div>
-      <button id="khqr-toggle-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom:10px;">
-        🔳 បង្ហាញ QR ជំនួស (Show QR instead)
+      <button id="aba-direct-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
+        📲 បើកកម្មវិធី ABA Mobile ដើម្បីទូទាត់ប្រាក់
       </button>
-      <button id="khqr-save-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom:10px;">
-        💾 រក្សាទុករូប QR (Save QR) — ស្កែនពី Gallery
+      <p id="aba-no-link-msg" style="display:none; color: var(--bad); font-size: 13px; margin-top: 12px;">
+        មិនមានតំណ ABA ទេ។ សូមទាក់ទងហាងតាម Telegram ដើម្បីទូទាត់។
+      </p>
+      <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block" style="margin-top: 10px;">
+        បិទ (Close)
       </button>
-      <button id="aba-direct-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); height: 48px; display: none; margin-bottom: 10px;">
-        📲 បើកកម្មវិធី ABA Mobile
-      </button>
-      <button id="aba-pay-link-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom: 10px;">
-        🏦 បើក Bakong / ធនាគារផ្សេង
-      </button>
-      <button id="aba-copy-link-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom: 10px;">
-        📋 ចម្លងតំណទូទាត់ (Copy link)
-      </button>
-      <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block">បិទ (Close)</button>
     </div>
   </div>
 
@@ -1260,7 +1250,6 @@
         }
 
         const grandTotal = data.grand_total || "0.00";
-        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
         const abaDirectUrl = data.aba_direct_url || "";
         if (new URLSearchParams(location.search).has("debug")) alert("DEBUG: " + JSON.stringify(data.debug));
 
@@ -1278,59 +1267,23 @@
         closeCartDrawer(); 
         updateCartState();
 
-        const qrString = data.qr_code || "";
-        if (qrString || deeplinkUrl) {
-          document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
-
-          // 1) QR code the customer scans with ABA (or any KHQR bank app)
-          const qrBox = document.getElementById('khqr-box');
-          const qrCanvas = document.getElementById('khqr-canvas');
-          const saveBtn = document.getElementById('khqr-save-btn');
-          qrCanvas.innerHTML = "";
-          if (qrString && window.QRCode) {
-            new QRCode(qrCanvas, { text: qrString, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
-            const hasLink = !!(abaDirectUrl || deeplinkUrl);
-            const toggleBtn = document.getElementById('khqr-toggle-btn');
-            qrBox.style.display = hasLink ? 'none' : 'block';
-            saveBtn.style.display = hasLink ? 'none' : 'flex';
-            toggleBtn.style.display = hasLink ? 'flex' : 'none';
-            toggleBtn.onclick = () => { qrBox.style.display = 'block'; saveBtn.style.display = 'flex'; toggleBtn.style.display = 'none'; };
-            saveBtn.onclick = () => {
-              const c = qrCanvas.querySelector('canvas');
-              const src = c ? c.toDataURL('image/png') : qrCanvas.querySelector('img')?.src;
-              if (!src) return;
-              const a = document.createElement('a');
-              a.href = src; a.download = 'KHQR-' + grandTotal + '.png';
-              document.body.appendChild(a); a.click(); a.remove();
-            };
-          } else { qrBox.style.display = 'none'; saveBtn.style.display = 'none'; }
-
-          // 2) Optional buttons (only shown when a link exists)
-          const abaBtn = document.getElementById('aba-direct-btn');
-          if (abaDirectUrl) {
-            abaBtn.style.display = 'flex';
-            abaBtn.onclick = (e) => { e.preventDefault(); window.location.href = abaDirectUrl; };
-          } else { abaBtn.style.display = 'none'; }
-
-          const payBtn = document.getElementById('aba-pay-link-btn');
-          const copyBtn = document.getElementById('aba-copy-link-btn');
-          if (deeplinkUrl) {
-            payBtn.style.display = 'flex';
-            payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
-            copyBtn.style.display = 'flex';
-            copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
-          } else { payBtn.style.display = 'none'; copyBtn.style.display = 'none'; }
-
+        document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
+        const abaBtn = document.getElementById('aba-direct-btn');
+        const noLinkMsg = document.getElementById('aba-no-link-msg');
+        if (abaDirectUrl) {
+          abaBtn.style.display = 'flex';
+          noLinkMsg.style.display = 'none';
+          const openAba = () => {
+            if (abaDirectUrl.startsWith('http')) openPayLink(abaDirectUrl);
+            else window.location.href = abaDirectUrl;
+          };
+          abaBtn.onclick = (e) => { e.preventDefault(); openAba(); };
           document.getElementById('aba-modal').style.display = 'flex';
-
-          // AUTO-OPEN the payment app right after the order is sent
-          const autoUrl = abaDirectUrl || deeplinkUrl;
-          if (autoUrl) setTimeout(() => {
-            if (autoUrl.startsWith('http')) openPayLink(autoUrl);
-            else window.location.href = autoUrl;
-          }, 400);
+          setTimeout(openAba, 400); // auto-open ABA right after the order is sent
         } else {
-          alert("ការកម្មង់បានជោគជ័យ!");
+          abaBtn.style.display = 'none';
+          noLinkMsg.style.display = 'block';
+          document.getElementById('aba-modal').style.display = 'flex';
         }
 
       } catch (err) { 
