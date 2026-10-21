@@ -1274,8 +1274,15 @@
           abaBtn.style.display = 'flex';
           noLinkMsg.style.display = 'none';
           const openAba = () => {
-            if (abaDirectUrl.startsWith('http')) openPayLink(abaDirectUrl);
-            else window.location.href = abaDirectUrl;
+            if (abaDirectUrl.startsWith('http')) { openPayLink(abaDirectUrl); return; }
+            const isAndroid = /android/i.test(navigator.userAgent);
+            if (isAndroid && abaDirectUrl.startsWith('abamobilebank://')) {
+              const rest = abaDirectUrl.replace('abamobilebank://', '');
+              const fallback = encodeURIComponent('https://play.google.com/store/apps/details?id=com.paygo24.ibank');
+              window.location.href = `intent://${rest}#Intent;scheme=abamobilebank;package=com.paygo24.ibank;S.browser_fallback_url=${fallback};end`;
+            } else {
+              window.location.href = abaDirectUrl;
+            }
           };
           abaBtn.onclick = (e) => { e.preventDefault(); openAba(); };
           document.getElementById('aba-modal').style.display = 'flex';
