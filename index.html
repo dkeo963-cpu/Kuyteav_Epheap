@@ -758,18 +758,26 @@
       updateCartState();
     }
 
-    function fetchGPSLocation() {
+ function fetchGPSLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
           clientLat = position.coords.latitude;
           clientLng = position.coords.longitude;
           const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
-          if (distance > MAX_DELIVERY_KM) { alert("ទីតាំងឆ្ងាយពេក!"); return; }
+          
+          if (distance > MAX_DELIVERY_KM) { 
+            alert(`ទីតាំងរបស់អ្នកនៅឆ្ងាយពេក (${distance.toFixed(1)} គីឡូម៉ែត្រ)! ហាងកំណត់ត្រឹម 5 គីឡូម៉ែត្រប៉ុណ្ណោះ។`); 
+            return; 
+          }
+          
           currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
           document.getElementById('input-address').value = `${clientLat.toFixed(4)}, ${clientLng.toFixed(4)}`;
           gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
           isLocationPinned = true;
-          document.getElementById('gps-status').innerText = "✓ សម្រេចយកទីតាំង GPS រួចរាល់";
+          
+          // FIX: Show the exact distance and delivery fee clearly to the user
+          document.getElementById('gps-status').innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(1)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
+          
           updateCartState();
         });
       }
