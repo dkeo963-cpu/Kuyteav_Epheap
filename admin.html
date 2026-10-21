@@ -190,6 +190,27 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </head>
 <body>
 
+
+
+
+
+
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន</h2>
+  <p class="muted" style="margin:4px 0 12px">ចុចទីនេះដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញភ្លាមៗដោយគ្មានការជូនដំណឹង</p>
+  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
 <!-- Access gate (shown when not opened inside Telegram) -->
 <div id="gate" class="gate">
   <div class="box">
@@ -916,6 +937,73 @@ if (!hasTG) {
   $("gate-view").onclick = () => { viewOnly = true; $("gate").classList.remove("show"); toast("របៀបមើលប៉ុណ្ណោះ"); };
 }
 refresh();
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --- SUPABASE REALTIME BROADCAST RELOAD ---
+const adminChannel = supa.channel('admin-actions', {
+  config: { broadcast: { self: false } }
+});
+
+adminChannel.subscribe(status => {
+  if (status === 'SUBSCRIBED') {
+    console.log("Connected to Realtime broadcast channel.");
+  }
+});
+
+// Function to trigger reload on all user pages
+async function triggerReloadForAllUsers() {
+  if (viewOnly || !hasTG) {
+    toast("មុខងារនេះសម្រាប់តែអ្នកគ្រប់គ្រងប៉ុណ្ណោះ", "err");
+    return;
+  }
+  
+  await adminChannel.send({
+    type: 'broadcast',
+    event: 'force_reload',
+    payload: { timestamp: Date.now() }
+  });
+  
+  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!", "ok");
+  hapticN("success");
+}
+
+// Attach event listener to a button (You can place this button anywhere in your admin HTML)
+// Example: <button class="btn btn-p" id="btn-reload-all">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>
