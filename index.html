@@ -23,7 +23,7 @@
     html, body { margin: 0; }
     body {
       font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.45;
+      background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.45;
       padding-bottom: calc(108px + var(--safe-b));
       user-select: none; -webkit-user-select: none;
     }
@@ -32,13 +32,36 @@
     button:focus-visible, input:focus-visible, textarea:focus-visible, [onclick]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 
+    /* Top Promotion Banner & Scrolling Marquee Styles */
     .top-promo-banner {
-      background: #fef3c7; color: #92400e; padding: 10px 14px; font-size: 14px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+      background: #fef3c7; color: #92400e; padding: 8px 0; font-size: 12px; font-weight: 700;
       border-bottom: 1px solid #fde68a; width: 100%; z-index: 100; position: relative;
+      overflow: hidden;
+    }
+    .top-promo-track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      animation: promoScroll 16s linear infinite;
+    }
+    .top-promo-banner:hover .top-promo-track {
+      animation-play-state: paused;
+    }
+    .top-promo-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-right: 40px;
+      white-space: nowrap;
     }
     .top-promo-badge {
       background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    @keyframes promoScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
     }
 
     .top { 
@@ -96,7 +119,7 @@
     .category-card:active { background: #f6f9f8; }
     .category-card.active { border-color: var(--brand); background: var(--brand-l); box-shadow: 0 0 0 1px var(--brand); }
     .category-img-wrap {
-      width: 100%; height: 68px; border-radius: 9px; overflow: hidden; background: #e8eeec;
+      width: 100%; height: 68px; border-radius: 99px; overflow: hidden; background: #e8eeec;
       display: flex; align-items: center; justify-content: center; margin-bottom: 6px; font-size: 1.7rem;
     }
     .category-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
@@ -250,8 +273,17 @@
 <body>
 
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
-    <span class="top-promo-badge" id="promo-badge-text">Free Delivery</span>
-    <span id="promo-msg-text">we willdelivery for more than 10 items for you</span>
+    <div class="top-promo-track">
+      <div class="top-promo-content">
+        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
+      </div>
+      <!-- Duplicate content for seamless infinite looping scroll -->
+      <div class="top-promo-content">
+        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
+      </div>
+    </div>
   </div>
 
   <header class="top">
@@ -602,9 +634,12 @@
 
           const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
           if (isActive && bannerEl) {
-            bannerEl.style.display = 'flex';
-            document.getElementById('promo-msg-text').innerText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
-            document.getElementById('promo-badge-text').innerText = cleanVal(badgeItem?.value, "Free Delivery");
+            bannerEl.style.display = 'block';
+            const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
+            const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
+
+            document.querySelectorAll('.promo-msg-text').forEach(el => el.innerText = msgText);
+            document.querySelectorAll('.promo-badge-text').forEach(el => el.innerText = badgeText);
           } else if (bannerEl) {
             bannerEl.style.display = 'none';
           }
@@ -1036,11 +1071,6 @@
       }
     }
 
-
-
-
-
-
 // --- LISTEN FOR REALTIME RELOAD BROADCAST ---
 const userChannel = supabaseClient.channel('admin-actions');
 
@@ -1061,25 +1091,6 @@ userChannel
       console.log("Listening for admin reload broadcasts.");
     }
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   </script>
 </body>
