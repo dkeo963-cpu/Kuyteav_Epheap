@@ -1233,7 +1233,7 @@
           throw new Error(data.error);
         }
 
-        // Clear cart and state immediately
+        // Clear local state
         cart = []; 
         clientLat = null;
         clientLng = null;
@@ -1247,9 +1247,18 @@
         closeCartDrawer(); 
         updateCartState();
 
-        // INSTANTLY LAUNCH ABA DEEP LINK / CHECKOUT
+        // TELEGRAM NATIVE LINK LAUNCH
         if (data && data.checkout_url) {
-          window.location.href = data.checkout_url;
+          const targetUrl = data.checkout_url;
+          if (window.Telegram && window.Telegram.WebApp) {
+            if (targetUrl.startsWith('https://t.me/') || targetUrl.startsWith('tg://')) {
+              window.Telegram.WebApp.openTelegramLink(targetUrl);
+            } else {
+              window.Telegram.WebApp.openLink(targetUrl);
+            }
+          } else {
+            window.location.href = targetUrl;
+          }
         } else {
           alert("ការកម្មង់បានជោគជ័យ!");
         }
