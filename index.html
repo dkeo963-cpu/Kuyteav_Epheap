@@ -618,15 +618,15 @@
         const firstSize = Object.keys(item.sizes)[0];
         const stockLimit = item.stock_quantity !== undefined && item.stock_quantity !== null ? Number(item.stock_quantity) : 0;
         
-        // Calculate total quantity of this item already added across all sizes in the cart
+        // Calculate total quantity of this item already added to the cart
         const totalInCart = cart
           .filter(c => c.id === item.item_key)
           .reduce((sum, c) => sum + c.quantity, 0);
 
-        // Disable if out of stock or if cart quantity has reached the stock limit
+        // Disable button if out of stock or if cart quantity has reached/exceeded the stock limit
         const isAvailable = item.is_available !== false && stockLimit > 0 && totalInCart < stockLimit;
-
         const itemImgs = getItemImages(item);
+
         return `
           <div class="food-card">
             <div class="food-info">
@@ -637,9 +637,6 @@
               <div>
                 <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
                 <div class="food-sub">${item.name_en}</div>
-                <div style="font-size: 11px; color: ${stockLimit <= 0 ? 'var(--bad)' : 'var(--sub)'}; margin-top: 2px;">
-                  ស្តុក: ${stockLimit}
-                </div>
               </div>
             </div>
             <div style="display: flex; align-items: center;">
@@ -675,6 +672,15 @@
     function openSizeModal(itemKey) {
       activeModalItem = menuItems.find(i => i.item_key === itemKey);
       if (!activeModalItem || activeModalItem.is_available === false) { alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!"); return; }
+      
+      const stockLimit = activeModalItem.stock_quantity !== undefined && activeModalItem.stock_quantity !== null ? Number(activeModalItem.stock_quantity) : 0;
+      const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
+
+      if (totalInCart >= stockLimit) {
+        alert("មុខម្ហូបនេះបានឈានដល់កម្រិតស្តុកអតិបរមាហើយ!");
+        return;
+      }
+
       document.getElementById('modal-title').innerText = activeModalItem.name_kh;
       const sizeKeys = Object.keys(activeModalItem.sizes);
       selectedSize = sizeKeys[0];
@@ -697,7 +703,16 @@
 
     function confirmAddToCart() {
       if (!activeModalItem || !selectedSize) return;
+
+      const stockLimit = activeModalItem.stock_quantity !== undefined && activeModalItem.stock_quantity !== null ? Number(activeModalItem.stock_quantity) : 0;
       const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize);
+      const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
+
+      if (totalInCart + 1 > stockLimit) {
+        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ប៉ុណ្ណោះ!`);
+        return;
+      }
+
       if (existing) existing.quantity += 1;
       else cart.push({ id: activeModalItem.item_key, size: selectedSize, quantity: 1 });
       closeSizeModal();
@@ -705,15 +720,31 @@
     }
 
     function changeQty(index, delta) {
-      cart[index].quantity += delta;
-      if (cart[index].quantity <= 0) cart.splice(index, 1);
+      const cartItem = cart[index];
+      const product = menuItems.find(m => m.item_key === cartItem.id);
+      const stockLimit = product && product.stock_quantity !== undefined && product.stock_quantity !== null ? Number(product.stock_quantity) : 0;
+      const totalInCartExceptThis = cart.filter(c => c.id === cartItem.id).reduce((sum, c) => sum + c.quantity, 0) - cartItem.quantity;
+
+      if (delta > 0 && totalInCartExceptThis + cartItem.quantity + delta > stockLimit) {
+        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ប៉ុណ្ណោះ!`);
+        return;
+      }
+
+      cartItem.quantity += delta;
+      if (cartItem.quantity <= 0) cart.splice(index, 1);
       updateCartState();
       renderCartDrawer();
     }
 
     function updateCartState() {
       const triggerBtn = document.getElementById('trigger-btn');
-      if (cart.length === 0) { document.getElementById('trigger-total').innerText = '$0.00'; triggerBtn.disabled = true; closeCartDrawer(); return; }
+      if (cart.length === 0) { 
+        document.getElementById('trigger-total').innerText = '$0.00'; 
+        triggerBtn.disabled = true; 
+        closeCartDrawer(); 
+        renderMenu();
+        return; 
+      }
       triggerBtn.disabled = false;
       const subtotal = cart.reduce((sum, c) => sum + parseFloat(menuItems.find(m => m.item_key === c.id)?.sizes[c.size] || 0) * c.quantity, 0);
       const grandTotal = subtotal + (selectedOrderType === 'delivery' ? currentDeliveryFee : 0);
@@ -722,6 +753,8 @@
       document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
       document.getElementById('summary-delivery').innerText = currentDeliveryFee === 0 ? 'ឥតគិតថ្លៃ (Free)' : `$${currentDeliveryFee.toFixed(2)}`;
       document.getElementById('summary-grandtotal').innerText = `$${grandTotal.toFixed(2)}`;
+      
+      renderMenu();
     }
 
     function openCartDrawer() { 
@@ -756,7 +789,6 @@
     async function setOrderType(type, element) {
       await checkDeliveryStatus();
       
-      // Forces an immediate popup alert when user tries to pick delivery while it's closed
       if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។`);
         return;
@@ -770,26 +802,18 @@
       updateCartState();
     }
 
- function fetchGPSLocation() {
+    function fetchGPSLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
           clientLat = position.coords.latitude;
           clientLng = position.coords.longitude;
           const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
-          
-          if (distance > MAX_DELIVERY_KM) { 
-            alert(`ទីតាំងរបស់អ្នកនៅឆ្ងាយពេក (${distance.toFixed(1)} គីឡូម៉ែត្រ)! ហាងកំណត់ត្រឹម 5 គីឡូម៉ែត្រប៉ុណ្ណោះ។`); 
-            return; 
-          }
-          
+          if (distance > MAX_DELIVERY_KM) { alert("ទីតាំងឆ្ងាយពេក!"); return; }
           currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
           document.getElementById('input-address').value = `${clientLat.toFixed(4)}, ${clientLng.toFixed(4)}`;
           gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
           isLocationPinned = true;
-          
-          // FIX: Show the exact distance and delivery fee clearly to the user
           document.getElementById('gps-status').innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(1)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
-          
           updateCartState();
         });
       }
