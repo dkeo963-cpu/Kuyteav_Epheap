@@ -905,7 +905,7 @@ $("bulk-disable-zero").onclick = () => bulk(items.filter(i => isOn(i) && stockOf
 async function refresh() {
   const ic = $("refresh-ic"); ic.classList.add("spin");
   
-  // Clear any persisted customer/cart session data on admin refresh
+  // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
   localStorage.removeItem('davin_app_session');
   
   await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu()]);
