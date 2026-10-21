@@ -33,7 +33,6 @@
     button:focus-visible, input:focus-visible, textarea:focus-visible, [onclick]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 
-    /* ---------- Top Promo Notification Bar ---------- */
     .top-promo-banner {
       background: #fef3c7; color: #92400e; padding: 10px 14px; font-size: 12px; font-weight: 700;
       display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
@@ -43,7 +42,6 @@
       background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
     }
 
-    /* ---------- Header ---------- */
     .top { position: sticky; top: 0; z-index: 50; background: var(--ink); color: #fff; padding: 11px 0; }
     .top .wrap { display: flex; flex-direction: column; gap: 6px; }
     .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
@@ -243,7 +241,6 @@
 </head>
 <body>
 
-  <!-- Top Promotion Banner Container -->
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
     <span class="top-promo-badge" id="promo-badge-text">Free Delivery</span>
     <span id="promo-msg-text">we will free delivery for more than 10 items for you</span>
@@ -618,12 +615,10 @@
         const firstSize = Object.keys(item.sizes)[0];
         const stockLimit = item.stock_quantity !== undefined && item.stock_quantity !== null ? Number(item.stock_quantity) : 0;
         
-        // Calculate total quantity of this item already added to the cart
         const totalInCart = cart
           .filter(c => c.id === item.item_key)
           .reduce((sum, c) => sum + c.quantity, 0);
 
-        // Disable button if out of stock or if cart quantity has reached/exceeded the stock limit
         const isAvailable = item.is_available !== false && stockLimit > 0 && totalInCart < stockLimit;
         const itemImgs = getItemImages(item);
 
@@ -824,14 +819,11 @@
           clientLat = position.coords.latitude;
           clientLng = position.coords.longitude;
 
-          // Calculate distance from shop in kilometers
           const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
 
-          // Check if user location exceeds maximum allowed delivery radius
           if (distance > MAX_DELIVERY_KM) {
             alert(`📍 ទីតាំងរបស់អ្នកនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
             
-            // Reset pinned GPS state
             clientLat = null;
             clientLng = null;
             addressInput.value = "";
@@ -844,7 +836,6 @@
             return;
           }
 
-          // Distance is within limit
           currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
           addressInput.value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
           gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
@@ -895,15 +886,49 @@
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true; btn.innerText = "កំពុងផ្ញើការកម្មង់...";
+      
       try {
-        const { error } = await supabaseClient.functions.invoke('smart-function', {
-          body: { cart, username: usernameVal, customer_name: customerNameVal, phone: phoneVal, order_type: selectedOrderType, address: document.getElementById('input-address').value, location_link: gpsLink, lat: clientLat, lng: clientLng, remark: document.getElementById('input-remark').value }
+        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
+          body: { 
+            cart, 
+            username: usernameVal, 
+            customer_name: customerNameVal, 
+            phone: phoneVal, 
+            order_type: selectedOrderType, 
+            address: document.getElementById('input-address').value, 
+            location_link: gpsLink, 
+            lat: clientLat, 
+            lng: clientLng, 
+            remark: document.getElementById('input-remark').value 
+          }
         });
-        if (error) throw new Error(error.message);
+
+        // Robust error extraction from Edge Function response context
+        if (error) {
+          let errorMsg = error.message;
+          if (error.context && typeof error.context.json === 'function') {
+            try {
+              const errJson = await error.context.json();
+              if (errJson.error) errorMsg = errJson.error;
+            } catch (e) {}
+          }
+          throw new Error(errorMsg);
+        }
+
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
+
         alert("ការកម្មង់បានជោគជ័យ!");
-        cart = []; closeCartDrawer(); updateCartState();
-      } catch (err) { alert("កំហុស: " + err.message); }
-      finally { btn.disabled = false; updateCartState(); }
+        cart = []; 
+        closeCartDrawer(); 
+        updateCartState();
+      } catch (err) { 
+        alert("កំហុស: " + (err.message || err)); 
+      } finally { 
+        btn.disabled = false; 
+        updateCartState(); 
+      }
     }
   </script>
 </body>
