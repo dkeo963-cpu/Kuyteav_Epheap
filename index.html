@@ -575,6 +575,9 @@
       <button id="aba-pay-link-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
         📲 បើកកម្មវិធី ABA Pay ដើម្បីទូទាត់ប្រាក់
       </button>
+      <button id="aba-copy-link-btn" type="button" class="btn btn-g btn-block" style="margin-top: 10px;">
+        📋 ចម្លងតំណទូទាត់ (Copy link)
+      </button>
       <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block" style="margin-top: 10px;">
         បិទ (Close)
       </button>
@@ -639,6 +642,23 @@
     const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Opens the ABA / Bakong payment link. Inside Telegram it uses Telegram's own opener, in a normal browser a new tab.
+    function openPayLink(url) {
+      try {
+        const tgApp = window.Telegram && window.Telegram.WebApp;
+        if (tgApp && tgApp.initData) {
+          if (url.startsWith('https://t.me/') || url.startsWith('tg://')) tgApp.openTelegramLink(url);
+          else tgApp.openLink(url, { try_instant_view: false });
+          return;
+        }
+      } catch (e) { console.error('openLink failed', e); }
+      if (!window.open(url, '_blank')) window.location.href = url;
+    }
+    async function copyPayLink(url) {
+      try { await navigator.clipboard.writeText(url); alert('បានចម្លងតំណទូទាត់! (Link copied)'); }
+      catch (e) { prompt('Copy this payment link:', url); }
+    }
 
     let IS_STORE_OPEN = false;
     let IS_DELIVERY_AVAILABLE = true;
@@ -1230,6 +1250,8 @@
 
         const grandTotal = data.grand_total || "0.00";
         const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
+        // Shows why a QR/deeplink was not made. Function secret DEBUG_PAY=false hides this.
+        if (data.debug && data.debug.link_source !== "bakong_or_khqr") alert("DEBUG: " + JSON.stringify(data.debug));
 
         // Clear local state
         cart = []; 
@@ -1249,18 +1271,9 @@
           document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
           const payBtn = document.getElementById('aba-pay-link-btn');
           
-          payBtn.onclick = (e) => {
-            e.preventDefault();
-            if (window.Telegram && window.Telegram.WebApp) {
-              if (deeplinkUrl.startsWith('https://t.me/') || deeplinkUrl.startsWith('tg://')) {
-                window.Telegram.WebApp.openTelegramLink(deeplinkUrl);
-              } else {
-                window.Telegram.WebApp.openLink(deeplinkUrl, { try_instant_view: false });
-              }
-            } else {
-              window.location.href = deeplinkUrl;
-            }
-          };
+          payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
+          const copyBtn = document.getElementById('aba-copy-link-btn');
+          copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
 
           document.getElementById('aba-modal').style.display = 'flex';
         } else {
