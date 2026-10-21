@@ -42,12 +42,22 @@
       background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
     }
 
-    .top { position: sticky; top: 0; z-index: 50; background: var(--ink); color: #fff; padding: 11px 0; }
+    /* UPDATED HEADER BAR STYLING */
+    .top { 
+      position: sticky; 
+      top: 0; 
+      z-index: 50; 
+      background: var(--surface); 
+      color: var(--ink); 
+      padding: 11px 0; 
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
     .top .wrap { display: flex; flex-direction: column; gap: 6px; }
     .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
     .top-l { flex: 1; min-width: 0; }
-    .greeting { font-size: 11px; font-weight: 500; opacity: .65; }
-    .shop-title { font-size: 30px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .greeting { font-size: 11px; font-weight: 600; color: var(--sub); }
+    .shop-title { font-size: 30px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     main.wrap { padding-top: 14px; }
 
     .hours-badge {
@@ -903,7 +913,6 @@
           }
         });
 
-        // Robust error extraction from Edge Function response context
         if (error) {
           let errorMsg = error.message;
           if (error.context && typeof error.context.json === 'function') {
