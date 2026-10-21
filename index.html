@@ -37,7 +37,7 @@
 
     /* Top Promotion Banner & Scrolling Marquee Styles */
     .top-promo-banner {
-      background: #fef3c7; color: #92400e; padding: 8px 0; font-size: 12px; font-weight: 700;
+      background: #fef3c7; color: #92400e; padding: 8px 0; font-size: 13px; font-weight: 700;
       border-bottom: 1px solid #fde68a; width: 100%; z-index: 100; position: relative;
       overflow: hidden;
     }
@@ -58,7 +58,7 @@
       white-space: nowrap;
     }
     .top-promo-badge {
-      background: #f59e0b; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
+      background: #f59e0b; color: #fff; font-size: 14px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
       flex-shrink: 0;
     }
 
@@ -1192,10 +1192,10 @@ userChannel
   .on('broadcast', { event: 'force_reload' }, payload => {
     console.log("Received reload signal from admin. Clearing session and reloading page...");
     
-    // Clear the cart/session state so it starts fresh
+    // លុបទិន្នន័យកន្ត្រក/Session ចាស់ចោល ដើម្បីឱ្យទំព័រដើមស្រឡះឡើងវិញ
     localStorage.removeItem('davin_app_session');
     
-    // Instantly reload the page seamlessly
+    // ផ្ទុកទំព័រឡើងវិញភ្លាមៗ
     window.location.reload();
   })
   .subscribe((status) => {
