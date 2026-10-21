@@ -576,6 +576,9 @@
         <div id="khqr-canvas" style="width:220px; height:220px; display:flex; align-items:center; justify-content:center;"></div>
         <div style="font-size:11px; color:var(--sub); margin-top:6px;">KHQR • ABA / Bakong / ធនាគារទាំងអស់</div>
       </div>
+      <button id="khqr-toggle-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom:10px;">
+        🔳 បង្ហាញ QR ជំនួស (Show QR instead)
+      </button>
       <button id="khqr-save-btn" type="button" class="btn btn-g btn-block" style="display:none; margin-bottom:10px;">
         💾 រក្សាទុករូប QR (Save QR) — ស្កែនពី Gallery
       </button>
@@ -1286,8 +1289,12 @@
           qrCanvas.innerHTML = "";
           if (qrString && window.QRCode) {
             new QRCode(qrCanvas, { text: qrString, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
-            qrBox.style.display = 'block';
-            saveBtn.style.display = 'flex';
+            const hasLink = !!(abaDirectUrl || deeplinkUrl);
+            const toggleBtn = document.getElementById('khqr-toggle-btn');
+            qrBox.style.display = hasLink ? 'none' : 'block';
+            saveBtn.style.display = hasLink ? 'none' : 'flex';
+            toggleBtn.style.display = hasLink ? 'flex' : 'none';
+            toggleBtn.onclick = () => { qrBox.style.display = 'block'; saveBtn.style.display = 'flex'; toggleBtn.style.display = 'none'; };
             saveBtn.onclick = () => {
               const c = qrCanvas.querySelector('canvas');
               const src = c ? c.toDataURL('image/png') : qrCanvas.querySelector('img')?.src;
@@ -1315,6 +1322,13 @@
           } else { payBtn.style.display = 'none'; copyBtn.style.display = 'none'; }
 
           document.getElementById('aba-modal').style.display = 'flex';
+
+          // AUTO-OPEN the payment app right after the order is sent
+          const autoUrl = abaDirectUrl || deeplinkUrl;
+          if (autoUrl) setTimeout(() => {
+            if (autoUrl.startsWith('http')) openPayLink(autoUrl);
+            else window.location.href = autoUrl;
+          }, 400);
         } else {
           alert("ការកម្មង់បានជោគជ័យ!");
         }
