@@ -462,6 +462,9 @@
       checkDeliveryStatus();
       checkPromoBanner();
       initBanners();
+
+      // Restore saved cart, selections, and form fields automatically after page reload
+      restoreSessionState();
     });
 
     const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
@@ -482,6 +485,90 @@
     let isLocationPinned = false;
     let activeImagesList = [];
     let currentSlideIndex = 0;
+
+    // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
+    function saveSessionState() {
+      const state = {
+        cart: cart,
+        customerName: document.getElementById('input-customer-name').value,
+        phone: document.getElementById('input-phone').value,
+        remark: document.getElementById('input-remark').value,
+        orderType: selectedOrderType,
+        clientLat: clientLat,
+        clientLng: clientLng,
+        gpsLink: gpsLink,
+        isLocationPinned: isLocationPinned,
+        currentDeliveryFee: currentDeliveryFee,
+        address: document.getElementById('input-address').value,
+        scrollPosition: window.scrollY
+      };
+      localStorage.setItem('davin_app_session', JSON.stringify(state));
+    }
+
+    function restoreSessionState() {
+      const savedState = localStorage.getItem('davin_app_session');
+      if (!savedState) return;
+
+      try {
+        const state = JSON.parse(savedState);
+        
+        if (Array.isArray(state.cart)) {
+          cart = state.cart;
+        }
+
+        if (state.customerName) document.getElementById('input-customer-name').value = state.customerName;
+        if (state.phone) document.getElementById('input-phone').value = state.phone;
+        if (state.remark) document.getElementById('input-remark').value = state.remark;
+        if (state.address) document.getElementById('input-address').value = state.address;
+
+        if (state.orderType) {
+          selectedOrderType = state.orderType;
+          const toggles = document.querySelectorAll('.toggle-grid .toggle-item');
+          toggles.forEach(el => {
+            if ((state.orderType === 'takeaway' && el.innerText.includes('Pick Up')) ||
+                (state.orderType === 'delivery' && el.innerText.includes('Delivery'))) {
+              el.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
+              el.classList.add('active');
+            }
+          });
+          document.getElementById('delivery-fee-row').style.display = state.orderType === 'delivery' ? 'flex' : 'none';
+          document.getElementById('gps-btn').disabled = state.orderType !== 'delivery';
+        }
+
+        clientLat = state.clientLat;
+        clientLng = state.clientLng;
+        gpsLink = state.gpsLink;
+        isLocationPinned = state.isLocationPinned;
+        currentDeliveryFee = state.currentDeliveryFee || 0.00;
+
+        if (isLocationPinned) {
+          document.getElementById('gps-status').style.color = "var(--ok)";
+          document.getElementById('gps-status').innerText = `✓ រក្សាទុកទីតាំង GPS រួចរាល់`;
+        }
+
+        updateCartState();
+
+        setTimeout(() => {
+          window.scrollTo(0, state.scrollPosition || 0);
+        }, 200);
+
+      } catch (e) {
+        console.error("Failed to restore session state", e);
+      }
+
+      localStorage.removeItem('davin_app_session');
+    }
+
+    const RELOAD_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+    setTimeout(() => {
+      saveSessionState();
+      window.location.reload();
+    }, RELOAD_INTERVAL_MS);
+
+    window.addEventListener('beforeunload', () => {
+      saveSessionState();
+    });
+    // ----------------------------------------------------------
 
     function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
@@ -949,6 +1036,52 @@
         updateCartState(); 
       }
     }
+
+
+
+
+
+
+// --- LISTEN FOR REALTIME RELOAD BROADCAST ---
+const userChannel = supabaseClient.channel('admin-actions');
+
+userChannel
+  .on('broadcast', { event: 'force_reload' }, payload => {
+    console.log("Received reload signal from admin. Reloading page...");
+    
+    // Save any ongoing session state (cart, inputs) before reloading
+    if (typeof saveSessionState === 'function') {
+      saveSessionState();
+    }
+    
+    // Instantly reload the page seamlessly
+    window.location.reload();
+  })
+  .subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      console.log("Listening for admin reload broadcasts.");
+    }
+  });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   </script>
 </body>
 </html>
