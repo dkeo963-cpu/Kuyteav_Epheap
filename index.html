@@ -1232,8 +1232,6 @@
           throw new Error(data.error);
         }
 
-        alert("ការកម្មង់បានជោគជ័យ!");
-        
         // RESET CART & CLEAR GPS LOCATION INFORMATION UPON SUCCESSFUL ORDER
         cart = []; 
         clientLat = null;
@@ -1247,6 +1245,15 @@
         
         closeCartDrawer(); 
         updateCartState();
+
+        // REDIRECT TO ABA MOBILE VIA CHECKOUT URL IF RETURNED
+        if (data && data.checkout_url) {
+          alert("ការកម្មង់បានជោគជ័យ! ប្រព័ន្ធកំពុងបញ្ជូនអ្នកទៅកាន់ ABA Mobile ដើម្បីទូទាត់ប្រាក់។");
+          window.location.href = data.checkout_url;
+        } else {
+          alert("ការកម្មង់បានជោគជ័យ!");
+        }
+
       } catch (err) { 
         alert("កំហុស: " + (err.message || err)); 
       } finally { 
