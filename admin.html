@@ -191,26 +191,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <body>
 
 
-
-
-
-
-<div class="card" style="margin-top:12px">
-  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន</h2>
-  <p class="muted" style="margin:4px 0 12px">ចុចទីនេះដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញភ្លាមៗដោយគ្មានការជូនដំណឹង</p>
-  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
-</div>
-
-
-
-
-
-
-
-
-
-
-
 <!-- Access gate (shown when not opened inside Telegram) -->
 <div id="gate" class="gate">
   <div class="box">
@@ -220,7 +200,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <button class="btn btn-g" id="gate-view" style="margin-top:12px">មើលតែប៉ុណ្ណោះ (View only)</button>
   </div>
 </div>
-
 <header class="top">
   <div class="wrap">
     <h1>ផ្ទាំងគ្រប់គ្រងហាង<small>តូបគុយទាវ អ៊ីភាព</small></h1>
@@ -228,12 +207,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <a class="icon-btn" href="index.html" target="_blank" rel="noopener">👁️ ហាង</a>
   </div>
 </header>
-
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន (ចុច Reload page អតិថន)</h2>
+  <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
+  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+</div>
 <main class="wrap">
-
   <!-- ========== HOME ========== -->
   <section id="page-home" class="page on">
-
     <!-- Top Promotion Banner Control -->
     <div class="card">
       <div class="ctl" style="margin-bottom: 12px;">
@@ -315,7 +296,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <div id="who" class="muted" style="margin-top:6px"></div>
     </div>
     <div class="card" style="margin-top:12px">
-      <h2 class="h2">🧰 ឧបករណ៍រហ័ស</h2>
+      <h2 class="h2">🧰 អាប់ដេត រហ័ស</h2>
       <p class="muted" style="margin:4px 0 12px">សកម្មភាពលើមុខម្ហូបទាំងអស់ក្នុងពេលតែមួយ</p>
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-g" id="bulk-enable">✅ បើកលក់មុខម្ហូបទាំងអស់ដែលមានស្តុក</button>
@@ -324,7 +305,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     </div>
     <div class="card" style="margin-top:12px">
       <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
-      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) នៅលើ Supabase Edge Function។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន។</p>
+      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)។</p>
     </div>
   </section>
 
@@ -558,7 +539,7 @@ async function loadDelivery() {
     .select("is_delivery_available, estimated_wait_minutes").eq("id", 1).single();
   if (error || !data) return;
   $("delivery-toggle").checked = !!data.is_delivery_available;
-  setText($("delivery-text"), data.is_delivery_available ? "មានសេវាដឹក" : "ផ្អាកដឹកបណ្តោះអាសន្ន",
+  setText($("delivery-text"), data.is_delivery_available ? "មានជើងដឹកជញ្ចូន" : "ផ្អាកដឹកបណ្តោះអាសន្ន",
           data.is_delivery_available ? "ok" : "warn");
   $("wait-input").value = data.estimated_wait_minutes || 15;
 }
@@ -974,34 +955,13 @@ async function triggerReloadForAllUsers() {
     payload: { timestamp: Date.now() }
   });
   
-  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!", "ok");
+  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!(Reload page)", "ok");
   hapticN("success");
 }
 
 // Attach event listener to a button (You can place this button anywhere in your admin HTML)
 // Example: <button class="btn btn-p" id="btn-reload-all">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
 document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 </script>
