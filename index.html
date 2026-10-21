@@ -1186,17 +1186,30 @@
     }
 
 // --- LISTEN FOR REALTIME RELOAD BROADCAST ---
+let isForceReloading = false; // បន្ថែម Flag ដើម្បីទប់ស្កាត់ Android មិនឱ្យ Save Session វិញពេលកំពុង Reload
+
 const userChannel = supabaseClient.channel('admin-actions');
 
 userChannel
   .on('broadcast', { event: 'force_reload' }, payload => {
     console.log("Received reload signal from admin. Clearing session and reloading page...");
     
-    // លុបទិន្នន័យកន្ត្រក/Session ចាស់ចោល ដើម្បីឱ្យទំព័រដើមស្រឡះឡើងវិញ
+    // 1. បើក Flag ដើម្បីប្រាប់មុនថា Admin កំពុងបញ្ជាឱ្យ Reload
+    isForceReloading = true;
+    
+    // 2. លុបទិន្នន័យ Session ចេញពី localStorage ភ្លាមៗ
     localStorage.removeItem('davin_app_session');
     
-    // ផ្ទុកទំព័រឡើងវិញភ្លាមៗ
-    window.location.reload();
+    // 3. ជម្រះកន្ត្រក និងទីតាំងក្នុង Memory
+    cart = [];
+    clientLat = null;
+    clientLng = null;
+    gpsLink = "";
+    isLocationPinned = false;
+    currentDeliveryFee = 0.00;
+    
+    // 4. បង្ខំ Reload ទំព័រដោយរំលង Cache លើ Android (Hard Reload)
+    window.location.href = window.location.pathname + '?v=' + Date.now();
   })
   .subscribe((status) => {
     if (status === 'SUBSCRIBED') {
@@ -1204,6 +1217,27 @@ userChannel
     }
   });
 
+// --- ធ្វើបច្ចុប្បន្នភាពមុខងារ saveSessionState ដើមរបស់អ្នក ---
+function saveSessionState() {
+  // ប្រសិនបើកំពុងបង្ខំ Reload ដោយ Admin មិនត្រូវរក្សាទុកកន្ត្រកចាស់ចូល localStorage វិញឡើយ!
+  if (isForceReloading) return;
+
+  const state = {
+    cart: cart,
+    customerName: document.getElementById('input-customer-name')?.value || '',
+    phone: document.getElementById('input-phone')?.value || '',
+    remark: document.getElementById('input-remark')?.value || '',
+    orderType: selectedOrderType,
+    clientLat: clientLat,
+    clientLng: clientLng,
+    gpsLink: gpsLink,
+    isLocationPinned: isLocationPinned,
+    currentDeliveryFee: currentDeliveryFee,
+    address: document.getElementById('input-address')?.value || '',
+    scrollPosition: window.scrollY
+  };
+  localStorage.setItem('davin_app_session', JSON.stringify(state));
+}
   </script>
 </body>
 </html>
