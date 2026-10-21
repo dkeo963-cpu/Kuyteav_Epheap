@@ -575,6 +575,9 @@
       <button id="aba-pay-link-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
         📲 បើកកម្មវិធី ABA Pay ដើម្បីទូទាត់ប្រាក់
       </button>
+      <button id="aba-direct-btn" type="button" class="btn btn-p btn-block" style="background: #0b3d91; margin-top: 10px; display: none;">
+        🏦 បើក ABA Mobile ផ្ទាល់
+      </button>
       <button id="aba-copy-link-btn" type="button" class="btn btn-g btn-block" style="margin-top: 10px;">
         📋 ចម្លងតំណទូទាត់ (Copy link)
       </button>
@@ -1250,8 +1253,7 @@
 
         const grandTotal = data.grand_total || "0.00";
         const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
-        // Shows why a QR/deeplink was not made. Function secret DEBUG_PAY=false hides this.
-        if (data.debug && data.debug.link_source !== "bakong_or_khqr") alert("DEBUG: " + JSON.stringify(data.debug));
+        const abaDirectUrl = data.aba_direct_url || "";
 
         // Clear local state
         cart = []; 
@@ -1272,6 +1274,11 @@
           const payBtn = document.getElementById('aba-pay-link-btn');
           
           payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
+          const abaBtn = document.getElementById('aba-direct-btn');
+          if (abaDirectUrl) {
+            abaBtn.style.display = 'flex';
+            abaBtn.onclick = (e) => { e.preventDefault(); window.location.href = abaDirectUrl; };
+          } else { abaBtn.style.display = 'none'; }
           const copyBtn = document.getElementById('aba-copy-link-btn');
           copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
 
