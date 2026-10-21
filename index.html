@@ -1248,7 +1248,38 @@
           throw new Error(data.error);
         }
 
-      
+        const grandTotal = data.grand_total || "0.00";
+        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
+        // Shows why a QR/deeplink was not made. Function secret DEBUG_PAY=false hides this.
+        if (data.debug && data.debug.link_source !== "bakong_or_khqr") alert("DEBUG: " + JSON.stringify(data.debug));
+
+        // Clear local state
+        cart = []; 
+        clientLat = null;
+        clientLng = null;
+        gpsLink = "";
+        isLocationPinned = false;
+        currentDeliveryFee = 0.00;
+        
+        document.getElementById('input-address').value = "";
+        document.getElementById('gps-status').innerText = "";
+        
+        closeCartDrawer(); 
+        updateCartState();
+
+        if (deeplinkUrl) {
+          document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
+          const payBtn = document.getElementById('aba-pay-link-btn');
+          
+          payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
+          const copyBtn = document.getElementById('aba-copy-link-btn');
+          copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
+
+          document.getElementById('aba-modal').style.display = 'flex';
+        } else {
+          alert("ការកម្មង់បានជោគជ័យ!");
+        }
+
       } catch (err) { 
         alert("កំហុស: " + (err.message || err)); 
       } finally { 
