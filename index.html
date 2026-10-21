@@ -803,26 +803,87 @@
     }
 
     function fetchGPSLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
+      const gpsBtn = document.getElementById('gps-btn');
+      const gpsStatus = document.getElementById('gps-status');
+      const addressInput = document.getElementById('input-address');
+
+      if (!navigator.geolocation) {
+        alert("កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រការទាញយកទីតាំង GPS ទេ!");
+        return;
+      }
+
+      gpsBtn.disabled = true;
+      gpsBtn.innerText = "⏳ កំពុងទាញយកទីតាំង...";
+      gpsStatus.innerText = "";
+
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          gpsBtn.disabled = false;
+          gpsBtn.innerText = "📍 ថតយកទីតាំង GPS (Pin Location)";
+
           clientLat = position.coords.latitude;
           clientLng = position.coords.longitude;
+
+          // Calculate distance from shop in kilometers
           const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
-          if (distance > MAX_DELIVERY_KM) { alert("ទីតាំងឆ្ងាយពេក!"); return; }
+
+          // Check if user location exceeds maximum allowed delivery radius
+          if (distance > MAX_DELIVERY_KM) {
+            alert(`📍 ទីតាំងរបស់អ្នកនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
+            
+            // Reset pinned GPS state
+            clientLat = null;
+            clientLng = null;
+            addressInput.value = "";
+            gpsLink = "";
+            isLocationPinned = false;
+            currentDeliveryFee = 0.00;
+            gpsStatus.style.color = "var(--bad)";
+            gpsStatus.innerText = `❌ ឆ្ងាយពេក (${distance.toFixed(1)} km) - ហាងដឹកត្រឹមតែ ${MAX_DELIVERY_KM} km`;
+            updateCartState();
+            return;
+          }
+
+          // Distance is within limit
           currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
-          document.getElementById('input-address').value = `${clientLat.toFixed(4)}, ${clientLng.toFixed(4)}`;
+          addressInput.value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
           gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
           isLocationPinned = true;
-          document.getElementById('gps-status').innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(1)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
+
+          gpsStatus.style.color = "var(--ok)";
+          gpsStatus.innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(2)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
           updateCartState();
-        });
-      }
+        },
+        error => {
+          gpsBtn.disabled = false;
+          gpsBtn.innerText = "📍 ថតយកទីតាំង GPS (Pin Location)";
+          gpsStatus.style.color = "var(--bad)";
+
+          let errorMsg = "មិនអាចទាញយកទីតាំង GPS បានទេ!";
+          if (error.code === error.PERMISSION_DENIED) {
+            errorMsg = "សូមអនុញ្ញាត (Allow) ការប្រើប្រាស់ទីតាំង GPS នៅក្នុងកម្មវិធី ឬទូរស័ព្ទរបស់អ្នក!";
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorMsg = "ព័ត៌មានទីតាំងមិនមាននៅពេលនេះទេ! សូមព្យាយាមម្ដងទៀត។";
+          } else if (error.code === error.TIMEOUT) {
+            errorMsg = "ការទាញយកទីតាំងរង់ចាំយូរពេក! សូមព្យាយាមម្ដងទៀត។";
+          }
+          
+          gpsStatus.innerText = `❌ ${errorMsg}`;
+          alert(errorMsg);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
     }
 
     async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
+        return;
+      }
+
+      if (selectedOrderType === 'delivery' && !isLocationPinned) {
+        alert("សូមចុច '📍 ថតយកទីតាំង GPS (Pin Location)' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
         return;
       }
 
