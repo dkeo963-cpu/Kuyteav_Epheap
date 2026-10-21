@@ -1190,12 +1190,10 @@ const userChannel = supabaseClient.channel('admin-actions');
 
 userChannel
   .on('broadcast', { event: 'force_reload' }, payload => {
-    console.log("Received reload signal from admin. Reloading page...");
+    console.log("Received reload signal from admin. Clearing session and reloading page...");
     
-    // Save any ongoing session state (cart, inputs) before reloading
-    if (typeof saveSessionState === 'function') {
-      saveSessionState();
-    }
+    // Clear the cart/session state so it starts fresh
+    localStorage.removeItem('davin_app_session');
     
     // Instantly reload the page seamlessly
     window.location.reload();
