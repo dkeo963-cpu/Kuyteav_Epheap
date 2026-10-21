@@ -6,6 +6,9 @@
   <title>តូបគុយទាវ អ៊ីភាព</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Leaflet CSS & JS for Interactive Map Picker -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&display=swap');
     :root {
@@ -189,18 +192,20 @@
     .btn-block { width: 100%; }
     .x { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #e8eeec; font-weight: 800; cursor: pointer; }
 
-    .modal-overlay, .cart-drawer-overlay {
+    .modal-overlay, .cart-drawer-overlay, .map-modal-overlay {
       position: fixed; inset: 0; background: rgba(10,20,19,.55); display: none; align-items: flex-end; justify-content: center;
     }
     .modal-overlay { z-index: 500; }
     .cart-drawer-overlay { z-index: 600; }
+    .map-modal-overlay { z-index: 800; }
+
     .modal-card, .cart-drawer-card {
       background: var(--surface); width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
       border-radius: 20px 20px 0 0; padding: 18px 16px calc(16px + var(--safe-b)); animation: up .2s ease-out;
     }
     @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
     @media (min-width: 700px) {
-      .modal-overlay, .cart-drawer-overlay { align-items: center; padding: 20px; }
+      .modal-overlay, .cart-drawer-overlay, .map-modal-overlay { align-items: center; padding: 20px; }
       .modal-card, .cart-drawer-card { border-radius: 20px; }
     }
 
@@ -248,7 +253,7 @@
     .custom-input:focus { border-color: var(--brand); background: #fff; }
     .custom-input[readonly] { background: #eef2f1; color: var(--sub); cursor: not-allowed; }
 
-    .gps-btn { background: var(--brand); color: #fff; border: 0; height: 44px; border-radius: var(--r-s); font-size: 13px; font-weight: 800; margin-top: 8px; cursor: pointer; width: 100%; }
+    .gps-btn { background: var(--brand); color: #fff; border: 0; height: 44px; border-radius: var(--r-s); font-size: 13px; font-weight: 800; margin-top: 8px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .gps-btn:active { background: var(--brand-d); }
     .gps-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; }
 
@@ -268,6 +273,37 @@
     .slider-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); transition: all .2s; }
     .dot.active { background: #fff; transform: scale(1.3); }
+
+    /* Interactive Map Modal Styles */
+    .map-card {
+      background: var(--surface); width: 100%; max-width: 600px; height: 85vh; border-radius: 20px 20px 0 0;
+      display: flex; flex-direction: column; overflow: hidden; position: relative; animation: up .2s ease-out;
+    }
+    @media (min-width: 700px) { .map-card { border-radius: 20px; height: 80vh; } }
+    .map-header {
+      padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center; z-index: 10;
+    }
+    .map-container-wrapper { flex: 1; position: relative; width: 100%; background: #e5e3df; }
+    #picker-map { width: 100%; height: 100%; }
+    .center-pin-marker {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%);
+      z-index: 500; pointer-events: none; transition: transform 0.15s ease;
+    }
+    .center-pin-shadow {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 14px; height: 6px; background: rgba(0,0,0,0.25); border-radius: 50%;
+      z-index: 499; pointer-events: none;
+    }
+    .map-recenter-btn {
+      position: absolute; bottom: 20px; right: 16px; z-index: 500;
+      width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; color: var(--brand);
+    }
+    .map-recenter-btn:active { background: #f0f0f0; }
+    .map-footer { padding: 14px 16px calc(14px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); z-index: 10; }
+    .map-addr-preview { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   </style>
 </head>
 <body>
@@ -418,7 +454,9 @@
       <div id="gps-section">
         <div class="section-label">ទីតាំង GPS *</div>
         <input type="text" id="input-address" class="custom-input" readonly placeholder="បិទការប្រើប្រាស់ពេលទៅយកផ្ទាល់...">
-        <button type="button" id="gps-btn" class="gps-btn" onclick="fetchGPSLocation()" disabled>📍 ថតយកទីតាំង GPS (Pin Location)</button>
+        <button type="button" id="gps-btn" class="gps-btn" onclick="openMapModal()" disabled>
+          🗺️ ជ្រើសរើសទីតាំងលើផែនទី (Pick Location)
+        </button>
         <div id="gps-status" style="font-size: 0.8rem; color: var(--ok); margin-top: 6px;"></div>
       </div>
       <div class="section-label">វិធីសាស្ត្រទូទាត់ប្រាក់</div>
@@ -448,6 +486,37 @@
     </div>
   </div>
 
+  <!-- Interactive Map Location Picker Modal (Grab / Eget Style) -->
+  <div id="map-modal" class="map-modal-overlay">
+    <div class="map-card">
+      <div class="map-header">
+        <div style="font-weight: 800; font-size: 1rem; color: var(--ink);">🗺️ ជ្រើសរើសទីតាំងដឹកជញ្ជូន</div>
+        <button type="button" class="x" onclick="closeMapModal()">✕</button>
+      </div>
+      <div class="map-container-wrapper">
+        <div id="picker-map"></div>
+        <div class="center-pin-shadow"></div>
+        <div class="center-pin-marker">
+          <svg width="38" height="48" viewBox="0 0 38 48" fill="none">
+            <path d="M19 0C8.5 0 0 8.5 0 19C0 31.5 19 48 19 48C19 48 38 31.5 38 19C38 8.5 29.5 0 19 0Z" fill="#0f766e"/>
+            <circle cx="19" cy="18" r="8" fill="#ffffff"/>
+            <circle cx="19" cy="18" r="4" fill="#0f766e"/>
+          </svg>
+        </div>
+        <button type="button" class="map-recenter-btn" onclick="recenterMapToUser()" title="ទីតាំងបច្ចុប្បន្ន">🎯</button>
+      </div>
+      <div class="map-footer">
+        <div class="map-addr-preview">
+          <span>📍</span>
+          <span id="map-coords-display">កំពុងកំណត់ទីតាំង...</span>
+        </div>
+        <button type="button" class="btn btn-p btn-block" onclick="confirmMapLocation()">
+          បញ្ជាក់ទីតាំងនេះ (Confirm Location)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const STORE_LAT = 11.5300546;
     const STORE_LNG = 104.8039416;
@@ -456,6 +525,12 @@
     let clientLat = null;
     let clientLng = null;
     let currentDeliveryFee = 0.00;
+
+    // Interactive Leaflet Map Variables
+    let pickerMap = null;
+    let tempLat = STORE_LAT;
+    let tempLng = STORE_LNG;
+    let storeMarker = null;
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371;
@@ -927,73 +1002,112 @@
       updateCartState();
     }
 
-    function fetchGPSLocation() {
-      const gpsBtn = document.getElementById('gps-btn');
-      const gpsStatus = document.getElementById('gps-status');
-      const addressInput = document.getElementById('input-address');
+    /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
+    function openMapModal() {
+      document.getElementById('map-modal').style.display = 'flex';
 
+      const initialLat = clientLat || STORE_LAT;
+      const initialLng = clientLng || STORE_LNG;
+      tempLat = initialLat;
+      tempLng = initialLng;
+
+      if (!pickerMap) {
+        pickerMap = L.map('picker-map', { zoomControl: false }).setView([initialLat, initialLng], 16);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(pickerMap);
+
+        L.control.zoom({ position: 'topright' }).addTo(pickerMap);
+
+        // Add Store Location Marker
+        const shopIcon = L.divIcon({
+          className: 'custom-shop-icon',
+          html: `<div style="background:#005d7b; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,0.3);">🏪</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+        storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: shopIcon }).addTo(pickerMap);
+        storeMarker.bindPopup("<b>តូបគុយទាវ អ៊ីភាព (ហាង)</b>");
+
+        pickerMap.on('move', () => {
+          const center = pickerMap.getCenter();
+          tempLat = center.lat;
+          tempLng = center.lng;
+          updateMapDisplayCoords(tempLat, tempLng);
+        });
+      } else {
+        pickerMap.setView([initialLat, initialLng], 16);
+      }
+
+      setTimeout(() => {
+        pickerMap.invalidateSize();
+        updateMapDisplayCoords(tempLat, tempLng);
+      }, 250);
+
+      // Auto-locate user on open if no custom position saved yet
+      if (!clientLat && navigator.geolocation) {
+        recenterMapToUser();
+      }
+    }
+
+    function updateMapDisplayCoords(lat, lng) {
+      const dist = calculateDistance(STORE_LAT, STORE_LNG, lat, lng);
+      const displayEl = document.getElementById('map-coords-display');
+      if (dist > MAX_DELIVERY_KM) {
+        displayEl.innerHTML = `<span style="color:var(--bad);">⚠️ ឆ្ងាយពេក (${dist.toFixed(2)} km) - ហាងដឹកត្រឹមតែ ${MAX_DELIVERY_KM} km</span>`;
+      } else {
+        displayEl.innerHTML = `<span>${lat.toFixed(5)}, ${lng.toFixed(5)} (${dist.toFixed(2)} km ពីហាង)</span>`;
+      }
+    }
+
+    function recenterMapToUser() {
       if (!navigator.geolocation) {
-        alert("កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រការទាញយកទីតាំង GPS ទេ!");
+        alert("កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រ GPS ទេ!");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          tempLat = pos.coords.latitude;
+          tempLng = pos.coords.longitude;
+          if (pickerMap) {
+            pickerMap.flyTo([tempLat, tempLng], 17, { animate: true, duration: 1.2 });
+          }
+        },
+        err => {
+          alert("មិនអាចទទួលបានទីតាំង GPS របស់អ្នកទេ! សូមពិនិត្យការអនុញ្ញាត GPS។");
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function confirmMapLocation() {
+      const distance = calculateDistance(STORE_LAT, STORE_LNG, tempLat, tempLng);
+
+      if (distance > MAX_DELIVERY_KM) {
+        alert(`📍 ទីតាំងដែលបានជ្រើសរើសនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
         return;
       }
 
-      gpsBtn.disabled = true;
-      gpsBtn.innerText = "⏳ កំពុងទាញយកទីតាំង...";
-      gpsStatus.innerText = "";
+      clientLat = tempLat;
+      clientLng = tempLng;
 
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          gpsBtn.disabled = false;
-          gpsBtn.innerText = "📍 ថតយកទីតាំង GPS (Pin Location)";
+      currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
+      document.getElementById('input-address').value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
+      gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
+      isLocationPinned = true;
 
-          clientLat = position.coords.latitude;
-          clientLng = position.coords.longitude;
+      const gpsStatus = document.getElementById('gps-status');
+      gpsStatus.style.color = "var(--ok)";
+      gpsStatus.innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(2)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
 
-          const distance = calculateDistance(STORE_LAT, STORE_LNG, clientLat, clientLng);
+      updateCartState();
+      closeMapModal();
+    }
 
-          if (distance > MAX_DELIVERY_KM) {
-            alert(`📍 ទីតាំងរបស់អ្នកនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
-            
-            clientLat = null;
-            clientLng = null;
-            addressInput.value = "";
-            gpsLink = "";
-            isLocationPinned = false;
-            currentDeliveryFee = 0.00;
-            gpsStatus.style.color = "var(--bad)";
-            gpsStatus.innerText = `❌ ឆ្ងាយពេក (${distance.toFixed(1)} km) - ហាងដឹកត្រឹមតែ ${MAX_DELIVERY_KM} km`;
-            updateCartState();
-            return;
-          }
-
-          currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
-          addressInput.value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
-          gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
-          isLocationPinned = true;
-
-          gpsStatus.style.color = "var(--ok)";
-          gpsStatus.innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(2)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
-          updateCartState();
-        },
-        error => {
-          gpsBtn.disabled = false;
-          gpsBtn.innerText = "📍 ថតយកទីតាំង GPS (Pin Location)";
-          gpsStatus.style.color = "var(--bad)";
-
-          let errorMsg = "មិនអាចទាញយកទីតាំង GPS បានទេ!";
-          if (error.code === error.PERMISSION_DENIED) {
-            errorMsg = "សូមអនុញ្ញាត (Allow) ការប្រើប្រាស់ទីតាំង GPS នៅក្នុងកម្មវិធី ឬទូរស័ព្ទរបស់អ្នក!";
-          } else if (error.code === error.POSITION_UNAVAILABLE) {
-            errorMsg = "ព័ត៌មានទីតាំងមិនមាននៅពេលនេះទេ! សូមព្យាយាមម្ដងទៀត។";
-          } else if (error.code === error.TIMEOUT) {
-            errorMsg = "ការទាញយកទីតាំងរង់ចាំយូរពេក! សូមព្យាយាមម្ដងទៀត។";
-          }
-          
-          gpsStatus.innerText = `❌ ${errorMsg}`;
-          alert(errorMsg);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
+    function closeMapModal() {
+      document.getElementById('map-modal').style.display = 'none';
     }
 
     async function sendOrder() {
@@ -1004,7 +1118,7 @@
       }
 
       if (selectedOrderType === 'delivery' && !isLocationPinned) {
-        alert("សូមចុច '📍 ថតយកទីតាំង GPS (Pin Location)' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
+        alert("សូមចុច '🗺️ ជ្រើសរើសទីតាំងលើផែនទី' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
         return;
       }
 
