@@ -616,7 +616,16 @@
 
       container.innerHTML = filtered.map(item => {
         const firstSize = Object.keys(item.sizes)[0];
-        const isAvailable = item.is_available !== false && (item.stock_quantity === undefined || item.stock_quantity > 0);
+        const stockLimit = item.stock_quantity !== undefined && item.stock_quantity !== null ? Number(item.stock_quantity) : 0;
+        
+        // Calculate total quantity of this item already added across all sizes in the cart
+        const totalInCart = cart
+          .filter(c => c.id === item.item_key)
+          .reduce((sum, c) => sum + c.quantity, 0);
+
+        // Disable if out of stock or if cart quantity has reached the stock limit
+        const isAvailable = item.is_available !== false && stockLimit > 0 && totalInCart < stockLimit;
+
         const itemImgs = getItemImages(item);
         return `
           <div class="food-card">
@@ -628,6 +637,9 @@
               <div>
                 <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
                 <div class="food-sub">${item.name_en}</div>
+                <div style="font-size: 11px; color: ${stockLimit <= 0 ? 'var(--bad)' : 'var(--sub)'}; margin-top: 2px;">
+                  ស្តុក: ${stockLimit}
+                </div>
               </div>
             </div>
             <div style="display: flex; align-items: center;">
