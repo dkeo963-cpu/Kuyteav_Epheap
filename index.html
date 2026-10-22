@@ -1110,7 +1110,7 @@
       document.getElementById('map-modal').style.display = 'none';
     }
 
-    async function sendOrder() {
+ async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
@@ -1172,25 +1172,22 @@
         closeCartDrawer(); 
         updateCartState();
 
-        // 1. Get payment URL from response or use PayWay link
+        // SAFE PAYMENT REDIRECT (Prevents ERR_UNKNOWN_URL_SCHEME inside Telegram WebApp)
         const targetLink = data.deeplink || "https://link.payway.com.kh/ABAPAYWu551072p";
 
-        // 2. Safe Redirect Logic
-        if (window.Telegram?.WebApp) {
-          // Telegram WebApp openLink only accepts http:// or https:// URLs
-          if (targetLink.startsWith("http://") || targetLink.startsWith("https://")) {
-            try {
-              window.Telegram.WebApp.openLink(targetLink);
-            } catch (e) {
-              window.open(targetLink, '_blank');
-            }
+        if (targetLink.startsWith("http://") || targetLink.startsWith("https://")) {
+          if (window.Telegram?.WebApp?.openLink) {
+            window.Telegram.WebApp.openLink(targetLink);
           } else {
-            // For custom schemes (abamobilebank://), redirect directly
             window.location.href = targetLink;
           }
         } else {
-          // Standard Browser
-          window.location.href = targetLink;
+          // Hidden iframe fallback for direct custom protocols without crashing WebApp view
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          iframe.src = targetLink;
+          document.body.appendChild(iframe);
+          setTimeout(() => iframe.remove(), 2000);
         }
 
       } catch (err) { 
