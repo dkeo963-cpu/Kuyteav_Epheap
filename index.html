@@ -6,6 +6,7 @@
   <title>តូបគុយទាវ អ៊ីភាព</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Leaflet CSS & JS for Interactive Map Picker -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -564,17 +565,20 @@
     </div>
   </div>
 
-  <!-- ABA PAYMENT DIRECT TAP MODAL -->
+  <!-- ABA PAYMENT MODAL -->
   <div id="aba-modal" class="modal-overlay" style="z-index: 900;">
     <div class="modal-card" style="text-align: center; padding: 24px 16px;">
       <div style="font-size: 42px; margin-bottom: 8px;">💳</div>
       <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800;">ការកម្មង់បានជោគជ័យ!</h3>
       <p style="color: var(--sub); margin-bottom: 20px; font-size: 14px;">
-        សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកកម្មវិធី ABA Mobile ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b>
+        ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b> តាម ABA Mobile
       </p>
-      <button id="aba-pay-link-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
-        📲 បើកកម្មវិធី ABA Pay ដើម្បីទូទាត់ប្រាក់
+      <button id="aba-direct-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
+        📲 បើកកម្មវិធី ABA Mobile ដើម្បីទូទាត់ប្រាក់
       </button>
+      <p id="aba-no-link-msg" style="display:none; color: var(--bad); font-size: 13px; margin-top: 12px;">
+        មិនមានតំណ ABA ទេ។ សូមទាក់ទងហាងតាម Telegram ដើម្បីទូទាត់។
+      </p>
       <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block" style="margin-top: 10px;">
         បិទ (Close)
       </button>
@@ -639,6 +643,23 @@
     const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Opens the ABA / Bakong payment link. Inside Telegram it uses Telegram's own opener, in a normal browser a new tab.
+    function openPayLink(url) {
+      try {
+        const tgApp = window.Telegram && window.Telegram.WebApp;
+        if (tgApp && tgApp.initData) {
+          if (url.startsWith('https://t.me/') || url.startsWith('tg://')) tgApp.openTelegramLink(url);
+          else tgApp.openLink(url, { try_instant_view: false });
+          return;
+        }
+      } catch (e) { console.error('openLink failed', e); }
+      if (!window.open(url, '_blank')) window.location.href = url;
+    }
+    async function copyPayLink(url) {
+      try { await navigator.clipboard.writeText(url); alert('បានចម្លងតំណទូទាត់! (Link copied)'); }
+      catch (e) { prompt('Copy this payment link:', url); }
+    }
 
     let IS_STORE_OPEN = false;
     let IS_DELIVERY_AVAILABLE = true;
@@ -1229,7 +1250,8 @@
         }
 
         const grandTotal = data.grand_total || "0.00";
-        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
+        const abaDirectUrl = data.aba_direct_url || "";
+        if (new URLSearchParams(location.search).has("debug")) alert("DEBUG: " + JSON.stringify(data.debug));
 
         // Clear local state
         cart = []; 
@@ -1245,26 +1267,30 @@
         closeCartDrawer(); 
         updateCartState();
 
-        if (deeplinkUrl) {
-          document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
-          const payBtn = document.getElementById('aba-pay-link-btn');
-          
-          payBtn.onclick = (e) => {
-            e.preventDefault();
-            if (window.Telegram && window.Telegram.WebApp) {
-              if (deeplinkUrl.startsWith('https://t.me/') || deeplinkUrl.startsWith('tg://')) {
-                window.Telegram.WebApp.openTelegramLink(deeplinkUrl);
-              } else {
-                window.Telegram.WebApp.openLink(deeplinkUrl, { try_instant_view: false });
-              }
+        document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
+        const abaBtn = document.getElementById('aba-direct-btn');
+        const noLinkMsg = document.getElementById('aba-no-link-msg');
+        if (abaDirectUrl) {
+          abaBtn.style.display = 'flex';
+          noLinkMsg.style.display = 'none';
+          const openAba = () => {
+            if (abaDirectUrl.startsWith('http')) { openPayLink(abaDirectUrl); return; }
+            const isAndroid = /android/i.test(navigator.userAgent);
+            if (isAndroid && abaDirectUrl.startsWith('abamobilebank://')) {
+              const rest = abaDirectUrl.replace('abamobilebank://', '');
+              const fallback = encodeURIComponent('https://play.google.com/store/apps/details?id=com.paygo24.ibank');
+              window.location.href = `intent://${rest}#Intent;scheme=abamobilebank;package=com.paygo24.ibank;S.browser_fallback_url=${fallback};end`;
             } else {
-              window.location.href = deeplinkUrl;
+              window.location.href = abaDirectUrl;
             }
           };
-
+          abaBtn.onclick = (e) => { e.preventDefault(); openAba(); };
           document.getElementById('aba-modal').style.display = 'flex';
+          setTimeout(openAba, 400); // auto-open ABA right after the order is sent
         } else {
-          alert("ការកម្មង់បានជោគជ័យ!");
+          abaBtn.style.display = 'none';
+          noLinkMsg.style.display = 'block';
+          document.getElementById('aba-modal').style.display = 'flex';
         }
 
       } catch (err) { 
