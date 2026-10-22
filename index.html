@@ -316,6 +316,9 @@
     .pay-qr { width: 210px; height: 210px; margin: 12px auto 0; border: 1px solid var(--line); border-radius: 12px; padding: 6px; display: block; object-fit: contain; background: #fff; }
     .pay-state { margin-top: 12px; font-size: 13px; font-weight: 700; }
     .pay-state.ok { color: var(--ok); } .pay-state.bad { color: var(--bad); } .pay-state.wait { color: var(--warn); }
+    .pay-resume { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 850; display: none; background: var(--aba); color: #fff; border-radius: var(--r-s); padding: 10px 12px; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+    .pay-resume button { border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+    .pay-resume .go { background: #fff; color: var(--aba); } .pay-resume .x { background: transparent; color: #fff; }
   </style>
 </head>
 <body>
@@ -567,6 +570,11 @@
     </div>
   </div>
 
+  <div id="pay-resume" class="pay-resume">
+    <span style="flex:1">⏳ មានការបង់ប្រាក់មួយមិនទាន់បញ្ចប់</span>
+    <button type="button" class="go" onclick="reopenPayment()">បន្ត</button>
+    <button type="button" class="x" onclick="dismissResume()">✕</button>
+  </div>
   <!-- ABA Pay Modal -->
   <div id="pay-modal" class="pay-overlay">
     <div class="pay-card">
@@ -1240,14 +1248,21 @@
       startPaymentPolling();
     }
 
-    // Must be called from a tap (user gesture) so Telegram/Android/iOS allow the app switch.
+    // Called from the "Open ABA Mobile" button only (a real tap).
+    // The deeplink is tried inside a hidden iframe so the Mini App page itself is NEVER replaced
+    // (setting location.href to abamobilebank:// makes Telegram's browser show ERR_UNKNOWN_URL_SCHEME).
     function openAbaApp() {
       if (!payDeeplink) return;
-      window.location.href = payDeeplink;
-      // If ABA Mobile isn't installed, nothing happens: show the store link after a moment.
+      try {
+        const f = document.createElement('iframe');
+        f.style.display = 'none';
+        f.src = payDeeplink;
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 3000);
+      } catch (e) {}
       setTimeout(() => {
-        if (document.visibilityState === 'visible' && document.getElementById('pay-modal').style.display === 'flex') {
-          setPayState('បើកមិនបាន? សូមដំឡើង ABA Mobile ឬស្កេន QR ខាងលើ', 'bad');
+        if (document.getElementById('pay-modal').style.display === 'flex') {
+          setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
         }
       }, 2500);
     }
@@ -1285,18 +1300,40 @@
     function cancelPaymentUi() {
       // Only hides the popup; if the customer already paid we still confirm it in the background.
       stopPaymentPolling();
+      localStorage.removeItem('pending_payment');
       document.getElementById('pay-modal').style.display = 'none';
     }
 
-    // If Telegram reloads the page while the customer is in the ABA app, resume checking.
-    function resumePendingPayment() {
+    // If Telegram reloads the page while the customer is in the ABA app, quietly check the
+    // payment. The shop page always opens first; the popup only reopens if the customer taps "បន្ត".
+    let resumeInfo = null;
+    async function resumePendingPayment() {
       try {
         const raw = localStorage.getItem('pending_payment');
         if (!raw) return;
         const info = JSON.parse(raw);
         if (!info?.tran_id || Date.now() - info.started_at > PAY_MAX_MS) { localStorage.removeItem('pending_payment'); return; }
-        showPayModal(info);
-      } catch (e) { localStorage.removeItem('pending_payment'); }
+        const { data } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: info.tran_id } });
+        if (data?.status === 'paid') {
+          localStorage.removeItem('pending_payment');
+          resetAfterOrder();
+          alert("✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង");
+        } else if (data?.status === 'expired') {
+          localStorage.removeItem('pending_payment');
+        } else {
+          resumeInfo = info;
+          document.getElementById('pay-resume').style.display = 'flex';
+        }
+      } catch (e) {}
+    }
+    function reopenPayment() {
+      document.getElementById('pay-resume').style.display = 'none';
+      if (resumeInfo) showPayModal(resumeInfo);
+    }
+    function dismissResume() {
+      document.getElementById('pay-resume').style.display = 'none';
+      localStorage.removeItem('pending_payment');
+      resumeInfo = null;
     }
 
     async function sendOrder() {
@@ -1351,7 +1388,6 @@
         const info = { ...data, started_at: Date.now() };
         localStorage.setItem('pending_payment', JSON.stringify(info));
         showPayModal(info);
-        openAbaApp(); // try to jump straight into ABA Mobile; the button in the popup is the fallback
       } catch (err) {
         alert("កំហុស: " + (err.message || err));
       } finally {
