@@ -1254,23 +1254,16 @@
 function openAbaApp() {
   if (!payDeeplink) return;
 
-  let targetUrl = payDeeplink;
-
-  // Converts custom app scheme into an OS-compatible HTTPS link
-  if (targetUrl.startsWith('abamobilebank://')) {
-    targetUrl = targetUrl.replace('abamobilebank://', 'https://checkout.payway.com.kh/app/');
-  }
-
-  // Telegram WebApp Native Opener
+  // Telegram WebApp Native Opener handles abamobilebank:// directly
   if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-    window.Telegram.WebApp.openLink(targetUrl);
+    window.Telegram.WebApp.openLink(payDeeplink, { try_instant_view: false });
   } else {
     // Fallback for standard mobile browsers
-    window.location.href = targetUrl;
+    window.location.href = payDeeplink;
   }
 
   setTimeout(() => {
-    if (document.getElementById('pay-modal').style.display === 'flex') {
+    if (document.getElementById('pay-modal') && document.getElementById('pay-modal').style.display === 'flex') {
       setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile', 'wait');
     }
   }, 2500);
