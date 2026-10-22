@@ -1301,6 +1301,7 @@
       stopPaymentPolling();
       localStorage.removeItem('pending_payment');
       document.getElementById('pay-modal').style.display = 'none';
+      resetSendButton();
     }
 
     // If Telegram reloads the page while the customer is in the ABA app, quietly check the
@@ -1335,6 +1336,15 @@
       resumeInfo = null;
     }
 
+    // Restores the send button to "ធ្វើការកម្មង់ • $total" (the loading text replaces its inner HTML).
+    function resetSendButton() {
+      const btn = document.getElementById('send-order-btn');
+      if (!btn) return;
+      btn.disabled = false;
+      btn.innerHTML = 'ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>';
+      updateCartState(); // refills #final-total with the current total
+    }
+
     async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
@@ -1353,7 +1363,7 @@
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
 
       const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerText = "កំពុងបង្កើត ABA QR...";
+      btn.disabled = true; btn.innerHTML = '<span>កំពុងបង្កើត ABA QR...</span>';
 
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1390,8 +1400,7 @@
       } catch (err) {
         alert("កំហុស: " + (err.message || err));
       } finally {
-        btn.disabled = false;
-        updateCartState();
+        resetSendButton();
       }
     }
 
