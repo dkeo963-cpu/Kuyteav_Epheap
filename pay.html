@@ -23,27 +23,39 @@
 </div>
 <script>
 (function () {
-  var d = new URLSearchParams(location.search).get('d') || '';
-  // Only allow the ABA Mobile scheme.
-  if (d.indexOf('abamobilebank://') !== 0) {
-    document.getElementById('msg').textContent = 'តំណភ្ជាប់មិនត្រឹមត្រូវ។ សូមត្រឡប់ទៅ Telegram ហើយស្កេន QR។';
-    document.getElementById('open').style.display = 'none';
-    return;
-  }
-  var ua = navigator.userAgent;
-  var isAndroid = /Android/i.test(ua);
-  var target = d;
-  if (isAndroid) {
-    // Android Chrome opens the app reliably through an intent URL.
-    target = 'intent://' + d.replace('abamobilebank://', '') + '#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
-  }
+  var API = 'https://lykgwttlhqedyrkxfoja.supabase.co/functions/v1/payment-status';
+  var msg = document.getElementById('msg');
   var btn = document.getElementById('open');
-  btn.href = target;
   var store = document.getElementById('store');
-  store.href = isAndroid ? 'https://play.google.com/store/apps/details?id=com.paygo24.ibank'
-                         : 'https://apps.apple.com/app/aba-mobile-bank/id968860649';
-  store.style.display = 'block';
-  setTimeout(function () { window.location.href = target; }, 400);
+  function stop(text) { msg.textContent = text; btn.style.display = 'none'; }
+
+  // The address carries ONLY the order id, never a deeplink, so this page can only open
+  // payments that our own system created.
+  var o = new URLSearchParams(location.search).get('o') || '';
+  if (!/^[A-Za-z0-9_-]{4,20}$/.test(o)) { stop('តំណភ្ជាប់មិនត្រឹមត្រូវ។ សូមត្រឡប់ទៅ Telegram ហើយស្កេន QR។'); return; }
+
+  btn.style.display = 'none';
+  fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tran_id: o }) })
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (j.status === 'paid') { stop('✅ ការបង់ប្រាក់នេះបានបញ្ចប់ហើយ។ សូមត្រឡប់ទៅ Telegram។'); return; }
+      if (j.status === 'expired') { stop('⌛ QR ផុតកំណត់ សូមត្រឡប់ទៅ Telegram ហើយកម្មង់ម្ដងទៀត។'); return; }
+      var d = j.deeplink || '';
+      // Defence in depth: only the ABA scheme, and no characters that could inject extra Android intent parameters.
+      if (d.indexOf('abamobilebank://') !== 0 || d.length > 3000 || /[;#<>"'`\\\s]/.test(d)) {
+        stop('តំណភ្ជាប់មិនត្រឹមត្រូវ។ សូមត្រឡប់ទៅ Telegram ហើយស្កេន QR។'); return;
+      }
+      var isAndroid = /Android/i.test(navigator.userAgent);
+      var target = isAndroid
+        ? 'intent://' + d.replace('abamobilebank://', '') + '#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end'
+        : d;
+      btn.href = target; btn.style.display = 'block';
+      store.href = isAndroid ? 'https://play.google.com/store/apps/details?id=com.paygo24.ibank'
+                             : 'https://apps.apple.com/app/aba-mobile-bank/id968860649';
+      store.style.display = 'block';
+      setTimeout(function () { window.location.href = target; }, 400);
+    })
+    .catch(function () { stop('មិនអាចភ្ជាប់បានទេ។ សូមត្រឡប់ទៅ Telegram ហើយស្កេន QR។'); });
 })();
 </script>
 </body>
