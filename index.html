@@ -701,8 +701,8 @@
   </div>
 
   <script>
-    const STORE_LAT = 11.5312387;
-    const STORE_LNG = 104.8136501;
+    const STORE_LAT = 11.5300546;
+    const STORE_LNG = 104.8039416;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -1096,7 +1096,7 @@
       selectedSize = sizeKeys[0];
       document.getElementById('size-options-container').innerHTML = sizeKeys.map(sizeKey => `
         <div class="size-tile ${sizeKey === selectedSize ? 'selected' : ''}" id="size-tile-${sizeKey}" onclick="selectSizeOption('${sizeKey}')">
-          <span>ទំហំ ${sizeKey.toUpperCase()}</span>
+          <span>ជ្រើសរើស :  ${sizeKey.toUpperCase()}</span>
           <span style="color: var(--brand);">$${parseFloat(activeModalItem.sizes[sizeKey]).toFixed(2)}</span>
         </div>
       `).join('');
