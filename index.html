@@ -81,15 +81,55 @@
     .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
     .top-l { flex: 1; min-width: 0; }
     .greeting { font-size: 14px; font-weight: 600; color: var(--sub); }
+    
+    /* Branding Header with Chef Girl Icon */
+    .shop-title-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chef-girl-icon {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--brand-l);
+      border: 1.5px solid var(--brand);
+      border-radius: 50%;
+      padding: 3px;
+    }
+    .chef-girl-icon svg {
+      width: 100%;
+      height: 100%;
+    }
     .shop-title { font-size: 25px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     main.wrap { padding-top: 14px; }
 
-    .hours-badge {
-      font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 99px;
-      background: var(--bad-l); color: var(--bad); width: fit-content;
-      margin-left: auto;
+    /* Store Status Badge with Back-and-Forth Moving Glow Light Effect */
+    @keyframes borderGlowBackAndForth {
+      0% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
+      50% { border-color: rgba(21, 128, 61, 1); box-shadow: inset 0 0 10px rgba(21, 128, 61, 0.4), 0 0 12px rgba(21, 128, 61, 0.6); background: #dcfce7; }
+      100% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
     }
-    .hours-badge.open { background: var(--ok-l); color: var(--ok); }
+
+    @keyframes closedBorderGlow {
+      0% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
+      50% { border-color: rgba(198, 40, 40, 1); box-shadow: inset 0 0 10px rgba(198, 40, 40, 0.4), 0 0 12px rgba(198, 40, 40, 0.6); background: #fee2e2; }
+      100% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
+    }
+
+    .hours-badge {
+      font-size: 13px; font-weight: 800; padding: 5px 12px; border-radius: 99px;
+      background: var(--bad-l); color: var(--bad); width: fit-content;
+      margin-left: auto; border: 1.5px solid transparent;
+      animation: closedBorderGlow 2.5s ease-in-out infinite;
+    }
+    .hours-badge.open {
+      background: var(--ok-l); color: var(--ok);
+      animation: borderGlowBackAndForth 2.5s ease-in-out infinite;
+    }
 
     .closed-banner, .delivery-limit-banner, .username-warning {
       padding: 11px 14px; border-radius: var(--r); font-weight: 700; text-align: center;
@@ -343,7 +383,31 @@
       <div class="top-row-main">
         <div class="top-l">
           <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-          <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+          <div class="shop-title-container">
+            <!-- Chef Girl Icon holding kitchen accessories -->
+            <div class="chef-girl-icon" title="Chef Epheap">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Chef Hat -->
+                <path d="M18 20C15 18 16 12 22 10C24 6 32 5 36 9C40 6 48 8 48 13C52 15 50 21 46 22H18Z" fill="#ffffff" stroke="#0f766e" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M20 22H44V26C44 27.1 43.1 28 42 28H22C20.9 28 20 27.1 20 26V22Z" fill="#0f766e"/>
+                <!-- Girl Head & Hair -->
+                <path d="M18 30C16 38 20 46 22 48C24 50 40 50 42 48C44 46 48 38 46 30C44 33 41 34 32 34C23 34 20 33 18 30Z" fill="#4a2c11"/>
+                <circle cx="32" cy="36" r="10" fill="#fbd2b3"/>
+                <!-- Eyes & Smile -->
+                <circle cx="28" cy="36" r="1.5" fill="#14201f"/>
+                <circle cx="36" cy="36" r="1.5" fill="#14201f"/>
+                <path d="M29 40C31 42 33 42 35 40" stroke="#c62828" stroke-width="1.5" stroke-linecap="round"/>
+                <!-- Apron / Body -->
+                <path d="M20 48L24 60H40L44 48C38 52 26 52 20 48Z" fill="#0f766e"/>
+                <!-- Kitchen Accessories: Spatula & Spoon in Hand -->
+                <path d="M12 42L22 52" stroke="#b45309" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M10 40L14 36L17 39L13 43Z" fill="#b45309"/>
+                <path d="M52 42L42 52" stroke="#b45309" stroke-width="2.5" stroke-linecap="round"/>
+                <ellipse cx="53" cy="40" rx="3" ry="4" fill="#b45309"/>
+              </svg>
+            </div>
+            <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+          </div>
         </div>
       </div>
     </div>
