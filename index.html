@@ -215,12 +215,6 @@
     }
     .size-tile.selected { border-color: var(--brand); background: var(--brand-l); box-shadow: 0 0 0 1px var(--brand); }
 
-    .option-group { margin: 14px 0; }
-    .option-title { font-size: 12px; font-weight: 700; color: var(--sub); margin-bottom: 6px; }
-    .option-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pill { height: 34px; padding: 0 14px; display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 99px; font-size: 12px; font-weight: 700; color: var(--sub); cursor: pointer; }
-    .pill.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-
     .cart-trigger-bar {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--surface);
       border-top: 1px solid var(--line); padding: 10px 14px calc(10px + var(--safe-b));
@@ -314,7 +308,6 @@
         <span class="top-promo-badge promo-badge-text">Free Delivery</span>
         <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
       </div>
-      <!-- Duplicate content for seamless infinite looping scroll -->
       <div class="top-promo-content">
         <span class="top-promo-badge promo-badge-text">Free Delivery</span>
         <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
@@ -360,13 +353,13 @@
 
   <div class="bottom-icons-bar">
     <button class="icon-action-btn info" onclick="openInfoModal()">
-      <span>ℹ️</span> សេវាកម្មផ្សេងៗ
+      <span>ℹ️</span> ព័ត៌មាន និងគោលការណ៍ហាង
     </button>
-    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="icon-action-btn fb">
+    <a href="https://www.facebook.com/share/1JmSamWQLg/" target="_blank" rel="noopener noreferrer" class="icon-action-btn fb">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
       Facebook
     </a>
-    <a href="https://t.me/keodavin" target="_blank" rel="noopener noreferrer" class="icon-action-btn tg">
+    <a href="https://t.me/Kuyteav_Epheap" target="_blank" rel="noopener noreferrer" class="icon-action-btn tg">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.52l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.2 1.05.14.84.96z"/></svg>
       Telegram
     </a>
@@ -385,7 +378,7 @@
         <button onclick="closeVideoModal()" class="x">✕</button>
       </div>
       <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--r-s); overflow: hidden; margin-bottom: 14px;">
-        <iframe id="guide-video-frame" width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="How to order guide" frameborder="0" allowfullscreen></iframe>
+        <iframe id="guide-video-frame" width="100%" height="100%" src="https://www.youtube.com/embed/3j4WpJIhXk8" title="How to order guide" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
       <button onclick="closeVideoModal()" class="btn btn-p btn-block">យល់ព្រម</button>
     </div>
@@ -393,11 +386,65 @@
 
   <div id="info-modal" class="modal-overlay">
     <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">ℹ️ សេវាកម្មផ្សេងៗ</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">ℹ️ ព័ត៌មាន និងគោលការណ៍ហាង</h3>
         <button onclick="closeInfoModal()" class="x">✕</button>
       </div>
-      <button onclick="closeInfoModal()" class="btn btn-p btn-block">បិទ</button>
+
+      <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
+        <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⏰ ម៉ោងដំណើរការហាង</div>
+          <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
+            • បើកលក់រាល់ថ្ងៃចាប់ពីម៉ោង <b>៧:០០ ព្រឹក</b> ដល់ <b>៥:០០ ល្ងាច</b>។<br>
+            • ក្រៅពីម៉ោងនេះ អតិថិជនអាចផ្ញើសារកម្មង់ទុកមុនបាន តាមរយៈ Telegram។
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">🛵 គោលការណ៍សេវាដឹកជញ្ជូន</div>
+          <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
+            • ចម្ងាយក្រោម ២០០ម៉ែត្រ៖ <b>ឥតគិតថ្លៃ (Free)</b><br>
+            • ចម្ងាយពី ២០០ម ដល់ ២.០ គីឡូម៉ែត្រ៖ <b>$0.25</b><br>
+            • ចម្ងាយចាប់ពី ២.០ ដល់ ៥.០ គីឡូម៉ែត្រ៖ <b>$0.50</b><br>
+            • ហាងកំណត់សេវាដឹកជញ្ជូនក្នុងរង្វង់អតិបរមា <b>៥ គីឡូម៉ែត្រ</b> ប៉ុណ្ណោះ។
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⚠️ គោលការណ៍ការកម្មង់</div>
+          <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
+            • រាល់ការកម្មង់ហើយ មិនអាចលុបចោលវិញបានទេ បន្ទាប់ពីហាងបានចាប់ផ្តើមរៀបចំធ្វើរួចរាល់។<br>
+            • សូមពិនិត្យទីតាំង GPS និងលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវមុនពេលបញ្ជូនការកម្មង់ ឬ បង់ប្រាក់តាមរយៈ ABA ។
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;"> Contact Me</div>
+          <a href="https://t.me/dddda11999" target="_blank" rel="noopener noreferrer" class="btn btn-p btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px; background: #0088cc; color: #fff;">
+            Click Here for Support
+          </a>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
+
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;">🌐 គេហទំព័រពួកយើង</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="https://davin-store.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
+              🛒 Davin Store (davin-store.com)
+            </a>
+            <a href="https://auraarchitecturemalin.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
+              🏛️ Aura Architecture (auraarchitecturemalin.com)
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
+        <button onclick="closeInfoModal()" class="btn btn-p btn-block">យល់ព្រម / បិទ</button>
+      </div>
     </div>
   </div>
 
@@ -517,6 +564,26 @@
     </div>
   </div>
 
+  <!-- ABA PAYMENT DIRECT TAP MODAL -->
+  <div id="aba-modal" class="modal-overlay" style="z-index: 900;">
+    <div class="modal-card" style="text-align: center; padding: 24px 16px;">
+      <div style="font-size: 42px; margin-bottom: 8px;">💳</div>
+      <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800;">ការកម្មង់បានជោគជ័យ!</h3>
+      <p style="color: var(--sub); margin-bottom: 20px; font-size: 14px;">
+        សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកកម្មវិធី ABA Mobile ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b>
+      </p>
+      <button id="aba-pay-link-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
+        📲 បើកកម្មវិធី ABA Pay ដើម្បីទូទាត់ប្រាក់
+      </button>
+      <button id="aba-copy-link-btn" type="button" class="btn btn-g btn-block" style="margin-top: 10px;">
+        📋 ចម្លងតំណទូទាត់ (Copy link)
+      </button>
+      <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block" style="margin-top: 10px;">
+        បិទ (Close)
+      </button>
+    </div>
+  </div>
+
   <script>
     const STORE_LAT = 11.5300546;
     const STORE_LNG = 104.8039416;
@@ -569,13 +636,29 @@
       checkPromoBanner();
       initBanners();
 
-      // Restore saved cart, selections, and form fields automatically after page reload
       restoreSessionState();
     });
 
     const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Opens the ABA / Bakong payment link. Inside Telegram it uses Telegram's own opener, in a normal browser a new tab.
+    function openPayLink(url) {
+      try {
+        const tgApp = window.Telegram && window.Telegram.WebApp;
+        if (tgApp && tgApp.initData) {
+          if (url.startsWith('https://t.me/') || url.startsWith('tg://')) tgApp.openTelegramLink(url);
+          else tgApp.openLink(url, { try_instant_view: false });
+          return;
+        }
+      } catch (e) { console.error('openLink failed', e); }
+      if (!window.open(url, '_blank')) window.location.href = url;
+    }
+    async function copyPayLink(url) {
+      try { await navigator.clipboard.writeText(url); alert('បានចម្លងតំណទូទាត់! (Link copied)'); }
+      catch (e) { prompt('Copy this payment link:', url); }
+    }
 
     let IS_STORE_OPEN = false;
     let IS_DELIVERY_AVAILABLE = true;
@@ -592,20 +675,21 @@
     let activeImagesList = [];
     let currentSlideIndex = 0;
 
-    // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
     function saveSessionState() {
+      if (isForceReloading) return;
+
       const state = {
         cart: cart,
-        customerName: document.getElementById('input-customer-name').value,
-        phone: document.getElementById('input-phone').value,
-        remark: document.getElementById('input-remark').value,
+        customerName: document.getElementById('input-customer-name')?.value || '',
+        phone: document.getElementById('input-phone')?.value || '',
+        remark: document.getElementById('input-remark')?.value || '',
         orderType: selectedOrderType,
         clientLat: clientLat,
         clientLng: clientLng,
         gpsLink: gpsLink,
         isLocationPinned: isLocationPinned,
         currentDeliveryFee: currentDeliveryFee,
-        address: document.getElementById('input-address').value,
+        address: document.getElementById('input-address')?.value || '',
         scrollPosition: window.scrollY
       };
       localStorage.setItem('davin_app_session', JSON.stringify(state));
@@ -665,7 +749,7 @@
       localStorage.removeItem('davin_app_session');
     }
 
-    const RELOAD_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+    const RELOAD_INTERVAL_MS = 30 * 60 * 1000;
     setTimeout(() => {
       saveSessionState();
       window.location.reload();
@@ -674,7 +758,6 @@
     window.addEventListener('beforeunload', () => {
       saveSessionState();
     });
-    // ----------------------------------------------------------
 
     function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
@@ -1002,7 +1085,7 @@
       updateCartState();
     }
 
-    /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
+    /* --- INTERACTIVE MAP PICKER LOGIC --- */
     function openMapModal() {
       document.getElementById('map-modal').style.display = 'flex';
 
@@ -1021,7 +1104,6 @@
 
         L.control.zoom({ position: 'topright' }).addTo(pickerMap);
 
-        // Add Store Location Marker
         const shopIcon = L.divIcon({
           className: 'custom-shop-icon',
           html: `<div style="background:#005d7b; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #fff; box-shadow:0 3px 8px rgba(0,0,0,0.3);">🏪</div>`,
@@ -1046,7 +1128,6 @@
         updateMapDisplayCoords(tempLat, tempLng);
       }, 250);
 
-      // Auto-locate user on open if no custom position saved yet
       if (!clientLat && navigator.geolocation) {
         recenterMapToUser();
       }
@@ -1110,7 +1191,11 @@
       document.getElementById('map-modal').style.display = 'none';
     }
 
- async function sendOrder() {
+    function closeAbaModal() {
+      document.getElementById('aba-modal').style.display = 'none';
+    }
+
+    async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
@@ -1129,7 +1214,8 @@
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
 
       const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerText = "កំពុងបង្កើត KHQR ទូទាត់...";
+      btn.disabled = true; 
+      btn.innerText = "កំពុងផ្ញើការកម្មង់...";
       
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1147,9 +1233,9 @@
           }
         });
 
-        if (error || (data && data.error)) {
-          let errorMsg = error?.message || data?.error || "Order Failed";
-          if (error && error.context && typeof error.context.json === 'function') {
+        if (error) {
+          let errorMsg = error.message;
+          if (error.context && typeof error.context.json === 'function') {
             try {
               const errJson = await error.context.json();
               if (errJson.error) errorMsg = errJson.error;
@@ -1158,7 +1244,16 @@
           throw new Error(errorMsg);
         }
 
-        // RESET CART & CLEAR SESSION STATE UPON SUCCESSFUL ORDER
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
+
+        const grandTotal = data.grand_total || "0.00";
+        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
+        // Shows why a QR/deeplink was not made. Function secret DEBUG_PAY=false hides this.
+        if (data.debug && data.debug.link_source !== "bakong_or_khqr") alert("DEBUG: " + JSON.stringify(data.debug));
+
+        // Clear local state
         cart = []; 
         clientLat = null;
         clientLng = null;
@@ -1172,22 +1267,17 @@
         closeCartDrawer(); 
         updateCartState();
 
-        // SAFE PAYMENT REDIRECT (Prevents ERR_UNKNOWN_URL_SCHEME inside Telegram WebApp)
-        const targetLink = data.deeplink || "https://link.payway.com.kh/ABAPAYWu551072p";
+        if (deeplinkUrl) {
+          document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
+          const payBtn = document.getElementById('aba-pay-link-btn');
+          
+          payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
+          const copyBtn = document.getElementById('aba-copy-link-btn');
+          copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
 
-        if (targetLink.startsWith("http://") || targetLink.startsWith("https://")) {
-          if (window.Telegram?.WebApp?.openLink) {
-            window.Telegram.WebApp.openLink(targetLink);
-          } else {
-            window.location.href = targetLink;
-          }
+          document.getElementById('aba-modal').style.display = 'flex';
         } else {
-          // Hidden iframe fallback for direct custom protocols without crashing WebApp view
-          const iframe = document.createElement("iframe");
-          iframe.style.display = "none";
-          iframe.src = targetLink;
-          document.body.appendChild(iframe);
-          setTimeout(() => iframe.remove(), 2000);
+          alert("ការកម្មង់បានជោគជ័យ!");
         }
 
       } catch (err) { 
@@ -1198,27 +1288,29 @@
       }
     }
 
-// --- ធ្វើបច្ចុប្បន្នភាពមុខងារ saveSessionState ដើមរបស់អ្នក ---
-function saveSessionState() {
-  // ប្រសិនបើកំពុងបង្ខំ Reload ដោយ Admin មិនត្រូវរក្សាទុកកន្ត្រកចាស់ចូល localStorage វិញឡើយ!
-  if (isForceReloading) return;
+    // LISTEN FOR REALTIME RELOAD BROADCAST
+    let isForceReloading = false;
 
-  const state = {
-    cart: cart,
-    customerName: document.getElementById('input-customer-name')?.value || '',
-    phone: document.getElementById('input-phone')?.value || '',
-    remark: document.getElementById('input-remark')?.value || '',
-    orderType: selectedOrderType,
-    clientLat: clientLat,
-    clientLng: clientLng,
-    gpsLink: gpsLink,
-    isLocationPinned: isLocationPinned,
-    currentDeliveryFee: currentDeliveryFee,
-    address: document.getElementById('input-address')?.value || '',
-    scrollPosition: window.scrollY
-  };
-  localStorage.setItem('davin_app_session', JSON.stringify(state));
-}
+    const userChannel = supabaseClient.channel('admin-actions');
+
+    userChannel
+      .on('broadcast', { event: 'force_reload' }, payload => {
+        console.log("Received reload signal from admin. Clearing session and reloading page...");
+        isForceReloading = true;
+        localStorage.removeItem('davin_app_session');
+        cart = [];
+        clientLat = null;
+        clientLng = null;
+        gpsLink = "";
+        isLocationPinned = false;
+        currentDeliveryFee = 0.00;
+        window.location.href = window.location.pathname + '?v=' + Date.now();
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log("Listening for admin reload broadcasts.");
+        }
+      });
   </script>
 </body>
 </html>
