@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ទូទាត់តាម ABA Mobile</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f2f4f7; margin: 0; display: flex; min-height: 100vh; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+  .card { background: #fff; border-radius: 16px; padding: 24px 20px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+  h1 { font-size: 18px; margin: 0 0 8px; color: #005e7b; }
+  p { color: #667; font-size: 13.5px; line-height: 1.6; margin: 8px 0; }
+  a.btn { display: block; background: #005e7b; color: #fff; text-decoration: none; font-weight: 800; padding: 15px; border-radius: 12px; margin-top: 16px; font-size: 15px; }
+  a.alt { display: block; color: #005e7b; font-size: 13px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>💳 ទូទាត់តាម ABA Mobile</h1>
+  <p id="msg">កំពុងបើក ABA Mobile... ប្រសិនបើមិនបើក សូមចុចប៊ូតុងខាងក្រោម។</p>
+  <a class="btn" id="open" href="#">បើក ABA Mobile</a>
+  <a class="alt" id="store" href="#" style="display:none">មិនទាន់មាន ABA Mobile? ដំឡើងទីនេះ</a>
+  <p style="font-size:12px">បង់រួច សូមត្រឡប់ទៅ Telegram វិញ។ ការកម្មង់នឹងត្រូវបញ្ជាក់ដោយស្វ័យប្រវត្តិ។</p>
+</div>
+<script>
+(function () {
+  var d = new URLSearchParams(location.search).get('d') || '';
+  // Only allow the ABA Mobile scheme.
+  if (d.indexOf('abamobilebank://') !== 0) {
+    document.getElementById('msg').textContent = 'តំណភ្ជាប់មិនត្រឹមត្រូវ។ សូមត្រឡប់ទៅ Telegram ហើយស្កេន QR។';
+    document.getElementById('open').style.display = 'none';
+    return;
+  }
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var target = d;
+  if (isAndroid) {
+    // Android Chrome opens the app reliably through an intent URL.
+    target = 'intent://' + d.replace('abamobilebank://', '') + '#Intent;scheme=abamobilebank;package=com.paygo24.ibank;end';
+  }
+  var btn = document.getElementById('open');
+  btn.href = target;
+  var store = document.getElementById('store');
+  store.href = isAndroid ? 'https://play.google.com/store/apps/details?id=com.paygo24.ibank'
+                         : 'https://apps.apple.com/app/aba-mobile-bank/id968860649';
+  store.style.display = 'block';
+  setTimeout(function () { window.location.href = target; }, 400);
+})();
+</script>
+</body>
+</html>
