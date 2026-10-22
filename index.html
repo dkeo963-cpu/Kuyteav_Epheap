@@ -1065,7 +1065,7 @@
       updateCartState();
     }
 
-    /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
+    /* --- INTERACTIVE MAP PICKER LOGIC --- */
     function openMapModal() {
       document.getElementById('map-modal').style.display = 'flex';
 
@@ -1229,7 +1229,7 @@
         }
 
         const grandTotal = data.grand_total || "0.00";
-        const checkoutUrl = data.checkout_url || "";
+        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
 
         // Clear local state
         cart = []; 
@@ -1245,21 +1245,20 @@
         closeCartDrawer(); 
         updateCartState();
 
-        if (checkoutUrl) {
-          // Display Payment Modal for direct user gesture trigger
+        if (deeplinkUrl) {
           document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
           const payBtn = document.getElementById('aba-pay-link-btn');
           
           payBtn.onclick = (e) => {
             e.preventDefault();
             if (window.Telegram && window.Telegram.WebApp) {
-              if (checkoutUrl.startsWith('https://t.me/') || checkoutUrl.startsWith('tg://')) {
-                window.Telegram.WebApp.openTelegramLink(checkoutUrl);
+              if (deeplinkUrl.startsWith('https://t.me/') || deeplinkUrl.startsWith('tg://')) {
+                window.Telegram.WebApp.openTelegramLink(deeplinkUrl);
               } else {
-                window.Telegram.WebApp.openLink(checkoutUrl);
+                window.Telegram.WebApp.openLink(deeplinkUrl, { try_instant_view: false });
               }
             } else {
-              window.location.href = checkoutUrl;
+              window.location.href = deeplinkUrl;
             }
           };
 
