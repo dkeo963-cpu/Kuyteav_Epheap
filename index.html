@@ -581,7 +581,7 @@
       <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
       <div class="pay-amount" id="pay-amount">$0.00</div>
       <div class="pay-sub" id="pay-orderid"></div>
-<a id="pay-open-btn" href="#" onclick="event.preventDefault(); openAbaApp();" class="pay-btn" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</a>
+      <button type="button" class="pay-btn" id="pay-open-btn" onclick="openAbaApp()">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</button>
       <img id="pay-qr" class="pay-qr" alt="ABA KHQR" style="display:none">
       <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
       <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
@@ -1248,26 +1248,23 @@
       startPaymentPolling();
     }
 
-    // Called from the "Open ABA Mobile" button only (a real tap).
-    // The deeplink is tried inside a hidden iframe so the Mini App page itself is NEVER replaced
-    // (setting location.href to abamobilebank:// makes Telegram's browser show ERR_UNKNOWN_URL_SCHEME).
-function openAbaApp() {
-  if (!payDeeplink) return;
-
-  // Telegram WebApp Native Opener handles abamobilebank:// directly
-  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
-    window.Telegram.WebApp.openLink(payDeeplink, { try_instant_view: false });
-  } else {
-    // Fallback for standard mobile browsers
-    window.location.href = payDeeplink;
-  }
-
-  setTimeout(() => {
-    if (document.getElementById('pay-modal') && document.getElementById('pay-modal').style.display === 'flex') {
-      setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile', 'wait');
+    // Called from the "Open ABA Mobile" button (a real tap).
+    // Telegram's in-app browser cannot open abamobilebank:// links, so we open pay.html in the phone's
+    // real browser (Chrome/Safari), which hands the deeplink to the ABA Mobile app.
+    function openAbaApp() {
+      if (!payDeeplink) return;
+      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
+      const url = base + 'pay.html?d=' + encodeURIComponent(payDeeplink);
+      try {
+        if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true });
+        else window.open(url, '_blank');
+      } catch (e) { window.open(url, '_blank'); }
+      setTimeout(() => {
+        if (document.getElementById('pay-modal').style.display === 'flex') {
+          setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
+        }
+      }, 2500);
     }
-  }, 2500);
-}
 
     function startPaymentPolling() {
       stopPaymentPolling();
