@@ -6,6 +6,7 @@
   <title>តូបគុយទាវ អ៊ីភាព</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Leaflet CSS & JS for Interactive Map Picker -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -564,20 +565,20 @@
     </div>
   </div>
 
-  <!-- ABA PAYMENT DIRECT TAP MODAL -->
+  <!-- ABA PAYMENT MODAL -->
   <div id="aba-modal" class="modal-overlay" style="z-index: 900;">
     <div class="modal-card" style="text-align: center; padding: 24px 16px;">
       <div style="font-size: 42px; margin-bottom: 8px;">💳</div>
       <h3 style="margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800;">ការកម្មង់បានជោគជ័យ!</h3>
       <p style="color: var(--sub); margin-bottom: 20px; font-size: 14px;">
-        សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកកម្មវិធី ABA Mobile ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b>
+        ទូទាត់ទឹកប្រាក់ចំនួន <b id="modal-pay-total" style="color: var(--brand);">$0.00</b> តាម ABA Mobile
       </p>
-      <button id="aba-pay-link-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
-        📲 បើកកម្មវិធី ABA Pay ដើម្បីទូទាត់ប្រាក់
+      <button id="aba-direct-btn" type="button" class="btn btn-p btn-block" style="background: var(--aba); font-size: 15px; height: 50px;">
+        📲 បើកកម្មវិធី ABA Mobile ដើម្បីទូទាត់ប្រាក់
       </button>
-      <button id="aba-copy-link-btn" type="button" class="btn btn-g btn-block" style="margin-top: 10px;">
-        📋 ចម្លងតំណទូទាត់ (Copy link)
-      </button>
+      <p id="aba-no-link-msg" style="display:none; color: var(--bad); font-size: 13px; margin-top: 12px;">
+        មិនមានតំណ ABA ទេ។ សូមទាក់ទងហាងតាម Telegram ដើម្បីទូទាត់។
+      </p>
       <button type="button" onclick="closeAbaModal()" class="btn btn-g btn-block" style="margin-top: 10px;">
         បិទ (Close)
       </button>
@@ -1249,9 +1250,8 @@
         }
 
         const grandTotal = data.grand_total || "0.00";
-        const deeplinkUrl = data.deeplink_url || data.checkout_url || "";
-        // Shows why a QR/deeplink was not made. Function secret DEBUG_PAY=false hides this.
-        if (data.debug && data.debug.link_source !== "bakong_or_khqr") alert("DEBUG: " + JSON.stringify(data.debug));
+        const abaDirectUrl = data.aba_direct_url || "";
+        if (new URLSearchParams(location.search).has("debug")) alert("DEBUG: " + JSON.stringify(data.debug));
 
         // Clear local state
         cart = []; 
@@ -1267,17 +1267,30 @@
         closeCartDrawer(); 
         updateCartState();
 
-        if (deeplinkUrl) {
-          document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
-          const payBtn = document.getElementById('aba-pay-link-btn');
-          
-          payBtn.onclick = (e) => { e.preventDefault(); openPayLink(deeplinkUrl); };
-          const copyBtn = document.getElementById('aba-copy-link-btn');
-          copyBtn.onclick = (e) => { e.preventDefault(); copyPayLink(deeplinkUrl); };
-
+        document.getElementById('modal-pay-total').innerText = `$${grandTotal}`;
+        const abaBtn = document.getElementById('aba-direct-btn');
+        const noLinkMsg = document.getElementById('aba-no-link-msg');
+        if (abaDirectUrl) {
+          abaBtn.style.display = 'flex';
+          noLinkMsg.style.display = 'none';
+          const openAba = () => {
+            if (abaDirectUrl.startsWith('http')) { openPayLink(abaDirectUrl); return; }
+            const isAndroid = /android/i.test(navigator.userAgent);
+            if (isAndroid && abaDirectUrl.startsWith('abamobilebank://')) {
+              const rest = abaDirectUrl.replace('abamobilebank://', '');
+              const fallback = encodeURIComponent('https://play.google.com/store/apps/details?id=com.paygo24.ibank');
+              window.location.href = `intent://${rest}#Intent;scheme=abamobilebank;package=com.paygo24.ibank;S.browser_fallback_url=${fallback};end`;
+            } else {
+              window.location.href = abaDirectUrl;
+            }
+          };
+          abaBtn.onclick = (e) => { e.preventDefault(); openAba(); };
           document.getElementById('aba-modal').style.display = 'flex';
+          setTimeout(openAba, 400); // auto-open ABA right after the order is sent
         } else {
-          alert("ការកម្មង់បានជោគជ័យ!");
+          abaBtn.style.display = 'none';
+          noLinkMsg.style.display = 'block';
+          document.getElementById('aba-modal').style.display = 'flex';
         }
 
       } catch (err) { 
