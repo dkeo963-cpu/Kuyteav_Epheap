@@ -1252,9 +1252,9 @@
     // Telegram's in-app browser cannot open abamobilebank:// links, so we open pay.html in the phone's
     // real browser (Chrome/Safari), which hands the deeplink to the ABA Mobile app.
     function openAbaApp() {
-      if (!payDeeplink) return;
+      if (!payDeeplink || !payTranId) return;
       const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-      const url = base + 'pay.html?d=' + encodeURIComponent(payDeeplink);
+      const url = base + 'pay.html?o=' + encodeURIComponent(payTranId);
       try {
         if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true });
         else window.open(url, '_blank');
