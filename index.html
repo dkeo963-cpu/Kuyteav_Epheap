@@ -1251,21 +1251,23 @@
     // Called from the "Open ABA Mobile" button only (a real tap).
     // The deeplink is tried inside a hidden iframe so the Mini App page itself is NEVER replaced
     // (setting location.href to abamobilebank:// makes Telegram's browser show ERR_UNKNOWN_URL_SCHEME).
-    function openAbaApp() {
-      if (!payDeeplink) return;
-      try {
-        const f = document.createElement('iframe');
-        f.style.display = 'none';
-        f.src = payDeeplink;
-        document.body.appendChild(f);
-        setTimeout(() => f.remove(), 3000);
-      } catch (e) {}
-      setTimeout(() => {
-        if (document.getElementById('pay-modal').style.display === 'flex') {
-          setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
-        }
-      }, 2500);
+ function openAbaApp() {
+  if (!payDeeplink) return;
+
+  // Use Telegram WebApp native link handler to open external app schemes
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+    window.Telegram.WebApp.openLink(payDeeplink, { try_instant_view: false });
+  } else {
+    // Fallback for standard mobile browsers
+    window.location.href = payDeeplink;
+  }
+
+  setTimeout(() => {
+    if (document.getElementById('pay-modal').style.display === 'flex') {
+      setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
     }
+  }, 2500);
+}
 
     function startPaymentPolling() {
       stopPaymentPolling();
