@@ -1162,9 +1162,7 @@
           throw new Error(data.error);
         }
 
-        alert("ការកម្មង់បានជោគជ័យ!");
-        
-        // RESET CART & CLEAR GPS LOCATION INFORMATION UPON SUCCESSFUL ORDER
+        // RESET CART & CLEAR SESSION STATE UPON SUCCESSFUL ORDER
         cart = []; 
         clientLat = null;
         clientLng = null;
@@ -1177,6 +1175,16 @@
         
         closeCartDrawer(); 
         updateCartState();
+
+        // DEEPLINK / AUTOMATED ABA REDIRECT
+        const payLink = data.aba_pay_link || "https://link.payway.com.kh/ABAPAYWu551072p";
+        
+        if (window.Telegram?.WebApp?.openLink) {
+          window.Telegram.WebApp.openLink(payLink);
+        } else {
+          window.location.href = payLink;
+        }
+
       } catch (err) { 
         alert("កំហុស: " + (err.message || err)); 
       } finally { 
@@ -1184,7 +1192,6 @@
         updateCartState(); 
       }
     }
-
 // --- LISTEN FOR REALTIME RELOAD BROADCAST ---
 let isForceReloading = false; // បន្ថែម Flag ដើម្បីទប់ស្កាត់ Android មិនឱ្យ Save Session វិញពេលកំពុង Reload
 
