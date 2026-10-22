@@ -415,8 +415,6 @@
 
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
 
-   
-
       <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
 
       <!-- Store Hours & Policy -->
@@ -448,16 +446,13 @@
         </div>
       </div>
 
- <!-- Contact Support Section -->
+      <!-- Contact Support Section -->
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;"> Contact Me</div>
         <a href="https://t.me/dddda11999" target="_blank" rel="noopener noreferrer" class="btn btn-p btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px; background: #0088cc; color: #fff;">
           Click Here for Support
         </a>
       </div>
-
-
-
 
       <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
 
@@ -475,9 +470,6 @@
       </div>
 
     </div>
-
-
-    
 
     <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
       <button onclick="closeInfoModal()" class="btn btn-p btn-block">យល់ព្រម / បិទ</button>
@@ -503,6 +495,29 @@
       <h3 id="modal-title" style="margin: 0 0 16px 0; font-size: 1.1rem;">ជ្រើសរើសទំហំ</h3>
       <div class="option-title">ជ្រើសរើសទំហំ</div>
       <div id="size-options-container"></div>
+
+      <!-- Dynamic Customization Section for Drinks -->
+      <div id="drink-customization-section" style="display: none; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px;">
+        <div class="option-group">
+          <div class="option-title">កម្រិតស្ករ (Sugar Level)</div>
+          <div class="option-pills" id="sugar-pills">
+            <div class="pill" onclick="setDrinkOption('sugar', '10%', this)">10%</div>
+            <div class="pill" onclick="setDrinkOption('sugar', '20%', this)">20%</div>
+            <div class="pill active" onclick="setDrinkOption('sugar', '100%', this)">100%</div>
+          </div>
+        </div>
+
+        <div class="option-group">
+          <div class="option-title">កម្រិតទឹកកក (Ice Level)</div>
+          <div class="option-pills" id="ice-pills">
+            <div class="pill" onclick="setDrinkOption('ice', 'គ្មានទឹកកក (No Ice)', this)">គ្មានទឹកកក</div>
+            <div class="pill" onclick="setDrinkOption('ice', 'ទឹកកកតិច (Little Ice)', this)">ទឹកកកតិច</div>
+            <div class="pill active" onclick="setDrinkOption('ice', 'ធម្មតា (Normal Ice)', this)">ធម្មតា</div>
+            <div class="pill" onclick="setDrinkOption('ice', 'ដាក់ទឹកកកក្រៅ (Ice Outside)', this)">ដាក់ទឹកកកក្រៅ</div>
+          </div>
+        </div>
+      </div>
+
       <button id="confirm-add-btn" onclick="confirmAddToCart()" class="btn btn-p btn-block" style="margin-top: 16px;">បន្ថែមទៅក្នុងកន្ត្រក</button>
       <button onclick="closeSizeModal()" class="btn btn-g btn-block" style="margin-top: 8px;">បោះបង់</button>
     </div>
@@ -689,7 +704,7 @@
     let currentCategory = 'all';
     let activeModalItem = null;
     let selectedSize = '';
-    let selectedOptions = { sugar: '100%', ice: 'ធម្មតា' };
+    let selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
     let cart = [];
     let selectedOrderType = 'takeaway';
     let gpsLink = "";
@@ -699,18 +714,20 @@
 
     // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
     function saveSessionState() {
+      if (isForceReloading) return;
+
       const state = {
         cart: cart,
-        customerName: document.getElementById('input-customer-name').value,
-        phone: document.getElementById('input-phone').value,
-        remark: document.getElementById('input-remark').value,
+        customerName: document.getElementById('input-customer-name')?.value || '',
+        phone: document.getElementById('input-phone')?.value || '',
+        remark: document.getElementById('input-remark')?.value || '',
         orderType: selectedOrderType,
         clientLat: clientLat,
         clientLng: clientLng,
         gpsLink: gpsLink,
         isLocationPinned: isLocationPinned,
         currentDeliveryFee: currentDeliveryFee,
-        address: document.getElementById('input-address').value,
+        address: document.getElementById('input-address')?.value || '',
         scrollPosition: window.scrollY
       };
       localStorage.setItem('davin_app_session', JSON.stringify(state));
@@ -974,6 +991,12 @@
     function goToSlide(idx) { currentSlideIndex = idx; updateSliderPosition(); }
     function closeImageModal() { document.getElementById('image-viewer-modal').style.display = 'none'; }
 
+    function setDrinkOption(type, value, element) {
+      selectedOptions[type] = value;
+      element.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      element.classList.add('active');
+    }
+
     function openSizeModal(itemKey) {
       activeModalItem = menuItems.find(i => i.item_key === itemKey);
       if (!activeModalItem || activeModalItem.is_available === false) { alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!"); return; }
@@ -987,6 +1010,24 @@
       }
 
       document.getElementById('modal-title').innerText = activeModalItem.name_kh;
+      
+      // Dynamic Customization options for Drinks category
+      const drinkSection = document.getElementById('drink-customization-section');
+      if (activeModalItem.category === 'drinks') {
+        drinkSection.style.display = 'block';
+        selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
+        
+        // Reset pills UI active states
+        document.querySelectorAll('#sugar-pills .pill').forEach(p => {
+          p.classList.toggle('active', p.innerText.trim() === '100%');
+        });
+        document.querySelectorAll('#ice-pills .pill').forEach(p => {
+          p.classList.toggle('active', p.innerText.trim() === 'ធម្មតា');
+        });
+      } else {
+        drinkSection.style.display = 'none';
+      }
+
       const sizeKeys = Object.keys(activeModalItem.sizes);
       selectedSize = sizeKeys[0];
       document.getElementById('size-options-container').innerHTML = sizeKeys.map(sizeKey => `
@@ -1010,7 +1051,9 @@
       if (!activeModalItem || !selectedSize) return;
 
       const stockLimit = activeModalItem.stock_quantity !== undefined && activeModalItem.stock_quantity !== null ? Number(activeModalItem.stock_quantity) : 0;
-      const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize);
+      
+      const optionsPayload = activeModalItem.category === 'drinks' ? { ...selectedOptions } : null;
+      const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize && JSON.stringify(c.options) === JSON.stringify(optionsPayload));
       const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
 
       if (totalInCart + 1 > stockLimit) {
@@ -1018,8 +1061,17 @@
         return;
       }
 
-      if (existing) existing.quantity += 1;
-      else cart.push({ id: activeModalItem.item_key, size: selectedSize, quantity: 1 });
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ 
+          id: activeModalItem.item_key, 
+          size: selectedSize, 
+          quantity: 1,
+          options: optionsPayload
+        });
+      }
+
       closeSizeModal();
       updateCartState();
     }
@@ -1072,10 +1124,17 @@
     function renderCartDrawer() {
       document.getElementById('drawer-cart-items').innerHTML = cart.map((c, idx) => {
         const product = menuItems.find(m => m.item_key === c.id);
+        
+        let optionsHtml = '';
+        if (c.options) {
+          optionsHtml = `<div style="font-size: 0.75rem; color: var(--warn); font-weight: 600;">• ស្ករ: ${c.options.sugar} | ទឹកកក: ${c.options.ice}</div>`;
+        }
+
         return `
           <div class="cart-item-row">
             <div>
               <div style="font-weight: 700;">${product?.name_kh || c.id} (${c.size.toUpperCase()})</div>
+              ${optionsHtml}
               <div style="font-size: 0.8rem; color: var(--sub);">$${product?.sizes[c.size]} × ${c.quantity}</div>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -1248,9 +1307,6 @@
       startPaymentPolling();
     }
 
-    // Called from the "Open ABA Mobile" button (a real tap).
-    // Telegram's in-app browser cannot open abamobilebank:// links, so we open pay.html in the phone's
-    // real browser (Chrome/Safari), which hands the deeplink to the ABA Mobile app.
     function openAbaApp() {
       if (!payDeeplink || !payTranId) return;
       const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
@@ -1297,15 +1353,12 @@
     }
 
     function cancelPaymentUi() {
-      // Only hides the popup; if the customer already paid we still confirm it in the background.
       stopPaymentPolling();
       localStorage.removeItem('pending_payment');
       document.getElementById('pay-modal').style.display = 'none';
       resetSendButton();
     }
 
-    // If Telegram reloads the page while the customer is in the ABA app, quietly check the
-    // payment. The shop page always opens first; the popup only reopens if the customer taps "បន្ត".
     let resumeInfo = null;
     async function resumePendingPayment() {
       try {
@@ -1336,13 +1389,12 @@
       resumeInfo = null;
     }
 
-    // Restores the send button to "ធ្វើការកម្មង់ • $total" (the loading text replaces its inner HTML).
     function resetSendButton() {
       const btn = document.getElementById('send-order-btn');
       if (!btn) return;
       btn.disabled = false;
       btn.innerHTML = 'ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>';
-      updateCartState(); // refills #final-total with the current total
+      updateCartState();
     }
 
     async function sendOrder() {
@@ -1405,7 +1457,7 @@
     }
 
 // --- LISTEN FOR REALTIME RELOAD BROADCAST ---
-let isForceReloading = false; // បន្ថែម Flag ដើម្បីទប់ស្កាត់ Android មិនឱ្យ Save Session វិញពេលកំពុង Reload
+let isForceReloading = false;
 
 const userChannel = supabaseClient.channel('admin-actions');
 
@@ -1413,13 +1465,9 @@ userChannel
   .on('broadcast', { event: 'force_reload' }, payload => {
     console.log("Received reload signal from admin. Clearing session and reloading page...");
     
-    // 1. បើក Flag ដើម្បីប្រាប់មុនថា Admin កំពុងបញ្ជាឱ្យ Reload
     isForceReloading = true;
-    
-    // 2. លុបទិន្នន័យ Session ចេញពី localStorage ភ្លាមៗ
     localStorage.removeItem('davin_app_session');
     
-    // 3. ជម្រះកន្ត្រក និងទីតាំងក្នុង Memory
     cart = [];
     clientLat = null;
     clientLng = null;
@@ -1427,7 +1475,6 @@ userChannel
     isLocationPinned = false;
     currentDeliveryFee = 0.00;
     
-    // 4. បង្ខំ Reload ទំព័រដោយរំលង Cache លើ Android (Hard Reload)
     window.location.href = window.location.pathname + '?v=' + Date.now();
   })
   .subscribe((status) => {
@@ -1436,9 +1483,7 @@ userChannel
     }
   });
 
-// --- ធ្វើបច្ចុប្បន្នភាពមុខងារ saveSessionState ដើមរបស់អ្នក ---
 function saveSessionState() {
-  // ប្រសិនបើកំពុងបង្ខំ Reload ដោយ Admin មិនត្រូវរក្សាទុកកន្ត្រកចាស់ចូល localStorage វិញឡើយ!
   if (isForceReloading) return;
 
   const state = {
