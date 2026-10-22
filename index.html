@@ -1129,7 +1129,7 @@
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
 
       const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerText = "កំពុងផ្ញើការកម្មង់...";
+      btn.disabled = true; btn.innerText = "កំពុងបង្កើត KHQR ទូទាត់...";
       
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1147,22 +1147,11 @@
           }
         });
 
-        if (error) {
-          let errorMsg = error.message;
-          if (error.context && typeof error.context.json === 'function') {
-            try {
-              const errJson = await error.context.json();
-              if (errJson.error) errorMsg = errJson.error;
-            } catch (e) {}
-          }
-          throw new Error(errorMsg);
+        if (error || (data && data.error)) {
+          throw new Error(error?.message || data?.error || " Order Failed");
         }
 
-        if (data && data.error) {
-          throw new Error(data.error);
-        }
-
-        // RESET CART & CLEAR SESSION STATE UPON SUCCESSFUL ORDER
+        // Reset cart and UI session
         cart = []; 
         clientLat = null;
         clientLng = null;
@@ -1176,13 +1165,16 @@
         closeCartDrawer(); 
         updateCartState();
 
-        // DEEPLINK / AUTOMATED ABA REDIRECT
-        const payLink = data.aba_pay_link || "https://link.payway.com.kh/ABAPAYWu551072p";
-        
-        if (window.Telegram?.WebApp?.openLink) {
-          window.Telegram.WebApp.openLink(payLink);
+        // AUTOMATIC DEEPLINK REDIRECT TO ABA APP
+        const deeplink = data.deeplink;
+        if (deeplink) {
+          if (window.Telegram?.WebApp?.openLink) {
+            window.Telegram.WebApp.openLink(deeplink);
+          } else {
+            window.location.href = deeplink;
+          }
         } else {
-          window.location.href = payLink;
+          alert("ការកុម្ម៉ង់ជោគជ័យ! សូមពិនិត្យមើលសារក្នុង Telegram ដើម្បីទូទាត់ប្រាក់។");
         }
 
       } catch (err) { 
