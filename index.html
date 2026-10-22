@@ -304,6 +304,18 @@
     .map-recenter-btn:active { background: #f0f0f0; }
     .map-footer { padding: 14px 16px calc(14px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); z-index: 10; }
     .map-addr-preview { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  
+    /* ABA Pay modal */
+    .pay-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 900; display: none; align-items: flex-end; justify-content: center; }
+    .pay-card { background: var(--surface); width: 100%; max-width: 440px; border-radius: 18px 18px 0 0; padding: 20px 18px calc(20px + var(--safe-b)); text-align: center; max-height: 92vh; overflow-y: auto; }
+    @media (min-width: 600px) { .pay-overlay { align-items: center; padding: 20px; } .pay-card { border-radius: 18px; } }
+    .pay-amount { font-size: 28px; font-weight: 800; color: var(--aba); margin: 4px 0 2px; }
+    .pay-sub { color: var(--sub); font-size: 12.5px; }
+    .pay-btn { width: 100%; height: 52px; background: var(--aba); color: #fff; border: 0; border-radius: var(--r-s); font-size: 15px; font-weight: 800; margin-top: 14px; cursor: pointer; }
+    .pay-btn.ghost { background: var(--surface); color: var(--aba); border: 1.5px solid var(--aba); height: 44px; font-size: 13px; }
+    .pay-qr { width: 210px; height: 210px; margin: 12px auto 0; border: 1px solid var(--line); border-radius: 12px; padding: 6px; display: block; object-fit: contain; background: #fff; }
+    .pay-state { margin-top: 12px; font-size: 13px; font-weight: 700; }
+    .pay-state.ok { color: var(--ok); } .pay-state.bad { color: var(--bad); } .pay-state.wait { color: var(--warn); }
   </style>
 </head>
 <body>
@@ -555,6 +567,21 @@
     </div>
   </div>
 
+  <!-- ABA Pay Modal -->
+  <div id="pay-modal" class="pay-overlay">
+    <div class="pay-card">
+      <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
+      <div class="pay-amount" id="pay-amount">$0.00</div>
+      <div class="pay-sub" id="pay-orderid"></div>
+      <button type="button" class="pay-btn" id="pay-open-btn" onclick="openAbaApp()">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</button>
+      <img id="pay-qr" class="pay-qr" alt="ABA KHQR" style="display:none">
+      <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
+      <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
+      <button type="button" class="pay-btn ghost" id="pay-check-btn" onclick="checkPaymentNow()">🔄 ខ្ញុំបានបង់ហើយ (ពិនិត្យ)</button>
+      <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="cancelPaymentUi()">បិទ</button>
+    </div>
+  </div>
+
   <!-- Interactive Map Location Picker Modal (Grab / Eget Style) -->
   <div id="map-modal" class="map-modal-overlay">
     <div class="map-card">
@@ -640,6 +667,7 @@
 
       // Restore saved cart, selections, and form fields automatically after page reload
       restoreSessionState();
+      resumePendingPayment();
     });
 
     const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
@@ -1179,13 +1207,104 @@
       document.getElementById('map-modal').style.display = 'none';
     }
 
+    /* ================= ABA PAY FLOW ================= */
+    let payTranId = null, payDeeplink = "", payPollTimer = null, payStartedAt = 0;
+    const PAY_MAX_MS = 12 * 60 * 1000;
+
+    function resetAfterOrder() {
+      cart = [];
+      clientLat = null; clientLng = null; gpsLink = "";
+      isLocationPinned = false; currentDeliveryFee = 0.00;
+      document.getElementById('input-address').value = "";
+      document.getElementById('gps-status').innerText = "";
+      closeCartDrawer();
+      updateCartState();
+    }
+
+    function setPayState(text, cls) {
+      const el = document.getElementById('pay-state');
+      el.innerText = text; el.className = 'pay-state ' + cls;
+    }
+
+    function showPayModal(info) {
+      payTranId = info.tran_id;
+      payDeeplink = info.abapay_deeplink || "";
+      payStartedAt = info.started_at || Date.now();
+      document.getElementById('pay-amount').innerText = '$' + Number(info.grand_total).toFixed(2);
+      document.getElementById('pay-orderid').innerText = 'Order ' + info.tran_id;
+      const qr = document.getElementById('pay-qr');
+      if (info.qr_image) { qr.src = info.qr_image; qr.style.display = 'block'; } else { qr.style.display = 'none'; }
+      setPayState('⏳ កំពុងរង់ចាំការបង់ប្រាក់...', 'wait');
+      document.getElementById('pay-check-btn').style.display = '';
+      document.getElementById('pay-modal').style.display = 'flex';
+      startPaymentPolling();
+    }
+
+    // Must be called from a tap (user gesture) so Telegram/Android/iOS allow the app switch.
+    function openAbaApp() {
+      if (!payDeeplink) return;
+      window.location.href = payDeeplink;
+      // If ABA Mobile isn't installed, nothing happens: show the store link after a moment.
+      setTimeout(() => {
+        if (document.visibilityState === 'visible' && document.getElementById('pay-modal').style.display === 'flex') {
+          setPayState('បើកមិនបាន? សូមដំឡើង ABA Mobile ឬស្កេន QR ខាងលើ', 'bad');
+        }
+      }, 2500);
+    }
+
+    function startPaymentPolling() {
+      stopPaymentPolling();
+      payPollTimer = setInterval(() => checkPaymentNow(true), 3000);
+    }
+    function stopPaymentPolling() { if (payPollTimer) { clearInterval(payPollTimer); payPollTimer = null; } }
+
+    async function checkPaymentNow(silent) {
+      if (!payTranId) return;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: payTranId } });
+        if (error) throw error;
+        if (data?.status === 'paid') {
+          stopPaymentPolling();
+          localStorage.removeItem('pending_payment');
+          setPayState('✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង', 'ok');
+          document.getElementById('pay-check-btn').style.display = 'none';
+          resetAfterOrder();
+          setTimeout(() => { document.getElementById('pay-modal').style.display = 'none'; payTranId = null; }, 2500);
+        } else if (data?.status === 'expired' || Date.now() - payStartedAt > PAY_MAX_MS) {
+          stopPaymentPolling();
+          localStorage.removeItem('pending_payment');
+          setPayState('⌛ QR ផុតកំណត់ សូមកម្មង់ម្ដងទៀត', 'bad');
+        } else if (!silent) {
+          setPayState('⏳ មិនទាន់ទទួលបានការបង់ប្រាក់ទេ...', 'wait');
+        }
+      } catch (e) {
+        if (!silent) setPayState('កំហុសក្នុងការពិនិត្យ: ' + (e.message || e), 'bad');
+      }
+    }
+
+    function cancelPaymentUi() {
+      // Only hides the popup; if the customer already paid we still confirm it in the background.
+      stopPaymentPolling();
+      document.getElementById('pay-modal').style.display = 'none';
+    }
+
+    // If Telegram reloads the page while the customer is in the ABA app, resume checking.
+    function resumePendingPayment() {
+      try {
+        const raw = localStorage.getItem('pending_payment');
+        if (!raw) return;
+        const info = JSON.parse(raw);
+        if (!info?.tran_id || Date.now() - info.started_at > PAY_MAX_MS) { localStorage.removeItem('pending_payment'); return; }
+        showPayModal(info);
+      } catch (e) { localStorage.removeItem('pending_payment'); }
+    }
+
     async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
         return;
       }
-
       if (selectedOrderType === 'delivery' && !isLocationPinned) {
         alert("សូមចុច '🗺️ ជ្រើសរើសទីតាំងលើផែនទី' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
         return;
@@ -1198,21 +1317,21 @@
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
 
       const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerText = "កំពុងផ្ញើការកម្មង់...";
-      
+      btn.disabled = true; btn.innerText = "កំពុងបង្កើត ABA QR...";
+
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
-          body: { 
-            cart, 
-            username: usernameVal, 
-            customer_name: customerNameVal, 
-            phone: phoneVal, 
-            order_type: selectedOrderType, 
-            address: document.getElementById('input-address').value, 
-            location_link: gpsLink, 
-            lat: clientLat, 
-            lng: clientLng, 
-            remark: document.getElementById('input-remark').value 
+          body: {
+            cart,
+            username: usernameVal,
+            customer_name: customerNameVal,
+            phone: phoneVal,
+            order_type: selectedOrderType,
+            address: document.getElementById('input-address').value,
+            location_link: gpsLink,
+            lat: clientLat,
+            lng: clientLng,
+            remark: document.getElementById('input-remark').value
           }
         });
 
@@ -1226,31 +1345,18 @@
           }
           throw new Error(errorMsg);
         }
+        if (data && data.error) throw new Error(data.error);
+        if (!data?.abapay_deeplink) throw new Error("មិនទទួលបាន ABA deeplink ពីប្រព័ន្ធ");
 
-        if (data && data.error) {
-          throw new Error(data.error);
-        }
-
-        alert("ការកម្មង់បានជោគជ័យ!");
-        
-        // RESET CART & CLEAR GPS LOCATION INFORMATION UPON SUCCESSFUL ORDER
-        cart = []; 
-        clientLat = null;
-        clientLng = null;
-        gpsLink = "";
-        isLocationPinned = false;
-        currentDeliveryFee = 0.00;
-        
-        document.getElementById('input-address').value = "";
-        document.getElementById('gps-status').innerText = "";
-        
-        closeCartDrawer(); 
+        const info = { ...data, started_at: Date.now() };
+        localStorage.setItem('pending_payment', JSON.stringify(info));
+        showPayModal(info);
+        openAbaApp(); // try to jump straight into ABA Mobile; the button in the popup is the fallback
+      } catch (err) {
+        alert("កំហុស: " + (err.message || err));
+      } finally {
+        btn.disabled = false;
         updateCartState();
-      } catch (err) { 
-        alert("កំហុស: " + (err.message || err)); 
-      } finally { 
-        btn.disabled = false; 
-        updateCartState(); 
       }
     }
 
