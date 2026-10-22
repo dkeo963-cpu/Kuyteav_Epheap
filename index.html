@@ -581,7 +581,7 @@
       <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
       <div class="pay-amount" id="pay-amount">$0.00</div>
       <div class="pay-sub" id="pay-orderid"></div>
-      <button type="button" class="pay-btn" id="pay-open-btn" onclick="openAbaApp()">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</button>
+<a id="pay-open-btn" href="#" onclick="event.preventDefault(); openAbaApp();" class="pay-btn" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</a>
       <img id="pay-qr" class="pay-qr" alt="ABA KHQR" style="display:none">
       <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
       <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
@@ -1251,7 +1251,7 @@
     // Called from the "Open ABA Mobile" button only (a real tap).
     // The deeplink is tried inside a hidden iframe so the Mini App page itself is NEVER replaced
     // (setting location.href to abamobilebank:// makes Telegram's browser show ERR_UNKNOWN_URL_SCHEME).
- function openAbaApp() {
+function openAbaApp() {
   if (!payDeeplink) return;
 
   // Use Telegram WebApp native link handler to open external app schemes
