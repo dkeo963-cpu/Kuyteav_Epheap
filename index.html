@@ -1129,7 +1129,7 @@
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
 
       const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerText = "កំពុងបង្កើត KHQR ទូទាត់...";
+      btn.disabled = true; btn.innerText = "កំពុងផ្ញើការកម្មង់...";
       
       try {
         const { data, error } = await supabaseClient.functions.invoke('smart-function', {
@@ -1147,11 +1147,24 @@
           }
         });
 
-        if (error || (data && data.error)) {
-          throw new Error(error?.message || data?.error || " Order Failed");
+        if (error) {
+          let errorMsg = error.message;
+          if (error.context && typeof error.context.json === 'function') {
+            try {
+              const errJson = await error.context.json();
+              if (errJson.error) errorMsg = errJson.error;
+            } catch (e) {}
+          }
+          throw new Error(errorMsg);
         }
 
-        // Reset cart and UI session
+        if (data && data.error) {
+          throw new Error(data.error);
+        }
+
+        alert("ការកម្មង់បានជោគជ័យ!");
+        
+        // RESET CART & CLEAR GPS LOCATION INFORMATION UPON SUCCESSFUL ORDER
         cart = []; 
         clientLat = null;
         clientLng = null;
@@ -1164,19 +1177,6 @@
         
         closeCartDrawer(); 
         updateCartState();
-
-        // AUTOMATIC DEEPLINK REDIRECT TO ABA APP
-        const deeplink = data.deeplink;
-        if (deeplink) {
-          if (window.Telegram?.WebApp?.openLink) {
-            window.Telegram.WebApp.openLink(deeplink);
-          } else {
-            window.location.href = deeplink;
-          }
-        } else {
-          alert("ការកុម្ម៉ង់ជោគជ័យ! សូមពិនិត្យមើលសារក្នុង Telegram ដើម្បីទូទាត់ប្រាក់។");
-        }
-
       } catch (err) { 
         alert("កំហុស: " + (err.message || err)); 
       } finally { 
