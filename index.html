@@ -1,1761 +1,903 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>តូបគុយទាវ អ៊ីភាព</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet CSS & JS for Interactive Map Picker -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&display=swap');
-    :root {
-      --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
-      --brand:#0f766e; --brand-d:#0b5c56; --brand-l:#e3f3f1;
-      --ok:#15803d; --ok-l:#e5f5ea;
-      --warn:#b45309; --warn-l:#fdf1dc;
-      --bad:#c62828; --bad-l:#fde8e8;
-      --r:14px; --r-s:10px;
-      --aba:#005d7b;
-      --safe-b:env(safe-area-inset-bottom,0px);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ផ្ទាំងគ្រប់គ្រង - តូបគុយទាវ អ៊ីភាព</title>
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { margin: 0; }
-    body {
-      font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.45;
-      padding-bottom: calc(108px + var(--safe-b));
-      user-select: none; -webkit-user-select: none;
-    }
-    input, textarea { user-select: text; -webkit-user-select: text; font: inherit; color: inherit; }
-    button { font: inherit; color: inherit; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible, [onclick]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    /* Top Promotion Banner & Scrolling Marquee Styles */
-    .top-promo-banner {
-      background: #fef3c7; color: #92400e; padding: 8px 0; font-size: 13px; font-weight: 700;
-      border-bottom: 1px solid #fde68a; width: 100%; z-index: 100; position: relative;
-      overflow: hidden;
-    }
-    .top-promo-track {
-      display: flex;
-      align-items: center;
-      width: max-content;
-      animation: promoScroll 16s linear infinite;
-    }
-    .top-promo-banner:hover .top-promo-track {
-      animation-play-state: paused;
-    }
-    .top-promo-content {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-right: 40px;
-      white-space: nowrap;
-    }
-    .top-promo-badge {
-      background: #f59e0b; color: #fff; font-size: 14px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
-      flex-shrink: 0;
-    }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&display=swap');
 
-    @keyframes promoScroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
+:root{
+  --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
+  --brand:#0f766e; --brand-d:#0b5c56; --brand-l:#e3f3f1;
+  --ok:#15803d; --ok-l:#e5f5ea;
+  --warn:#b45309; --warn-l:#fdf1dc;
+  --bad:#c62828; --bad-l:#fde8e8;
+  --r:14px; --r-s:10px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:'Kantumruy Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--ink); font-size:14px; line-height:1.45;
+  padding-bottom:calc(76px + var(--safe-b));
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select,textarea{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:960px;margin:0 auto;padding:0 14px}
 
-    .top { 
-      position: sticky; 
-      top: 0; 
-      z-index: 50; 
-      background: var(--surface); 
-      color: var(--ink); 
-      padding: 11px 0; 
-      border-bottom: 1px solid var(--line);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-    .top .wrap { display: flex; flex-direction: column; gap: 6px; }
-    .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
-    .top-l { flex: 1; min-width: 0; }
-    .greeting { font-size: 14px; font-weight: 600; color: var(--sub); }
-    
-    /* Branding Header with Chef Girl Icon */
-    .shop-title-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .chef-girl-icon {
-      width: 44px;            /* logo circle size: change this number to make it bigger or smaller */
-      height: 44px;
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--brand-l);
-      border: 1.5px solid var(--brand);
-      border-radius: 50%;
-      padding: 3px;
-      overflow: hidden;
-    }
-    .chef-girl-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 50%;
-      mix-blend-mode: multiply;   /* the logo's white background melts into the circle colour */
-    }
-    .shop-title { font-size: 25px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    main.wrap { padding-top: 14px; }
+.top{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:12px 0}
+.top .wrap{display:flex;align-items:center;gap:10px}
+.top h1{font-size:16px;font-weight:800;margin:0;flex:1;min-width:0}
+.top small{display:block;font-weight:500;font-size:11px;opacity:.65}
+.icon-btn{height:36px;padding:0 12px;border-radius:var(--r-s);background:rgba(255,255,255,.12);color:#fff;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.icon-btn:active{background:rgba(255,255,255,.22)}
+.spin{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    /* Store Status Badge with Back-and-Forth Moving Glow Light Effect */
-    @keyframes borderGlowBackAndForth {
-      0% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
-      50% { border-color: rgba(21, 128, 61, 1); box-shadow: inset 0 0 10px rgba(21, 128, 61, 0.4), 0 0 12px rgba(21, 128, 61, 0.6); background: #dcfce7; }
-      100% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
-    }
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding:0}
+.tab{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--sub);position:relative}
+.tab .ic{font-size:20px;line-height:1}
+.tab.on{color:var(--brand)}
+.tab.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--brand)}
+.tab .dot{position:absolute;top:6px;left:calc(50% + 8px);min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px}
 
-    @keyframes closedBorderGlow {
-      0% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
-      50% { border-color: rgba(198, 40, 40, 1); box-shadow: inset 0 0 10px rgba(198, 40, 40, 0.4), 0 0 12px rgba(198, 40, 40, 0.6); background: #fee2e2; }
-      100% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
-    }
+.page{display:none;padding-top:16px}
+.page.on{display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.h2{font-size:15px;font-weight:800;margin:0 0 2px}
+.muted{color:var(--sub);font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.sec-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:22px 0 10px}
 
-    .hours-badge {
-      font-size: 13px; font-weight: 800; padding: 5px 12px; border-radius: 99px;
-      background: var(--bad-l); color: var(--bad); width: fit-content;
-      margin-left: auto; border: 1.5px solid transparent;
-      animation: closedBorderGlow 2.5s ease-in-out infinite;
-    }
-    .hours-badge.open {
-      background: var(--ok-l); color: var(--ok);
-      animation: borderGlowBackAndForth 2.5s ease-in-out infinite;
-    }
+.btn{height:40px;padding:0 16px;border-radius:var(--r-s);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:active{background:var(--brand-d)}
+.btn-g{background:#e8eeec;color:var(--ink)}
+.btn-d{background:var(--bad-l);color:var(--bad)}
+.btn-s{height:32px;padding:0 11px;font-size:12px}
 
-    .closed-banner, .delivery-limit-banner, .username-warning {
-      padding: 11px 14px; border-radius: var(--r); font-weight: 700; text-align: center;
-      margin-bottom: 12px; font-size: 13px;
-    }
-    .closed-banner { background: var(--bad-l); color: var(--bad); border: 1px solid #f1c0c0; }
-    .delivery-limit-banner, .username-warning { background: var(--warn-l); color: var(--warn); border: 1px solid #f0d9a8; display: none; }
+.sw{position:relative;width:50px;height:28px;flex-shrink:0;display:inline-block}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:#c3cecb;border-radius:28px;transition:.2s;cursor:pointer}
+.sw span::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw input:checked+span{background:var(--ok)}
+.sw input:checked+span::before{transform:translateX(22px)}
 
-    .banner-container {
-      width: 100%; height: 150px; border-radius: var(--r); overflow: hidden;
-      margin-bottom: 12px; position: relative; border: 1px solid var(--line); background: var(--surface);
-    }
-    .banner-slider { display: flex; width: 100%; height: 100%; transition: transform .4s ease-in-out; }
-    .banner-slide { min-width: 100%; height: 100%; }
-    .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ctl .lbl{font-size:12px;color:var(--sub);font-weight:600}
+.ctl .val{font-size:17px;font-weight:800;margin-top:2px}
+.ctl .val.ok{color:var(--ok)} .ctl .val.bad{color:var(--bad)} .ctl .val.warn{color:var(--warn)}
+.wait-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.wait-row label{font-size:12px;font-weight:700;color:var(--sub);flex:1}
+.num{width:76px;height:36px;border:1px solid var(--line);border-radius:var(--r-s);text-align:center;font-weight:800;background:#fafcfb}
 
-    .search-input {
-      width: 100%; height: 44px; border: 1px solid var(--line); border-radius: var(--r-s);
-      padding: 0 14px 0 40px; font-size: 14px; background: var(--surface) no-repeat 13px center;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235f706d' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
-      outline: none; margin-bottom: 12px;
-    }
-    .search-input:focus { border-color: var(--brand); }
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{border-radius:var(--r);padding:12px 14px;background:var(--surface);border:1px solid var(--line);text-align:left;width:100%}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stat span{font-size:12px;color:var(--sub);font-weight:600}
+.stat.warn b{color:var(--warn)} .stat.bad b{color:var(--bad)} .stat.ok b{color:var(--ok)}
 
-    .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
-    .category-card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 6px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s;
-    }
-    .category-card:active { background: #f6f9f8; }
-    .category-card.active { border-color: var(--brand); background: var(--brand-l); box-shadow: 0 0 0 1px var(--brand); }
-    .category-img-wrap {
-      width: 100%; height: 68px; border-radius: 99px; overflow: hidden; background: #e8eeec;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 6px; font-size: 1.7rem;
-    }
-    .category-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .category-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .category-card.active .category-name { color: var(--brand); }
+.low-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.low-row:last-child{border-bottom:0}
+.low-row .nm{flex:1;min-width:0;font-weight:700}
+.low-row .nm small{display:block;font-weight:500;color:var(--sub);font-size:11px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:800}
+.pill.warn{background:var(--warn-l);color:var(--warn)}
+.pill.bad{background:var(--bad-l);color:var(--bad)}
+.pill.ok{background:var(--ok-l);color:var(--ok)}
+.pill.pop{background:#ffe9e0;color:#c2410c}
 
-    #food-list { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    #food-list > div:not(.food-card) { grid-column: 1 / -1; text-align: center; color: var(--sub); padding: 30px 0; }
-    @media (min-width: 700px) { #food-list { grid-template-columns: 1fr 1fr; } }
+.toolbar{position:sticky;top:60px;z-index:40;background:var(--bg);padding:10px 0 8px}
+.search{position:relative}
+.search input{width:100%;height:42px;padding:0 14px 0 38px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+.search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-style:normal;opacity:.5}
+.pills{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill-b{flex-shrink:0;height:34px;padding:0 13px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:12px;color:var(--sub)}
+.pill-b.on{background:var(--brand);border-color:var(--brand);color:#fff}
 
-    .food-card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r);
-      padding: 11px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
-    }
-    .food-info { display: flex; align-items: center; gap: 11px; min-width: 0; flex: 1; }
-    .food-icon-wrap {
-      position: relative; width: 72px; height: 72px; flex-shrink: 0; background: #e8eeec; border-radius: 12px;
-      overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
-    }
-    .food-icon-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-count-badge {
-      position: absolute; bottom: 3px; right: 3px; background: rgba(20,32,31,.78); color: #fff;
-      font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px;
-    }
-    .food-name { font-weight: 800; font-size: 14px; }
-    .food-sub { font-size: 12px; color: var(--sub); }
-    .food-price { font-weight: 800; font-size: 15px; color: var(--brand); margin-right: 10px; white-space: nowrap; }
-    .pop-badge { background: #ffe9e0; color: #c2410c; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 4px; white-space: nowrap; }
+.menu{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+@media(min-width:640px){.menu{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.menu{grid-template-columns:repeat(3,1fr)}}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px}
+.item.off{background:#faf3f3;border-color:#efc9c9}
+.item-h{display:flex;gap:11px;align-items:center}
+.thumb{width:58px;height:58px;border-radius:12px;background:#e8eeec;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.item-h .t{flex:1;min-width:0}
+.item-h .t b{display:block;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-h .t small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{font-size:12px;font-weight:700;color:var(--brand);margin-top:2px}
+.item-m{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.step{display:flex;align-items:center;background:#eef3f1;border-radius:var(--r-s);overflow:hidden}
+.step button{width:38px;height:38px;font-size:20px;font-weight:700;color:var(--ink)}
+.step input{width:50px;height:38px;border:0;background:transparent;text-align:center;font-weight:800;font-size:15px}
+.avail{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--sub)}
+.item-f{display:flex;gap:8px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:10px}
+.empty{grid-column:1/-1;text-align:center;padding:44px 10px;color:var(--sub)}
+.empty .big{font-size:34px;margin-bottom:6px}
 
-    .add-btn {
-      width: 40px; height: 40px; border-radius: 11px; background: var(--brand); color: #fff; border: 0;
-      font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer;
-      transition: transform .08s;
-    }
-    .add-btn:active { transform: scale(.94); background: var(--brand-d); }
-    .add-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; }
+.fab{position:fixed;right:16px;bottom:calc(84px + var(--safe-b));z-index:55;height:50px;padding:0 20px;border-radius:25px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(15,118,110,.4);display:none;align-items:center;gap:8px}
+.fab.show{display:inline-flex}
 
-    .bottom-icons-bar { display: flex; gap: 8px; margin: 22px 0 10px; }
-    .icon-action-btn {
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 6px;
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s);
-      font-size: 12px; font-weight: 700; color: var(--ink); text-decoration: none; cursor: pointer;
-    }
-    .icon-action-btn:active { transform: scale(.97); }
-    .icon-action-btn.fb { color: #1877f2; }
-    .icon-action-btn.tg { color: #0088cc; }
-    .icon-action-btn.info { color: var(--brand); }
+.ov{position:fixed;inset:0;z-index:100;background:rgba(10,20,19,.55);display:none;align-items:flex-end;justify-content:center}
+.ov.show{display:flex}
+@media(min-width:700px){.ov{align-items:center;padding:20px}}
+.sheet{background:var(--surface);width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0}
+@media(min-width:700px){.sheet{border-radius:20px}}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sheet-h h3{margin:0;font-size:16px;font-weight:800}
+.x{width:34px;height:34px;border-radius:50%;background:#e8eeec;font-weight:800}
+.sheet-b{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sheet-f{padding:12px 16px calc(12px + var(--safe-b));border-top:1px solid var(--line);display:flex;gap:8px}
+.sheet-f .btn-p{flex:1}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.f input[type=text],.f input[type=number],.f select,.f textarea{width:100%;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb}
+.f textarea{height:auto;min-height:74px;padding:10px 12px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.size-row{display:grid;grid-template-columns:1fr 96px 38px;gap:8px;margin-bottom:8px}
+.size-row button{height:42px;border-radius:var(--r-s);background:var(--bad-l);color:var(--bad);font-weight:800}
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:#f3f7f6;border-radius:var(--r-s);font-weight:700;font-size:13px}
 
-    @keyframes floatBounce {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-    }
+.toast{position:fixed;left:50%;bottom:calc(92px + var(--safe-b));transform:translate(-50%,20px);z-index:300;max-width:calc(100% - 28px);padding:11px 16px;border-radius:12px;background:var(--ink);color:#fff;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--bad)}
+.toast.ok{background:var(--ok)}
 
-    .guide-float-btn {
-      position: fixed; right: 14px; bottom: calc(92px + var(--safe-b)); z-index: 150;
-      height: 42px; padding: 0 16px; border-radius: 21px; background: #e11d48; color: #fff;
-      border: 0; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer;
-      box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4);
-      animation: floatBounce 1.8s ease-in-out infinite !important;
-    }
-    .guide-float-btn:active { transform: scale(.96); background: #be123c; }
-
-    .btn { height: 46px; padding: 0 16px; border: 0; border-radius: var(--r-s); font-weight: 800; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform .08s; }
-    .btn:active { transform: scale(.98); }
-    .btn-p { background: var(--brand); color: #fff; }
-    .btn-g { background: #e8eeec; color: var(--ink); }
-    .btn-block { width: 100%; }
-    .x { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #e8eeec; font-weight: 800; cursor: pointer; }
-
-    .modal-overlay, .cart-drawer-overlay, .map-modal-overlay {
-      position: fixed; inset: 0; background: rgba(10,20,19,.55); display: none; align-items: flex-end; justify-content: center;
-    }
-    .modal-overlay { z-index: 500; }
-    .cart-drawer-overlay { z-index: 600; }
-    .map-modal-overlay { z-index: 800; }
-
-    .modal-card, .cart-drawer-card {
-      background: var(--surface); width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
-      border-radius: 20px 20px 0 0; padding: 18px 16px calc(16px + var(--safe-b)); animation: up .2s ease-out;
-    }
-    @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-    @media (min-width: 700px) {
-      .modal-overlay, .cart-drawer-overlay, .map-modal-overlay { align-items: center; padding: 20px; }
-      .modal-card, .cart-drawer-card { border-radius: 20px; }
-    }
-
-    .size-tile {
-      background: #f6f9f8; border: 1px solid var(--line); border-radius: var(--r-s); padding: 13px 14px;
-      margin: 8px 0; display: flex; justify-content: space-between; font-weight: 700; cursor: pointer;
-    }
-    .size-tile.selected { border-color: var(--brand); background: var(--brand-l); box-shadow: 0 0 0 1px var(--brand); }
-
-    .option-group { margin: 14px 0; }
-    .option-title { font-size: 12px; font-weight: 700; color: var(--sub); margin-bottom: 6px; }
-    .option-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pill { height: 34px; padding: 0 14px; display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 99px; font-size: 12px; font-weight: 700; color: var(--sub); cursor: pointer; }
-    .pill.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-
-    .cart-trigger-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--surface);
-      border-top: 1px solid var(--line); padding: 10px 14px calc(10px + var(--safe-b));
-    }
-    .trigger-btn {
-      display: flex; width: 100%; max-width: 692px; margin: 0 auto; height: 52px; padding: 0 18px;
-      background: var(--brand); color: #fff; border: 0; border-radius: var(--r-s);
-      font-size: 15px; font-weight: 800; justify-content: space-between; align-items: center; cursor: pointer;
-    }
-    .trigger-btn:active { background: var(--brand-d); }
-    .trigger-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-    .modal-top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
-    .back-btn { background: #e8eeec; border: 0; color: var(--ink); font-weight: 700; padding: 0 14px; height: 36px; border-radius: var(--r-s); font-size: 13px; cursor: pointer; }
-    .drawer-title { font-size: 16px; font-weight: 800; margin: 0; }
-
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
-    .qty-stepper { display: flex; align-items: center; gap: 6px; background: #eef3f1; padding: 3px 6px; border-radius: var(--r-s); }
-    .stepper-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-weight: 800; cursor: pointer; }
-
-    .section-label { font-size: 12px; color: var(--sub); margin: 18px 0 8px; font-weight: 700; }
-    .toggle-grid { display: flex; gap: 8px; }
-    .toggle-item { flex: 1; padding: 12px 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); border-radius: var(--r-s); font-weight: 700; font-size: 13px; text-align: center; cursor: pointer; }
-    .toggle-item.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-
-    .aba-pay-card { background: var(--aba) !important; color: #fff !important; border-color: var(--aba) !important; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-    .custom-input { width: 100%; background: #fafcfb; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 13px; height: 44px; font-size: 14px; outline: none; margin-top: 6px; }
-    textarea.custom-input { height: auto; padding: 10px 13px; resize: vertical; }
-    .custom-input:focus { border-color: var(--brand); background: #fff; }
-    .custom-input[readonly] { background: #eef2f1; color: var(--sub); cursor: not-allowed; }
-
-    .gps-btn { background: var(--brand); color: #fff; border: 0; height: 44px; border-radius: var(--r-s); font-size: 13px; font-weight: 800; margin-top: 8px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .gps-btn:active { background: var(--brand-d); }
-    .gps-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; }
-
-    .submit-order-btn { width: 100%; height: 52px; background: var(--brand); color: #fff; border: 0; border-radius: var(--r-s); font-size: 15px; font-weight: 800; margin-top: 18px; cursor: pointer; }
-    .submit-order-btn:active { background: var(--brand-d); }
-    .submit-order-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    .image-modal-overlay { position: fixed; inset: 0; background: rgba(10,20,19,.93); display: none; flex-direction: column; justify-content: space-between; z-index: 1000; padding: 18px 14px; }
-    .image-modal-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 700; z-index: 1001; }
-    .close-img-btn { background: rgba(255,255,255,.18); color: #fff; border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
-    .slider-viewport { width: 100%; flex: 1; display: flex; align-items: center; overflow: hidden; position: relative; margin: 14px 0; }
-    .slider-track { display: flex; width: 100%; height: 100%; transition: transform .3s ease-in-out; }
-    .slider-slide { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .slider-slide img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--r-s); }
-    .slider-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.22); color: #fff; border: 0; width: 42px; height: 42px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; z-index: 1002; display: flex; align-items: center; justify-content: center; }
-    .slider-prev { left: 8px; } .slider-next { right: 8px; }
-    .slider-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); transition: all .2s; }
-    .dot.active { background: #fff; transform: scale(1.3); }
-
-    /* Interactive Map Modal Styles */
-    .map-card {
-      background: var(--surface); width: 100%; max-width: 600px; height: 85vh; border-radius: 20px 20px 0 0;
-      display: flex; flex-direction: column; overflow: hidden; position: relative; animation: up .2s ease-out;
-    }
-    @media (min-width: 700px) { .map-card { border-radius: 20px; height: 80vh; } }
-    .map-header {
-      padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
-      display: flex; justify-content: space-between; align-items: center; z-index: 10;
-    }
-    .map-container-wrapper { flex: 1; position: relative; width: 100%; background: #e5e3df; }
-    #picker-map { width: 100%; height: 100%; }
-    .center-pin-marker {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%);
-      z-index: 500; pointer-events: none; transition: transform 0.15s ease;
-    }
-    .center-pin-shadow {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 14px; height: 6px; background: rgba(0,0,0,0.25); border-radius: 50%;
-      z-index: 499; pointer-events: none;
-    }
-    .map-recenter-btn {
-      position: absolute; bottom: 20px; right: 16px; z-index: 500;
-      width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; color: var(--brand);
-    }
-    .map-recenter-btn:active { background: #f0f0f0; }
-    .map-footer { padding: 14px 16px calc(14px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); z-index: 10; }
-    .map-addr-preview { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  
-    /* ABA Pay modal */
-    .pay-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 900; display: none; align-items: flex-end; justify-content: center; }
-    .pay-card { background: var(--surface); width: 100%; max-width: 440px; border-radius: 18px 18px 0 0; padding: 20px 18px calc(20px + var(--safe-b)); text-align: center; max-height: 92vh; overflow-y: auto; }
-    @media (min-width: 600px) { .pay-overlay { align-items: center; padding: 20px; } .pay-card { border-radius: 18px; } }
-    .pay-amount { font-size: 28px; font-weight: 800; color: var(--aba); margin: 4px 0 2px; }
-    .pay-sub { color: var(--sub); font-size: 12.5px; }
-    .pay-btn { width: 100%; height: 52px; background: var(--aba); color: #fff; border: 0; border-radius: var(--r-s); font-size: 15px; font-weight: 800; margin-top: 14px; cursor: pointer; }
-    .pay-btn.ghost { background: var(--surface); color: var(--aba); border: 1.5px solid var(--aba); height: 44px; font-size: 13px; }
-    .pay-qr { width: 210px; height: 210px; margin: 12px auto 0; border: 1px solid var(--line); border-radius: 12px; padding: 6px; display: block; object-fit: contain; background: #fff; }
-    .pay-state { margin-top: 12px; font-size: 13px; font-weight: 700; }
-    .pay-state.ok { color: var(--ok); } .pay-state.bad { color: var(--bad); } .pay-state.wait { color: var(--warn); }
-    .pay-resume { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 850; display: none; background: var(--aba); color: #fff; border-radius: var(--r-s); padding: 10px 12px; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
-    .pay-resume button { border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
-    .pay-resume .go { background: #fff; color: var(--aba); } .pay-resume .x { background: transparent; color: #fff; }
-    .leaflet-tooltip.store-tip { background:#fff; color:#005d7b; font-weight:800; font-size:12px; border:0; border-radius:8px; padding:3px 8px; box-shadow:0 2px 8px rgba(0,0,0,.25); }
-    .leaflet-tooltip.store-tip::before { display:none; }
-    .leaflet-container .leaflet-control-attribution { font-size:9px; background:rgba(255,255,255,.7); }
-    #map-modal .lifted { translate: 0 -10px; transition: translate .15s ease; }
-  </style>
+.gate{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;text-align:center}
+.gate.show{display:flex}
+.skeleton{background:linear-gradient(90deg,#e6ecea 25%,#f2f6f5 50%,#e6ecea 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:var(--r);height:118px}
+@keyframes sk{to{background-position:-200% 0}}
+</style>
 </head>
 <body>
 
-  <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
-    <div class="top-promo-track">
-      <div class="top-promo-content">
-        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
+<div id="gate" class="gate">
+  <div class="box">
+    <div class="big">🔒</div>
+    <h2>សូមបើកតាម Telegram</h2>
+    <p class="muted" style="font-size:13px">ទំព័រនេះអាចកែប្រែទិន្នន័យបានតែនៅពេលបើកតាមរយៈ Telegram Bot របស់ហាងប៉ុណ្ណោះ។</p>
+    <button class="btn btn-g" id="gate-view" style="margin-top:12px">មើលតែប៉ុណ្ណោះ (View only)</button>
+  </div>
+</div>
+
+<header class="top">
+  <div class="wrap">
+    <h1>ផ្ទាំងគ្រប់គ្រងហាង<small>តូបគុយទាវ អ៊ីភាព</small></h1>
+    <button class="icon-btn" id="btn-refresh" aria-label="ធ្វើបច្ចុប្បន្នភាព"><span id="refresh-ic">🔄</span> Refresh</button>
+    <a class="icon-btn" href="index.html" target="_blank" rel="noopener">👁️ ហាង</a>
+  </div>
+</header>
+
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន</h2>
+  <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
+  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+</div>
+
+<main class="wrap">
+  <!-- ========== HOME ========== -->
+  <section id="page-home" class="page on">
+    <div class="card">
+      <div class="ctl" style="margin-bottom: 12px;">
+        <div>
+          <div class="lbl">ប្រូម៉ូសិនបដាខាងលើ (Top Promotion Banner)</div>
+          <div id="promo-status-text" class="val">…</div>
+          <div class="muted">បង្ហាញ ឬបិទប្រូម៉ូសិននៅផ្នែកខាងលើរបស់អតិថិជន</div>
+        </div>
+        <label class="sw"><input type="checkbox" id="promo-toggle"><span></span></label>
       </div>
-      <!-- Duplicate content for seamless infinite looping scroll -->
-      <div class="top-promo-content">
-        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
+      <div class="wait-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">អត្ថបទផ្លាកសញ្ញា (Badge Text):</label>
+          <input type="text" id="promo-badge-input" placeholder="Free Delivery" style="height: 38px; width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 10px; background: #fafcfb;">
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
+          <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
+        </div>
+        <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
       </div>
     </div>
-  </div>
 
-  <header class="top">
-    <div class="wrap">
-      <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
-      <div class="top-row-main">
-        <div class="top-l">
-          <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-          <div class="shop-title-container">
-            <!-- Chef Girl Icon holding kitchen accessories -->
-            <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
-              <img id="shop-logo" alt="Shop logo" src="data:image/png;base64,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">
-            </div>
-            <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+    <div class="grid2">
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">ស្ថានភាពហាង</div>
+            <div id="store-text" class="val">…</div>
+            <div class="muted">បើក/បិទ ការទទួលការកម្មង់</div>
           </div>
+          <label class="sw"><input type="checkbox" id="store-toggle"><span></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">សេវាដឹកជញ្ជូន</div>
+            <div id="delivery-text" class="val">…</div>
+          </div>
+          <label class="sw"><input type="checkbox" id="delivery-toggle"><span></span></label>
+        </div>
+        <div class="wait-row">
+          <label for="wait-input">រយៈពេលរង់ចាំ (នាទី)</label>
+          <input class="num" type="number" id="wait-input" min="1" max="180" inputmode="numeric" placeholder="15">
+          <button class="btn btn-p btn-s" id="wait-save">រក្សាទុក</button>
         </div>
       </div>
     </div>
-  </header>
 
-  <main class="wrap">
+    <div class="stats" id="stats"></div>
 
-  <div id="store-closed-banner" class="closed-banner" style="display: none;">
-    🔒 ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកម្មង់បានទេនៅពេលនេះ។
-  </div>
-
-  <div id="delivery-limit-banner" class="delivery-limit-banner" style="display: none;">
-    🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល <span id="banner-wait-time">១៥</span> នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។
-  </div>
-
-  <div id="tg-login-box" style="display:none; margin:10px 16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); text-align:center; font-size:13px;"></div>
-
-  <div id="no-username-banner" class="username-warning">
-    ℹ️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ អ្នកនៅតែអាចកម្មង់បាន ហាងនឹងទាក់ទងអ្នកតាមលេខទូរស័ព្ទ។
-  </div>
-
-  <div class="banner-container">
-    <div class="banner-slider" id="banner-slider"></div>
-  </div>
-
-  <input type="text" id="search-input" class="search-input" placeholder="ស្វែងរកមុខម្ហូប..." oninput="renderMenu()">
-
-  <div id="category-cards-container" class="category-grid"></div>
-
-  <div id="food-list">កំពុងទាញយកទិន្នន័យ...</div>
-
-  <div class="bottom-icons-bar">
-    <button class="icon-action-btn info" onclick="openInfoModal()">
-      <span>ℹ️</span> ព័ត៌មាន និងគោលការណ៍ហាង
-    </button>
-    <a href="https://www.facebook.com/share/1JmSamWQLg/" target="_blank" rel="noopener noreferrer" class="icon-action-btn fb">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-      Facebook
-    </a>
-    <a href="https://t.me/Kuyteav_Epheap" target="_blank" rel="noopener noreferrer" class="icon-action-btn tg">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.52l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.2 1.05.14.84.96z"/></svg>
-      Telegram
-    </a>
-  </div>
-
-  </main>
-
-  <button class="guide-float-btn" onclick="openVideoModal()">
-    <span>▶️</span> វិធីបញ្ជាទិញ
-  </button>
-
-  <div id="video-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">🎥 វីដេអូបង្រៀនពីរបៀបកម្មង់</h3>
-        <button onclick="closeVideoModal()" class="x">✕</button>
+    <div class="sec-title">
+      <div>
+        <h2 class="h2">⚠️ ស្តុកជិតអស់</h2>
+        <div class="muted">មុខម្ហូបដែលនៅសល់ ≤ <span id="low-n"></span> ឬអស់ស្តុក</div>
       </div>
-      <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--r-s); overflow: hidden; margin-bottom: 14px;">
-        <iframe id="guide-video-frame" width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/3j4WpJIhXk8?rel=0&playsinline=1" title="How to order guide" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="width:100%;height:100%;border:0"></iframe>
-      </div>
-      <button type="button" class="btn btn-g btn-block" style="margin-bottom:10px" onclick="openGuideOnYouTube()">▶ បើកក្នុង YouTube (បើមើលមិនបាន)</button>
-      <button onclick="closeVideoModal()" class="btn btn-p btn-block">យល់ព្រម</button>
     </div>
+    <div class="card" id="low-list" style="padding:4px 14px"></div>
+  </section>
+
+  <!-- ========== MENU ========== -->
+  <section id="page-menu" class="page">
+    <div class="toolbar">
+      <div class="search">
+        <i>🔍</i>
+        <input type="search" id="search" placeholder="ស្វែងរកឈ្មោះម្ហូប…" autocomplete="off">
+      </div>
+      <div class="pills" id="cat-pills"></div>
+    </div>
+    <div class="menu" id="menu"></div>
+  </section>
+
+  <!-- ========== SETTINGS / MORE ========== -->
+  <section id="page-more" class="page">
+    <div class="card">
+      <h2 class="h2">👤 អ្នកគ្រប់គ្រង</h2>
+      <div id="who" class="muted" style="margin-top:6px"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧰 អាប់ដេត រហ័ស</h2>
+      <p class="muted" style="margin:4px 0 12px">សកម្មភាពលើមុខម្ហូបទាំងអស់ក្នុងពេលតែមួយ</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-g" id="bulk-enable">✅ បើកលក់មុខម្ហូបទាំងអស់ដែលមានស្តុក</button>
+        <button class="btn btn-g" id="bulk-disable-zero">⛔ បិទមុខម្ហូបដែលអស់ស្តុក (0)</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧾 ការកម្មង់ដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">ចុចដំណាក់កាល ដើម្បីឱ្យអតិថិជនឃើញក្នុងទំព័រតាមដាន។</p>
+      <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
+      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)。</p>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab" id="fab-add"><span style="font-size:20px;line-height:1">＋</span> បន្ថែមម្ហូប</button>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
+    <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
+    <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
   </div>
+</nav>
 
-<div id="info-modal" class="modal-overlay">
-  <div class="modal-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
-      <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">ℹ️ ព័ត៌មាន និងគោលការណ៍ហាង</h3>
-      <button onclick="closeInfoModal()" class="x">✕</button>
+<div class="ov" id="item-ov">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-h">
+      <h3 id="sheet-title">បន្ថែមមុខម្ហូបថ្មី</h3>
+      <button class="x" id="sheet-x" aria-label="បិទ">✕</button>
     </div>
-
-    <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
-
-      <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
-
-      <!-- Store Hours & Policy -->
+    <div class="sheet-b f">
+      <input type="hidden" id="f-edit">
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⏰ ម៉ោងដំណើរការហាង</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • បើកលក់រាល់ថ្ងៃចាប់ពីម៉ោង <b>៧:០០ ព្រឹក</b> ដល់ <b>៥:០០ ល្ងាច</b>។<br>
-          • ក្រៅពីម៉ោងនេះ អតិថិជនអាចផ្ញើសារកម្មង់ទុកមុនបាន តាមរយៈ Telegram។
+        <label for="f-key">កូដមុខម្ហូប (Item key) *</label>
+        <input type="text" id="f-key" placeholder="kuy_teav_special" autocapitalize="off" autocomplete="off">
+        <div class="hint">អក្សរអង់គ្លេសតូច លេខ និង _ ប៉ុណ្ណោះ។ មិនអាចប្តូរបានក្រោយបង្កើត។</div>
+      </div>
+      <div class="row2">
+        <div><label for="f-kh">ឈ្មោះខ្មែរ *</label><input type="text" id="f-kh" placeholder="គុយទាវពិសេស"></div>
+        <div><label for="f-en">ឈ្មោះអង់គ្លេស *</label><input type="text" id="f-en" placeholder="Special Noodle"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="f-cat">ប្រភេទ *</label>
+          <select id="f-cat"></select>
         </div>
+        <div><label for="f-stock">ស្តុក *</label><input type="number" id="f-stock" min="0" inputmode="numeric" value="50"></div>
       </div>
-
-      <!-- Delivery Policy -->
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">🛵 គោលការណ៍សេវាដឹកជញ្ជូន</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • ចម្ងាយក្រោម ២០០ម៖ <b>ឥតគិតថ្លៃ (Free)</b><br>
-          • ចម្ងាយពី ២០០ម ដល់ ២.០ គីឡូម៉ែត្រ៖ <b>$0.25</b><br>
-          • ចម្ងាយចាប់ពី ២.០ ដល់ ៥.០ គីឡូម៉ែត្រ៖ <b>$0.50</b><br>
-          • ហាងកំណត់សេវាដឹកជញ្ជូនក្នុងរង្វង់អតិបរមា <b>៥ គីឡូម៉ែត្រ</b> ប៉ុណ្ណោះ។
-        </div>
+        <label>ទំហំ និងតម្លៃ ($) *</label>
+        <div id="size-list"></div>
+        <button class="btn btn-g btn-s" id="size-add" type="button">＋ បន្ថែមទំហំ</button>
       </div>
-
-      <!-- Order & Cancellation Policy -->
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⚠️ គោលការណ៍ការកម្មង់</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • រាល់ការកម្មង់ហើយ មិនអាចលុបចោលវិញបានទេ បន្ទាប់ពីហាងបានចាប់ផ្តើមរៀបចំធ្វើរួចរាល់។<br>
-          • សូមពិនិត្យទីតាំង GPS និងលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវមុនពេលបញ្ជូនការកម្មង់ ឬ បង់ប្រាក់តាមរយៈ ABA ។
-        </div>
+        <label for="f-img">រូបភាព (URL មួយបន្ទាត់ម្តង)</label>
+        <textarea id="f-img" placeholder="./images/kuy_teav.png"></textarea>
       </div>
-
-      <!-- Contact Support Section -->
-      <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;"> Contact Me</div>
-        <a href="https://t.me/dddda11999" target="_blank" rel="noopener noreferrer" class="btn btn-p btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px; background: #0088cc; color: #fff;">
-          Click Here for Support
-        </a>
+      <div class="switch-row">
+        <span>ស្លាក "ពេញនិយម" 🔥</span>
+        <label class="sw"><input type="checkbox" id="f-pop"><span></span></label>
       </div>
-
-      <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
-
-      <!-- Websites Section -->
-      <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;">🌐 គេហទំព័រពួកយើង</div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <a href="https://davin-store.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
-            🛒 Davin Store (davin-store.com)
-          </a>
-          <a href="https://auraarchitecturemalin.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
-            🏛️ Aura Architecture (auraarchitecturemalin.com)
-          </a>
-        </div>
-      </div>
-
     </div>
-
-    <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
-      <button onclick="closeInfoModal()" class="btn btn-p btn-block">យល់ព្រម / បិទ</button>
+    <div class="sheet-f">
+      <button class="btn btn-p" id="sheet-save">រក្សាទុក</button>
+      <button class="btn btn-g" id="sheet-cancel">បោះបង់</button>
     </div>
   </div>
 </div>
 
-  <div id="image-viewer-modal" class="image-modal-overlay">
-    <div class="image-modal-header">
-      <span id="img-modal-title">រូបភាពមុខម្ហូប</span>
-      <button class="close-img-btn" onclick="closeImageModal()">✕</button>
+<div class="ov" id="cf-ov" style="z-index:200;align-items:center;padding:20px">
+  <div class="sheet" style="border-radius:20px;max-width:360px">
+    <div class="sheet-b" style="text-align:center;padding:24px 20px 14px">
+      <div style="font-size:34px">🗑️</div>
+      <div id="cf-msg" style="font-weight:700"></div>
     </div>
-    <div class="slider-viewport" id="slider-viewport">
-      <button class="slider-nav-btn slider-prev" onclick="prevSlide()">❮</button>
-      <div class="slider-track" id="slider-track"></div>
-      <button class="slider-nav-btn slider-next" onclick="nextSlide()">❯</button>
-    </div>
-    <div class="slider-dots" id="slider-dots"></div>
-  </div>
-
-  <div id="size-modal" class="modal-overlay">
-    <div class="modal-card">
-      <h3 id="modal-title" style="margin: 0 0 16px 0; font-size: 1.1rem;">ជ្រើសរើសទំហំ</h3>
-      <div class="option-title">ជ្រើសរើសទំហំ</div>
-      <div id="size-options-container"></div>
-
-      <!-- Dynamic Customization Section for Drinks -->
-      <div id="drink-customization-section" style="display: none; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px;">
-        <div class="option-group">
-          <div class="option-title">កម្រិតស្ករ (Sugar Level)</div>
-          <div class="option-pills" id="sugar-pills">
-            <div class="pill" onclick="setDrinkOption('sugar', '10%', this)">10%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '30%', this)">30%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '50%', this)">50%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '70%', this)">70%</div>
-            <div class="pill active" onclick="setDrinkOption('sugar', '100%', this)">100%</div>
-          </div>
-        </div>
-
-        <div class="option-group">
-          <div class="option-title">កម្រិតទឹកកក (Ice Level)</div>
-          <div class="option-pills" id="ice-pills">
-            <div class="pill" onclick="setDrinkOption('ice', 'គ្មានទឹកកក (No Ice)', this)">គ្មានទឹកកក</div>
-            <div class="pill" onclick="setDrinkOption('ice', 'ទឹកកកតិច (Little Ice)', this)">ទឹកកកតិច</div>
-            <div class="pill active" onclick="setDrinkOption('ice', 'ធម្មតា (Normal Ice)', this)">ធម្មតា</div>
-            <div class="pill" onclick="setDrinkOption('ice', 'ដាក់ទឹកកកក្រៅ (Ice Outside)', this)">ដាក់ទឹកកកក្រៅ</div>
-          </div>
-        </div>
-      </div>
-
-      <button id="confirm-add-btn" onclick="confirmAddToCart()" class="btn btn-p btn-block" style="margin-top: 16px;">បន្ថែមទៅក្នុងកន្ត្រក</button>
-      <button onclick="closeSizeModal()" class="btn btn-g btn-block" style="margin-top: 8px;">បោះបង់</button>
+    <div class="sheet-f">
+      <button class="btn btn-g" id="cf-no" style="flex:1">បោះបង់</button>
+      <button class="btn btn-d" id="cf-yes" style="flex:1">បាទ/ចាស លុប</button>
     </div>
   </div>
+</div>
 
-  <div class="cart-trigger-bar">
-    <button id="trigger-btn" class="trigger-btn" onclick="openCartDrawer()" disabled>
-      <span>🛒 មើលការកម្មង់</span>
-      <span id="trigger-total">$0.00</span>
-    </button>
-  </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <div id="cart-drawer" class="cart-drawer-overlay">
-    <div class="cart-drawer-card">
-      <div class="modal-top-nav">
-        <button class="back-btn" onclick="closeCartDrawer()">← ត្រឡប់ក្រោយ</button>
-        <div class="drawer-title">🛒 មើលការកម្មង់</div>
-        <div style="width: 60px;"></div>
-      </div>
-      <div id="drawer-cart-items"></div>
-      <div class="section-label">ព័ត៌មានអតិថិជន</div>
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub);">Telegram username</label>
-      <input type="text" id="input-username" class="custom-input" readonly placeholder="មិនមាន Username">
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub); margin-top: 8px; display: block;">ឈ្មោះអតិថិជន *</label>
-      <input type="text" id="input-customer-name" class="custom-input" placeholder="បញ្ចូលឈ្មោះរបស់អ្នក">
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub); margin-top: 8px; display: block;">លេខទូរស័ព្ទ *</label>
-      <input type="tel" id="input-phone" class="custom-input" placeholder="012 345 678" inputmode="tel" maxlength="16" autocomplete="tel">
-      <div class="section-label">ប្រភេទការកម្មង់</div>
-      <div class="toggle-grid">
-        <div class="toggle-item active" onclick="setOrderType('takeaway', this)">ទៅយក (Pick Up)</div>
-        <div class="toggle-item" id="delivery-toggle-btn" onclick="setOrderType('delivery', this)">ដឹកជញ្ជូន (Delivery)</div>
-      </div>
-      <div id="gps-section">
-        <div class="section-label">ទីតាំង GPS *</div>
-        <input type="text" id="input-address" class="custom-input" readonly placeholder="បិទការប្រើប្រាស់ពេលទៅយកផ្ទាល់...">
-        <button type="button" id="gps-btn" class="gps-btn" onclick="openMapModal()" disabled>
-          🗺️ ជ្រើសរើសទីតាំងលើផែនទី (Pick Location)
-        </button>
-        <div id="gps-status" style="font-size: 0.8rem; color: var(--ok); margin-top: 6px;"></div>
-      </div>
-      <div class="section-label">វិធីសាស្ត្រទូទាត់ប្រាក់</div>
-      <div class="toggle-grid">
-        <div class="toggle-item aba-pay-card"><span>💳</span> ABA Pay</div>
-      </div>
-      <div style="background: #f8fafc; padding: 12px; border-radius: var(--r-s); margin-top: 16px; border: 1px solid var(--line);">
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub);">
-          <span>តម្លៃសរុបមុខម្ហូប:</span>
-          <span id="summary-subtotal">$0.00</span>
-        </div>
-        <div id="delivery-fee-row" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub); margin-top: 4px; display: none;">
-          <span id="delivery-fee-label">ថ្លៃដឹកជញ្ជូន:</span>
-          <span id="summary-delivery">$0.00</span>
-        </div>
-        <hr style="border: 0; border-top: 1px solid var(--line); margin: 8px 0;">
-        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; color: var(--brand);">
-          <span>សរុបចុងក្រោយ:</span>
-          <span id="summary-grandtotal">$0.00</span>
-        </div>
-      </div>
-      <div class="section-label">កំណត់ចំណាំ</div>
-      <textarea id="input-remark" class="custom-input" rows="2" placeholder="ចំណាំបន្ថែម..."></textarea>
-      <button id="send-order-btn" class="submit-order-btn" onclick="sendOrder()">
-        ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>
-      </button>
-    </div>
-  </div>
+<script>
+const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
+const ADMIN_FUNCTION = "update-settings";
+const LOW_STOCK = 10;
 
-  <div id="pay-resume" class="pay-resume">
-    <span style="flex:1">⏳ មានការបង់ប្រាក់មួយមិនទាន់បញ្ចប់</span>
-    <button type="button" class="go" onclick="reopenPayment()">បន្ត</button>
-    <button type="button" class="x" onclick="dismissResume()">✕</button>
-  </div>
-  <!-- No-username popup -->
-  <div id="nouser-modal" class="pay-overlay">
-    <div class="pay-card">
-      <div style="font-size:38px">🙏</div>
-      <div style="font-weight:800;font-size:16px;margin:6px 0 8px;color:var(--ink)">គណនី Telegram មិនមាន Username</div>
-      <div class="pay-sub" style="line-height:1.7;text-align:left">
-        ដើម្បីកម្មង់ដោយមិនមាន Username សូមទាក់ទងហាងតាម Telegram ដើម្បីទទួលកូដ រួចបញ្ចូលកូដខាងក្រោម។<br>
-        ឬអ្នកអាចដាក់ Username ខ្លួនឯងក្នុង Telegram៖ <b>Settings → Username</b>។
-      </div>
-      <input id="nouser-code" class="custom-input" placeholder="បញ្ចូលកូដ (ឧ. K7M2QX9P)" maxlength="12" autocomplete="off" style="margin-top:12px;text-align:center;text-transform:uppercase;letter-spacing:2px">
-      <button type="button" class="pay-btn" id="nouser-redeem" onclick="redeemAccessCode()">🎟️ ប្រើកូដ</button>
-      <button type="button" class="pay-btn ghost" id="nouser-contact" onclick="openShopContact()">💬 ទាក់ទងហាងតាម Telegram</button>
-      <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="closeNoUsernameModal()">បិទ</button>
-    </div>
-  </div>
+const CATEGORIES = [
+  { key: "kuy_teav", label: "🍜 គុយទាវ" },
+  { key: "rice",     label: "🍚 បាយ" },
+  { key: "other",    label: "🍛 នំបាញ់ចុក" },
+  { key: "drinks",   label: "🧋 ភេសជ្ជៈ" },
+];
 
-  <!-- ABA Pay Modal -->
-  <div id="pay-modal" class="pay-overlay">
-    <div class="pay-card">
-      <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
-      <div class="pay-amount" id="pay-amount">$0.00</div>
-      <div class="pay-sub" id="pay-orderid"></div>
-      <button type="button" class="pay-btn" id="pay-open-btn" onclick="openAbaApp()">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</button>
-      <img id="pay-qr" class="pay-qr" alt="ABA KHQR" style="display:none">
-      <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
-      <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
-      <button type="button" class="pay-btn ghost" id="pay-check-btn" onclick="checkPaymentNow()">🔄 ខ្ញុំបានបង់ហើយ (ពិនិត្យ)</button>
-      <button type="button" class="pay-btn" id="pay-track-btn" style="display:none" onclick="openTrack()">🔎 តាមដានការកម្មង់ (បើកក្នុង browser)</button>
-      <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="cancelPaymentUi()">បិទ</button>
-    </div>
-  </div>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "$" + Number(n).toFixed(2);
+const catLabel = k => (CATEGORIES.find(c => c.key === k) || { label: k }).label;
 
-  <!-- Interactive Map Location Picker Modal (Grab / Eget Style) -->
-  <div id="map-modal" class="map-modal-overlay">
-    <div class="map-card">
-      <div class="map-header">
-        <div style="font-weight: 800; font-size: 1rem; color: var(--ink);">🗺️ ជ្រើសរើសទីតាំងដឹកជញ្ជូន</div>
-        <button type="button" class="x" onclick="closeMapModal()">✕</button>
-      </div>
-      <div class="map-container-wrapper">
-        <div id="picker-map"></div>
-        <div class="center-pin-shadow"></div>
-        <div class="center-pin-marker">
-          <svg width="38" height="48" viewBox="0 0 38 48" fill="none">
-            <path d="M19 0C8.5 0 0 8.5 0 19C0 31.5 19 48 19 48C19 48 38 31.5 38 19C38 8.5 29.5 0 19 0Z" fill="#0f766e"/>
-            <circle cx="19" cy="18" r="8" fill="#ffffff"/>
-            <circle cx="19" cy="18" r="4" fill="#0f766e"/>
-          </svg>
-        </div>
-        <button type="button" class="map-recenter-btn" onclick="recenterMapToUser()" title="ទីតាំងបច្ចុប្បន្ន">🎯</button>
-      </div>
-      <div class="map-footer">
-        <div class="map-addr-preview">
-          <span>📍</span>
-          <span id="map-coords-display">កំពុងកំណត់ទីតាំង...</span>
-        </div>
-        <button type="button" class="btn btn-p btn-block" onclick="confirmMapLocation()">
-          បញ្ជាក់ទីតាំងនេះ (Confirm Location)
-        </button>
-      </div>
-    </div>
-  </div>
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const tg = window.Telegram?.WebApp;
+const hasTG = !!(tg && tg.initData);
+let viewOnly = false;
 
-  <script>
-    const STORE_LAT = 11.5300546;
-    const STORE_LNG = 104.8039416;
-    const MAX_DELIVERY_KM = 5.0;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor("#14201f"); tg.setBackgroundColor("#f1f4f3"); } catch (_) {}
+  try { tg.enableClosingConfirmation(); } catch (_) {}
+}
+const haptic = (t = "light") => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (_) {} };
+const hapticN = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (_) {} };
 
-    let clientLat = null;
-    let clientLng = null;
-    let currentDeliveryFee = 0.00;
+let toastTimer;
+function toast(msg, type = "") {
+  const el = $("toast");
+  el.textContent = msg;
+  el.className = "toast show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  if (type === "ok") hapticN("success");
+  if (type === "err") hapticN("error");
+}
 
-    // Interactive Leaflet Map Variables
-    let pickerMap = null;
-    let tempLat = STORE_LAT;
-    let tempLng = STORE_LNG;
-    let storeMarker = null;
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * (Math.PI / 180);
-      const dLon = (lon2 - lon1) * (Math.PI / 180);
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-    }
-
-    const MAPTILER_KEY = ''; // optional: your MapTiler API key (restrict it to your domain in the MapTiler dashboard)
-    const MAX_QTY_PER_ITEM = 50; // hard cap per item per order
-    // How many of this item can be ordered: the stock number if it is set (blank = unlimited), never more than the cap.
-    function itemLimit(item) {
-      const n = item ? item.stock_quantity : null;
-      if (n === null || n === undefined || n === '') return MAX_QTY_PER_ITEM;
-      const v = Number(n);
-      return Number.isFinite(v) ? Math.min(Math.max(v, 0), MAX_QTY_PER_ITEM) : MAX_QTY_PER_ITEM;
-    }
-    const tg = window.Telegram?.WebApp;
-    if (tg) tg.expand();
-
-    const telegramUser = tg?.initDataUnsafe?.user;
-    const tgUsername = telegramUser?.username ? `@${telegramUser.username}` : "";
-    
-    document.addEventListener("DOMContentLoaded", () => {
-      const usernameInput = document.getElementById('input-username');
-      const noUsernameBanner = document.getElementById('no-username-banner');
-
-      if (tgUsername) {
-        usernameInput.value = tgUsername;
-        noUsernameBanner.style.display = 'none';
-      } else {
-        usernameInput.value = "";
-        usernameInput.placeholder = "គ្មាន Username";
-        noUsernameBanner.style.display = 'block';
+async function admin(body) {
+  if (viewOnly || !hasTG) return { error: "សូមបើកតាម Telegram ដើម្បីកែប្រែទិន្នន័យ" };
+  const { data, error } = await supa.functions.invoke(ADMIN_FUNCTION, {
+    body: { ...body, initData: tg.initData },
+  });
+  if (error) {
+    let msg = error.message;
+    try {
+      if (error.context?.json) {
+        const j = await error.context.json();
+        if (j?.error) msg = j.error;
       }
+    } catch (_) {}
+    return { error: msg };
+  }
+  if (data?.error) return { error: data.error };
+  return { data };
+}
 
-      if (telegramUser?.first_name) {
-        document.getElementById('user-name').innerText = telegramUser.first_name;
-        document.getElementById('input-customer-name').value = `${telegramUser.first_name} ${telegramUser.last_name || ''}`.trim();
+let items = [];
+let cat = "all";
+let query = "";
+const stockTimers = {};
+
+function showTab(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("on", p.id === "page-" + name));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === name));
+  $("fab-add").classList.toggle("show", name === "menu");
+  window.scrollTo({ top: 0 });
+  haptic();
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+async function loadPromoBanner() {
+  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge']);
+  if (data) {
+    const activeItem = data.find(i => i.key === 'promo_active');
+    const textItem = data.find(i => i.key === 'promo_text');
+    const badgeItem = data.find(i => i.key === 'promo_badge');
+
+    const cleanVal = (val, fallback) => {
+      if (val === undefined || val === null) return fallback;
+      let str = typeof val === 'string' ? val : JSON.stringify(val);
+      if (str.startsWith('"') && str.endsWith('"')) {
+        try { str = JSON.parse(str); } catch(e) {}
       }
-      
-      checkStoreStatus();
-      checkLoginRequirement();
-      checkDeliveryStatus();
-      checkPromoBanner();
-      initBanners();
-
-      // Restore saved cart, selections, and form fields automatically after page reload
-      restoreSessionState();
-      resumePendingPayment();
-    });
-
-    const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let IS_STORE_OPEN = false;
-    let IS_DELIVERY_AVAILABLE = true;
-    let ESTIMATED_WAIT_MINUTES = 15;
-    let menuItems = [];
-    let currentCategory = 'all';
-    let activeModalItem = null;
-    let selectedSize = '';
-    let selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
-    let cart = [];
-    let selectedOrderType = 'takeaway';
-    let gpsLink = "";
-    let isLocationPinned = false;
-    let activeImagesList = [];
-    let currentSlideIndex = 0;
-
-    // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
-    // Which Telegram account is using the page right now ("guest" in a plain browser without login).
-    function currentTgKey() {
-      try {
-        const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || (typeof getStoredLogin === 'function' && getStoredLogin()?.id);
-        return id ? String(id) : 'guest';
-      } catch (e) { return 'guest'; }
-    }
-
-    function saveSessionState() {
-      if (isForceReloading) return;
-
-      const state = {
-        cart: cart,
-        customerName: document.getElementById('input-customer-name')?.value || '',
-        phone: document.getElementById('input-phone')?.value || '',
-        remark: document.getElementById('input-remark')?.value || '',
-        orderType: selectedOrderType,
-        clientLat: clientLat,
-        clientLng: clientLng,
-        gpsLink: gpsLink,
-        isLocationPinned: isLocationPinned,
-        currentDeliveryFee: currentDeliveryFee,
-        address: document.getElementById('input-address')?.value || '',
-        scrollPosition: window.scrollY
-      };
-      state.tgId = currentTgKey();
-      localStorage.setItem('davin_app_session', JSON.stringify(state));
-    }
-
-    function restoreSessionState() {
-      const savedState = localStorage.getItem('davin_app_session');
-      if (!savedState) return;
-
-      try {
-        const state = JSON.parse(savedState);
-        // A session saved by another Telegram account (or an old session with no owner) must not fill this account's name, phone or cart.
-        if (String(state.tgId ?? '') !== currentTgKey()) { localStorage.removeItem('davin_app_session'); return; }
-        
-        if (Array.isArray(state.cart)) {
-          cart = state.cart;
-        }
-
-        if (state.customerName) document.getElementById('input-customer-name').value = state.customerName;
-        if (state.phone) document.getElementById('input-phone').value = state.phone;
-        if (state.remark) document.getElementById('input-remark').value = state.remark;
-        if (state.address) document.getElementById('input-address').value = state.address;
-
-        if (state.orderType) {
-          selectedOrderType = state.orderType;
-          const toggles = document.querySelectorAll('.toggle-grid .toggle-item');
-          toggles.forEach(el => {
-            if ((state.orderType === 'takeaway' && el.innerText.includes('Pick Up')) ||
-                (state.orderType === 'delivery' && el.innerText.includes('Delivery'))) {
-              el.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
-              el.classList.add('active');
-            }
-          });
-          document.getElementById('delivery-fee-row').style.display = state.orderType === 'delivery' ? 'flex' : 'none';
-          document.getElementById('gps-btn').disabled = state.orderType !== 'delivery';
-        }
-
-        clientLat = state.clientLat;
-        clientLng = state.clientLng;
-        gpsLink = state.gpsLink;
-        isLocationPinned = state.isLocationPinned;
-        currentDeliveryFee = state.currentDeliveryFee || 0.00;
-
-        if (isLocationPinned) {
-          document.getElementById('gps-status').style.color = "var(--ok)";
-          document.getElementById('gps-status').innerText = `✓ រក្សាទុកទីតាំង GPS រួចរាល់`;
-        }
-
-        updateCartState();
-
-        setTimeout(() => {
-          window.scrollTo(0, state.scrollPosition || 0);
-        }, 200);
-
-      } catch (e) {
-        console.error("Failed to restore session state", e);
-      }
-
-      localStorage.removeItem('davin_app_session');
-    }
-
-    const RELOAD_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
-    setTimeout(() => {
-      saveSessionState();
-      window.location.reload();
-    }, RELOAD_INTERVAL_MS);
-
-    window.addEventListener('beforeunload', () => {
-      saveSessionState();
-    });
-    // ----------------------------------------------------------
-
-    function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
-    function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
-    function openGuideOnYouTube() {
-      const u = 'https://www.youtube.com/watch?v=3j4WpJIhXk8';
-      if (tg && typeof tg.openLink === 'function') tg.openLink(u); else window.open(u, '_blank');
-    }
-    function openVideoModal() { document.getElementById('video-modal').style.display = 'flex'; }
-    function closeVideoModal() {
-      document.getElementById('video-modal').style.display = 'none';
-      const iframe = document.getElementById('guide-video-frame');
-      iframe.src = iframe.src;
-    }
-
-    async function checkPromoBanner() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('app_settings')
-          .select('key, value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge']);
-        
-        if (!error && data) {
-          const activeItem = data.find(i => i.key === 'promo_active');
-          const textItem = data.find(i => i.key === 'promo_text');
-          const badgeItem = data.find(i => i.key === 'promo_badge');
-
-          const bannerEl = document.getElementById('top-promo-banner');
-          const cleanVal = (val, fallback) => {
-            if (val === undefined || val === null) return fallback;
-            let str = typeof val === 'string' ? val : JSON.stringify(val);
-            if (str.startsWith('"') && str.endsWith('"')) {
-              try { str = JSON.parse(str); } catch(e) {}
-            }
-            return str || fallback;
-          };
-
-          const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
-          if (isActive && bannerEl) {
-            bannerEl.style.display = 'block';
-            const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
-            const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
-
-            document.querySelectorAll('.promo-msg-text').forEach(el => el.innerText = msgText);
-            document.querySelectorAll('.promo-badge-text').forEach(el => el.innerText = badgeText);
-          } else if (bannerEl) {
-            bannerEl.style.display = 'none';
-          }
-        }
-      } catch (e) {
-        console.error("Promo banner check failed", e);
-      }
-    }
-
-    async function checkStoreStatus() {
-      try {
-        const { data, error } = await supabaseClient.from('app_settings').select('value').eq('key', 'is_store_open').single();
-        IS_STORE_OPEN = (error || !data) ? true : data.value;
-      } catch (e) { IS_STORE_OPEN = true; }
-
-      const badge = document.getElementById('status-badge');
-      const closedBanner = document.getElementById('store-closed-banner');
-      if (IS_STORE_OPEN) {
-        badge.innerText = "បើក • ម៉ោង ៧:០០ ព្រឹក–៥:០០ ល្ងាច";
-        badge.classList.add('open');
-        closedBanner.style.display = 'none';
-      } else {
-        badge.innerText = "បិទ • ៥:០០ ល្ងាច–៧:០០ ព្រឹក";
-        badge.classList.remove('open');
-        closedBanner.style.display = 'block';
-      }
-      loadMenu();
-    }
-
-    async function checkDeliveryStatus() {
-      try {
-        const { data, error } = await supabaseClient.from('delivery_status').select('is_delivery_available, estimated_wait_minutes').eq('id', 1).single();
-        if (!error && data) {
-          IS_DELIVERY_AVAILABLE = data.is_delivery_available;
-          ESTIMATED_WAIT_MINUTES = data.estimated_wait_minutes || 15;
-        }
-      } catch (e) { IS_DELIVERY_AVAILABLE = true; }
-
-      const deliveryLimitBanner = document.getElementById('delivery-limit-banner');
-      const waitTimeSpan = document.getElementById('banner-wait-time');
-      const deliveryToggleBtn = document.getElementById('delivery-toggle-btn');
-
-      if (!IS_DELIVERY_AVAILABLE) {
-        deliveryLimitBanner.style.display = 'block';
-        waitTimeSpan.innerText = ESTIMATED_WAIT_MINUTES;
-        deliveryToggleBtn.style.opacity = '0.4';
-      } else {
-        deliveryLimitBanner.style.display = 'none';
-        deliveryToggleBtn.style.opacity = '1';
-      }
-    }
-
-    const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner3.png"];
-    function initBanners() {
-      const slider = document.getElementById('banner-slider');
-      slider.innerHTML = bannerImages.map(path => `<div class="banner-slide"><img src="${path}" alt="Banner" onerror="this.src='https://placehold.co/600x250/0284c7/fff?text=Longlay+Kitchen'"></div>`).join('');
-    }
-
-    async function loadMenu() {
-      const { data } = await supabaseClient.from('menu_items').select('*');
-      if (data) { menuItems = data; renderCategories(); renderMenu(); }
-    }
-
-    function renderCategories() {
-      const container = document.getElementById('category-cards-container');
-      const categories = [
-        { key: 'kuy_teav', name: 'គុយទាវ', icon: '🍜', img: './images/1.png' },
-        { key: 'rice', name: 'បាយ', icon: '🍚', img: './images/2.png' },
-        { key: 'other', name: 'នំបាញ់ចុក', icon: '🍛', img: './images/3.png' },
-        { key: 'drinks', name: 'ភេសជ្ជៈ', icon: '🧋', img: './images/4.png' }
-      ];
-      container.innerHTML = categories.map(cat => `
-        <div class="category-card ${currentCategory === cat.key ? 'active' : ''}" onclick="selectCategory('${cat.key}')">
-          <div class="category-img-wrap"><img src="${cat.img}" alt="${cat.name}" onerror="this.outerHTML='<span>${cat.icon}</span>'"></div>
-          <div class="category-name">${cat.name}</div>
-        </div>
-      `).join('');
-    }
-
-    function selectCategory(cat) { currentCategory = cat; renderCategories(); renderMenu(); }
-
-    function getItemImages(item) {
-      if (Array.isArray(item.images) && item.images.length > 0) return item.images;
-      if (item.image_url) return [item.image_url];
-      return [`./images/${item.item_key}.png`];
-    }
-
-    function renderMenu() {
-      const container = document.getElementById('food-list');
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const filtered = menuItems.filter(item => {
-        const matchesCat = currentCategory === 'all' || item.category === currentCategory;
-        const matchesSearch = item.name_kh.toLowerCase().includes(search) || item.name_en.toLowerCase().includes(search);
-        return matchesCat && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--sub); padding: 30px 0;">គ្មានមុខម្ហូបត្រូវបានរកឃើញទេ</div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(item => {
-        const firstSize = Object.keys(item.sizes)[0];
-        const totalInCart = cart
-          .filter(c => c.id === item.item_key)
-          .reduce((sum, c) => sum + c.quantity, 0);
-
-        const limitN = itemLimit(item);
-        const isAvailable = item.is_available !== false && limitN > 0 && totalInCart < limitN;
-        const itemImgs = getItemImages(item);
-
-        return `
-          <div class="food-card">
-            <div class="food-info">
-              <div class="food-icon-wrap" onclick="openImageModal('${item.item_key}')">
-                <img src="${itemImgs[0]}" alt="${item.name_kh}" onerror="this.outerHTML='<span>${item.icon || '🍜'}</span>'">
-                ${itemImgs.length > 1 ? `<span class="photo-count-badge">📷 ${itemImgs.length}</span>` : ''}
-              </div>
-              <div>
-                <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
-                <div class="food-sub">${item.name_en}</div>
-              </div>
-            </div>
-            <div style="display: flex; align-items: center;">
-              <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
-              <button class="add-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openImageModal(itemKey) {
-      const item = menuItems.find(i => i.item_key === itemKey);
-      if (!item) return;
-      activeImagesList = getItemImages(item);
-      currentSlideIndex = 0;
-      document.getElementById('img-modal-title').innerText = item.name_kh;
-      document.getElementById('slider-track').innerHTML = activeImagesList.map(url => `<div class="slider-slide"><img src="${url}" alt=""></div>`).join('');
-      document.getElementById('slider-dots').innerHTML = activeImagesList.map((_, idx) => `<div class="dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></div>`).join('');
-      updateSliderPosition();
-      document.getElementById('image-viewer-modal').style.display = 'flex';
-    }
-
-    function updateSliderPosition() {
-      document.getElementById('slider-track').style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-      document.querySelectorAll('.slider-dots .dot').forEach((dot, idx) => dot.classList.toggle('active', idx === currentSlideIndex));
-    }
-    function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % activeImagesList.length; updateSliderPosition(); }
-    function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + activeImagesList.length) % activeImagesList.length; updateSliderPosition(); }
-    function goToSlide(idx) { currentSlideIndex = idx; updateSliderPosition(); }
-    function closeImageModal() { document.getElementById('image-viewer-modal').style.display = 'none'; }
-
-    function setDrinkOption(type, value, element) {
-      selectedOptions[type] = value;
-      element.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      element.classList.add('active');
-    }
-
-    function openSizeModal(itemKey) {
-      activeModalItem = menuItems.find(i => i.item_key === itemKey);
-      if (!activeModalItem || activeModalItem.is_available === false) { alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!"); return; }
-      
-      document.getElementById('modal-title').innerText = activeModalItem.name_kh;
-      
-      // Dynamic Customization options for Drinks category
-      const drinkSection = document.getElementById('drink-customization-section');
-      if (activeModalItem.category === 'drinks') {
-        drinkSection.style.display = 'block';
-        selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
-        
-        // Reset pills UI active states
-        document.querySelectorAll('#sugar-pills .pill').forEach(p => {
-          p.classList.toggle('active', p.innerText.trim() === '100%');
-        });
-        document.querySelectorAll('#ice-pills .pill').forEach(p => {
-          p.classList.toggle('active', p.innerText.trim() === 'ធម្មតា');
-        });
-      } else {
-        drinkSection.style.display = 'none';
-      }
-
-      const sizeKeys = Object.keys(activeModalItem.sizes);
-      selectedSize = sizeKeys[0];
-      document.getElementById('size-options-container').innerHTML = sizeKeys.map(sizeKey => `
-        <div class="size-tile ${sizeKey === selectedSize ? 'selected' : ''}" id="size-tile-${sizeKey}" onclick="selectSizeOption('${sizeKey}')">
-          <span>ជ្រើសរើស :  ${sizeKey.toUpperCase()}</span>
-          <span style="color: var(--brand);">$${parseFloat(activeModalItem.sizes[sizeKey]).toFixed(2)}</span>
-        </div>
-      `).join('');
-      document.getElementById('size-modal').style.display = 'flex';
-    }
-
-    function selectSizeOption(sizeKey) {
-      selectedSize = sizeKey;
-      document.querySelectorAll('.size-tile').forEach(el => el.classList.remove('selected'));
-      document.getElementById(`size-tile-${sizeKey}`)?.classList.add('selected');
-    }
-
-    function closeSizeModal() { document.getElementById('size-modal').style.display = 'none'; }
-
-    function confirmAddToCart() {
-      if (!activeModalItem || !selectedSize) return;
-
-      const optionsPayload = activeModalItem.category === 'drinks' ? { ...selectedOptions } : null;
-      const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize && JSON.stringify(c.options) === JSON.stringify(optionsPayload));
-      const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
-
-      if (totalInCart + 1 > itemLimit(activeModalItem)) {
-        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកត្រឹមតែ ${itemLimit(activeModalItem)} ប៉ុណ្ណោះ!`);
-        return;
-      }
-
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({ 
-          id: activeModalItem.item_key, 
-          size: selectedSize, 
-          quantity: 1,
-          options: optionsPayload
-        });
-      }
-
-      closeSizeModal();
-      updateCartState();
-    }
-
-    function changeQty(index, delta) {
-      const cartItem = cart[index];
-      const product = menuItems.find(m => m.item_key === cartItem.id);
-      const totalInCartExceptThis = cart.filter(c => c.id === cartItem.id).reduce((sum, c) => sum + c.quantity, 0) - cartItem.quantity;
-
-      if (delta > 0 && totalInCartExceptThis + cartItem.quantity + delta > itemLimit(product)) {
-        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកត្រឹមតែ ${itemLimit(product)} ប៉ុណ្ណោះ!`);
-        return;
-      }
-
-      cartItem.quantity += delta;
-      if (cartItem.quantity <= 0) cart.splice(index, 1);
-      updateCartState();
-      renderCartDrawer();
-    }
-
-    function updateCartState() {
-      const triggerBtn = document.getElementById('trigger-btn');
-      if (cart.length === 0) { 
-        document.getElementById('trigger-total').innerText = '$0.00'; 
-        triggerBtn.disabled = true; 
-        closeCartDrawer(); 
-        renderMenu();
-        return; 
-      }
-      triggerBtn.disabled = false;
-      const subtotal = cart.reduce((sum, c) => sum + parseFloat(menuItems.find(m => m.item_key === c.id)?.sizes[c.size] || 0) * c.quantity, 0);
-      const grandTotal = subtotal + (selectedOrderType === 'delivery' ? currentDeliveryFee : 0);
-      document.getElementById('trigger-total').innerText = `$${grandTotal.toFixed(2)}`;
-      document.getElementById('final-total').innerText = `$${grandTotal.toFixed(2)}`;
-      document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-      document.getElementById('summary-delivery').innerText = currentDeliveryFee === 0 ? 'ឥតគិតថ្លៃ (Free)' : `$${currentDeliveryFee.toFixed(2)}`;
-      document.getElementById('summary-grandtotal').innerText = `$${grandTotal.toFixed(2)}`;
-      
-      renderMenu();
-    }
-
-    function openCartDrawer() { 
-      checkDeliveryStatus(); 
-      renderCartDrawer(); 
-      document.getElementById('cart-drawer').style.display = 'flex'; 
-    }
-    function closeCartDrawer() { document.getElementById('cart-drawer').style.display = 'none'; }
-
-    function renderCartDrawer() {
-      document.getElementById('drawer-cart-items').innerHTML = cart.map((c, idx) => {
-        const product = menuItems.find(m => m.item_key === c.id);
-        
-        let optionsHtml = '';
-        if (c.options) {
-          optionsHtml = `<div style="font-size: 0.75rem; color: var(--warn); font-weight: 600;">• ស្ករ: ${c.options.sugar} | ទឹកកក: ${c.options.ice}</div>`;
-        }
-
-        return `
-          <div class="cart-item-row">
-            <div>
-              <div style="font-weight: 700;">${product?.name_kh || c.id} (${c.size.toUpperCase()})</div>
-              ${optionsHtml}
-              <div style="font-size: 0.8rem; color: var(--sub);">$${product?.sizes[c.size]} × ${c.quantity}</div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div class="qty-stepper">
-                <button class="stepper-btn" onclick="changeQty(${idx}, -1)">−</button>
-                <span style="font-weight: 800; font-size: 0.9rem;">${c.quantity}</span>
-                <button class="stepper-btn" onclick="changeQty(${idx}, 1)">+</button>
-              </div>
-              <span style="font-weight: 800; color: var(--brand);">$${(parseFloat(product?.sizes[c.size] || 0) * c.quantity).toFixed(2)}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function setOrderType(type, element) {
-      await checkDeliveryStatus();
-      
-      if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
-        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។`);
-        return;
-      }
-
-      element.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
-      element.classList.add('active');
-      selectedOrderType = type;
-      document.getElementById('delivery-fee-row').style.display = type === 'delivery' ? 'flex' : 'none';
-      document.getElementById('gps-btn').disabled = type !== 'delivery';
-      updateCartState();
-    }
-
-    /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
-    function openMapModal() {
-      document.getElementById('map-modal').style.display = 'flex';
-
-      const initialLat = clientLat || STORE_LAT;
-      const initialLng = clientLng || STORE_LNG;
-      tempLat = initialLat;
-      tempLng = initialLng;
-
-      if (!pickerMap) {
-        pickerMap = L.map('picker-map', {
-          zoomControl: false, attributionControl: false,
-          zoomSnap: 0.25, zoomDelta: 0.5, wheelPxPerZoomLevel: 90,
-          inertia: true, inertiaDeceleration: 2200, easeLinearity: 0.2,
-          zoomAnimation: true, fadeAnimation: true, markerZoomAnimation: true
-        }).setView([initialLat, initialLng], 17);
-
-        // Free OpenStreetMap tiles. For a Google-like look, put a MapTiler key in MAPTILER_KEY.
-        L.tileLayer(MAPTILER_KEY
-          ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
-          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
-        }).addTo(pickerMap);
-        // Map-data credits only (the licence requires them); no Leaflet logo.
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(pickerMap);
-
-        L.control.zoom({ position: 'topright' }).addTo(pickerMap);
-
-        // Delivery area
-        L.circle([STORE_LAT, STORE_LNG], {
-          radius: MAX_DELIVERY_KM * 1000, color: '#0f766e', weight: 1.5, dashArray: '6 6',
-          fillColor: '#0f766e', fillOpacity: 0.05, interactive: false
-        }).addTo(pickerMap);
-
-        // Store marker, named Kuyteav_Epheap
-        const shopIcon = L.divIcon({
-          className: 'custom-shop-icon',
-          html: `<div style="background:#005d7b; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.35);">🍜</div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
-        });
-        storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: shopIcon, title: 'Kuyteav_Epheap' }).addTo(pickerMap);
-        storeMarker.bindTooltip('Kuyteav_Epheap', { permanent: true, direction: 'top', offset: [0, -18], className: 'store-tip' });
-
-        // Smooth centre tracking (one update per frame) + the centre pin lifts while the map moves
-        let moveRaf = 0;
-        const pinEl = () => document.querySelector('#map-modal [class*="pin"], #map-modal [id*="pin"]');
-        pickerMap.on('move', () => {
-          if (moveRaf) return;
-          moveRaf = requestAnimationFrame(() => {
-            moveRaf = 0;
-            const center = pickerMap.getCenter();
-            tempLat = center.lat;
-            tempLng = center.lng;
-            updateMapDisplayCoords(tempLat, tempLng);
-          });
-        });
-        pickerMap.on('movestart', () => pinEl()?.classList.add('lifted'));
-        pickerMap.on('moveend', () => pinEl()?.classList.remove('lifted'));
-      } else {
-        pickerMap.setView([initialLat, initialLng], 17);
-      }
-
-      setTimeout(() => {
-        pickerMap.invalidateSize();
-        updateMapDisplayCoords(tempLat, tempLng);
-      }, 250);
-
-      // Auto-locate user on open if no custom position saved yet
-      if (!clientLat && navigator.geolocation) {
-        recenterMapToUser();
-      }
-    }
-
-    function updateMapDisplayCoords(lat, lng) {
-      const dist = calculateDistance(STORE_LAT, STORE_LNG, lat, lng);
-      const displayEl = document.getElementById('map-coords-display');
-      if (dist > MAX_DELIVERY_KM) {
-        displayEl.innerHTML = `<span style="color:var(--bad);">⚠️ ឆ្ងាយពេក (${dist.toFixed(2)} km) - ហាងដឹកត្រឹមតែ ${MAX_DELIVERY_KM} km</span>`;
-      } else {
-        displayEl.innerHTML = `<span>${lat.toFixed(5)}, ${lng.toFixed(5)} (${dist.toFixed(2)} km ពីហាង)</span>`;
-      }
-    }
-
-    function recenterMapToUser() {
-      if (!navigator.geolocation) {
-        alert("កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រ GPS ទេ!");
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          tempLat = pos.coords.latitude;
-          tempLng = pos.coords.longitude;
-          if (pickerMap) {
-            pickerMap.flyTo([tempLat, tempLng], 18, { animate: true, duration: 1.4, easeLinearity: 0.25 });
-            if (window.userDot) pickerMap.removeLayer(window.userDot);
-            window.userDot = L.circleMarker([tempLat, tempLng], { radius: 8, color: '#fff', weight: 3, fillColor: '#2563eb', fillOpacity: 1, interactive: false }).addTo(pickerMap);
-          }
-        },
-        err => {
-          alert("មិនអាចទទួលបានទីតាំង GPS របស់អ្នកទេ! សូមពិនិត្យការអនុញ្ញាត GPS។");
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-
-    function confirmMapLocation() {
-      const distance = calculateDistance(STORE_LAT, STORE_LNG, tempLat, tempLng);
-
-      if (distance > MAX_DELIVERY_KM) {
-        alert(`📍 ទីតាំងដែលបានជ្រើសរើសនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
-        return;
-      }
-
-      clientLat = tempLat;
-      clientLng = tempLng;
-
-      currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
-      document.getElementById('input-address').value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
-      gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
-      isLocationPinned = true;
-
-      const gpsStatus = document.getElementById('gps-status');
-      gpsStatus.style.color = "var(--ok)";
-      gpsStatus.innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(2)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
-
-      updateCartState();
-      closeMapModal();
-    }
-
-    function closeMapModal() {
-      document.getElementById('map-modal').style.display = 'none';
-    }
-
-    /* ================= ABA PAY FLOW ================= */
-    let payTranId = null, payDeeplink = "", payPollTimer = null, payStartedAt = 0;
-    const PAY_MAX_MS = 12 * 60 * 1000;
-
-    function resetAfterOrder() {
-      cart = [];
-      clientLat = null; clientLng = null; gpsLink = "";
-      isLocationPinned = false; currentDeliveryFee = 0.00;
-      document.getElementById('input-address').value = "";
-      document.getElementById('gps-status').innerText = "";
-      closeCartDrawer();
-      updateCartState();
-    }
-
-    function setPayState(text, cls) {
-      const el = document.getElementById('pay-state');
-      el.innerText = text; el.className = 'pay-state ' + cls;
-    }
-
-    function showPayModal(info) {
-      payTranId = info.tran_id;
-      payDeeplink = info.abapay_deeplink || "";
-      payStartedAt = info.started_at || Date.now();
-      document.getElementById('pay-amount').innerText = '$' + Number(info.grand_total).toFixed(2);
-      document.getElementById('pay-orderid').innerText = 'Order ' + info.tran_id;
-      const qr = document.getElementById('pay-qr');
-      if (info.qr_image) { qr.src = info.qr_image; qr.style.display = 'block'; } else { qr.style.display = 'none'; }
-      setPayState('⏳ កំពុងរង់ចាំការបង់ប្រាក់...', 'wait');
-      document.getElementById('pay-check-btn').style.display = '';
-      document.getElementById('pay-track-btn').style.display = 'none';
-      document.getElementById('pay-modal').style.display = 'flex';
-      startPaymentPolling();
-    }
-
-    let lastTrackId = null;
-    function openTrack() {
-      if (!lastTrackId) return;
-      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-      const url = base + 'track.html?o=' + encodeURIComponent(lastTrackId);
-      try { if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true }); else window.open(url, '_blank'); }
-      catch (e) { window.open(url, '_blank'); }
-    }
-    function openAbaApp() {
-      if (!payDeeplink || !payTranId) return;
-      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-      const url = base + 'pay.html?o=' + encodeURIComponent(payTranId);
-      try {
-        if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true });
-        else window.open(url, '_blank');
-      } catch (e) { window.open(url, '_blank'); }
-      setTimeout(() => {
-        if (document.getElementById('pay-modal').style.display === 'flex') {
-          setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
-        }
-      }, 2500);
-    }
-
-    function startPaymentPolling() {
-      stopPaymentPolling();
-      payPollTimer = setInterval(() => checkPaymentNow(true), 3000);
-    }
-    function stopPaymentPolling() { if (payPollTimer) { clearInterval(payPollTimer); payPollTimer = null; } }
-
-    async function checkPaymentNow(silent) {
-      if (!payTranId) return;
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: payTranId } });
-        if (error) throw error;
-        if (data?.status === 'paid') {
-          stopPaymentPolling();
-          localStorage.removeItem('pending_payment');
-          setPayState('✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង', 'ok');
-          document.getElementById('pay-check-btn').style.display = 'none';
-          resetAfterOrder();
-          lastTrackId = payTranId;
-          document.getElementById('pay-track-btn').style.display = '';
-        } else if (data?.status === 'expired' || Date.now() - payStartedAt > PAY_MAX_MS) {
-          stopPaymentPolling();
-          localStorage.removeItem('pending_payment');
-          setPayState('⌛ QR ផុតកំណត់ សូមកម្មង់ម្ដងទៀត', 'bad');
-        } else if (!silent) {
-          setPayState('⏳ មិនទាន់ទទួលបានការបង់ប្រាក់ទេ...', 'wait');
-        }
-      } catch (e) {
-        if (!silent) setPayState('កំហុសក្នុងការពិនិត្យ: ' + (e.message || e), 'bad');
-      }
-    }
-
-    function cancelPaymentUi() {
-      stopPaymentPolling();
-      localStorage.removeItem('pending_payment');
-      document.getElementById('pay-modal').style.display = 'none';
-      resetSendButton();
-    }
-
-    let resumeInfo = null;
-    async function resumePendingPayment() {
-      try {
-        const raw = localStorage.getItem('pending_payment');
-        if (!raw) return;
-        const info = JSON.parse(raw);
-        if (!info?.tran_id || Date.now() - info.started_at > PAY_MAX_MS) { localStorage.removeItem('pending_payment'); return; }
-        const { data } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: info.tran_id } });
-        if (data?.status === 'paid') {
-          localStorage.removeItem('pending_payment');
-          resetAfterOrder();
-          alert("✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង");
-        } else if (data?.status === 'expired') {
-          localStorage.removeItem('pending_payment');
-        } else {
-          resumeInfo = info;
-          document.getElementById('pay-resume').style.display = 'flex';
-        }
-      } catch (e) {}
-    }
-    function reopenPayment() {
-      document.getElementById('pay-resume').style.display = 'none';
-      if (resumeInfo) showPayModal(resumeInfo);
-    }
-    function dismissResume() {
-      document.getElementById('pay-resume').style.display = 'none';
-      localStorage.removeItem('pending_payment');
-      resumeInfo = null;
-    }
-
-    function resetSendButton() {
-      const btn = document.getElementById('send-order-btn');
-      if (!btn) return;
-      btn.disabled = false;
-      btn.innerHTML = 'ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>';
-      updateCartState();
-    }
-
-
-    /* ===== Telegram login (normal browser) + "require username" mode, switched in the admin panel ===== */
-    const BOT_USERNAME = 'Kuyteav_Epheap_bot';
-    const SHOP_CONTACT_URL = 'https://t.me/YOUR_SHOP_TELEGRAM'; // TODO: put the shop's Telegram link here
-    const inTelegram = !!(tg && tg.initData);
-    let requireLogin = true; // strict by default; the admin can switch it off
-
-    function getStoredLogin() {
-      try {
-        const o = JSON.parse(localStorage.getItem('tg_login') || 'null');
-        if (o && Date.now() / 1000 - Number(o.auth_date) < 23 * 3600) return o;
-      } catch (e) {}
-      try { localStorage.removeItem('tg_login'); } catch (e) {}
-      return null;
-    }
-    function onTelegramAuth(user) {
-      try { localStorage.setItem('tg_login', JSON.stringify(user)); } catch (e) {}
-      applyLogin(user);
-    }
-    function applyLogin(user) {
-      const box = document.getElementById('tg-login-box');
-      const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
-      box.style.display = 'block';
-      box.innerHTML = '';
-      const span = document.createElement('span');
-      span.textContent = '✅ ចូលជា ' + name + (user.username ? ' (@' + user.username + ')' : '') + ' ';
-      const out = document.createElement('button');
-      out.type = 'button'; out.className = 'btn btn-g'; out.style.cssText = 'margin-left:8px;padding:4px 10px';
-      out.textContent = 'ចាកចេញ'; out.onclick = () => { localStorage.removeItem('tg_login'); location.reload(); };
-      box.append(span, out);
-      const nameInput = document.getElementById('input-customer-name');
-      if (nameInput && !nameInput.value) nameInput.value = name;
-      document.getElementById('input-username').value = user.username ? '@' + user.username : '';
-    }
-    function showLoginWidget() {
-      const box = document.getElementById('tg-login-box');
-      box.style.display = 'block';
-      box.innerHTML = '<div style="margin-bottom:8px;font-weight:700">សូមចូលតាម Telegram ដើម្បីកម្មង់</div><div id="tg-widget-slot"></div>';
-      const sc = document.createElement('script');
-      sc.async = true; sc.src = 'https://telegram.org/js/telegram-widget.js?22';
-      sc.setAttribute('data-telegram-login', BOT_USERNAME);
-      sc.setAttribute('data-size', 'large'); sc.setAttribute('data-radius', '10');
-      sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
-      document.getElementById('tg-widget-slot').appendChild(sc);
-    }
-    async function redeemAccessCode() {
-      const input = document.getElementById('nouser-code');
-      const btn = document.getElementById('nouser-redeem');
-      const code = input.value.trim().toUpperCase();
-      if (!code) { alert("សូមបញ្ចូលកូដ!"); return; }
-      btn.disabled = true;
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
-          body: { action: 'redeem_code', code, initData: tg?.initData || '', tg_login: getStoredLogin() }
-        });
-        if (error) {
-          let msg = error.message;
-          if (error.context && typeof error.context.json === 'function') { try { const j = await error.context.json(); if (j.error) msg = j.error; } catch (e) {} }
-          throw new Error(msg);
-        }
-        if (data && data.error) throw new Error(data.error);
-        input.value = '';
-        closeNoUsernameModal();
-        alert("✅ កូដត្រឹមត្រូវ! ឥឡូវអ្នកអាចកម្មង់បានហើយ។");
-      } catch (e) {
-        alert("កំហុស: " + (e.message || e));
-      } finally { btn.disabled = false; }
-    }
-    function showNoUsernameModal() {
-      const hasLink = SHOP_CONTACT_URL && !SHOP_CONTACT_URL.includes('YOUR_SHOP_TELEGRAM');
-      document.getElementById('nouser-contact').style.display = hasLink ? '' : 'none';
-      document.getElementById('nouser-modal').style.display = 'flex';
-    }
-    function closeNoUsernameModal() { document.getElementById('nouser-modal').style.display = 'none'; }
-    // Cambodian mobile numbers (TRC prefix table). Prefixes marked * in the table have 7 digits after the prefix (10 digits total).
-    const KH_PREFIX_9 = ['010','011','012','013','015','016','017','060','061','066','067','068','069','070','077','078','079','080','081','083','084','085','086','087','089','090','092','093','095','098','099'];
-    const KH_PREFIX_10 = ['018','031','038','071','076','088','096','097'];
-    function normalizeKhPhone(raw) {
-      let d = String(raw || '').replace(/[\s\-().]/g, '');
-      if (d.startsWith('+855')) d = '0' + d.slice(4);
-      else if (d.startsWith('00855')) d = '0' + d.slice(5);
-      else if (d.startsWith('855')) d = '0' + d.slice(3);
-      if (!/^0\d+$/.test(d)) return null;
-      const p = d.slice(0, 3);
-      if (KH_PREFIX_9.includes(p) && d.length === 9) return d;
-      if (KH_PREFIX_10.includes(p) && d.length === 10) return d;
-      return null;
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      const el = document.getElementById('input-phone');
-      if (!el) return;
-      el.addEventListener('blur', () => {
-        if (!el.value.trim()) { el.style.borderColor = ''; return; }
-        const n = normalizeKhPhone(el.value);
-        if (n) { el.value = n; el.style.borderColor = ''; } else el.style.borderColor = 'var(--bad)';
-      });
-    });
-
-    function openShopContact() {
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(SHOP_CONTACT_URL); else window.open(SHOP_CONTACT_URL, '_blank');
-    }
-    async function checkLoginRequirement() {
-      try {
-        const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
-        requireLogin = !(data && (data.value === false || data.value === 'false'));
-      } catch (e) {}
-      const banner = document.getElementById('no-username-banner');
-      if (inTelegram) {
-        if (requireLogin && !tgUsername) {
-          banner.innerText = '⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ ចុចទីនេះដើម្បីបញ្ចូលកូដពីហាង។';
-          banner.style.cursor = 'pointer'; banner.onclick = showNoUsernameModal;
-          banner.style.display = 'block';
-        }
-        return;
-      }
-      banner.style.display = 'none';           // not in Telegram: the "no username" note does not apply
-      const stored = getStoredLogin();
-      if (stored) applyLogin(stored);
-      else if (requireLogin) showLoginWidget();
-    }
-
-    async function sendOrder() {
-      await checkDeliveryStatus();
-      if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
-        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
-        return;
-      }
-      if (selectedOrderType === 'delivery' && !isLocationPinned) {
-        alert("សូមចុច '🗺️ ជ្រើសរើសទីតាំងលើផែនទី' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
-        return;
-      }
-
-      const usernameVal = document.getElementById('input-username').value.trim();
-      const customerNameVal = document.getElementById('input-customer-name').value.trim();
-      const phoneRaw = document.getElementById('input-phone').value.trim();
-      const phoneVal = normalizeKhPhone(phoneRaw) || '';
-      if (!customerNameVal || !phoneRaw) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
-      if (!phoneVal) { alert("លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678 ឬ 096 123 4567"); return; }
-
-      if (requireLogin && !inTelegram && !getStoredLogin()) { alert("សូមចូលតាម Telegram ជាមុនសិន!"); return; }
-
-      const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerHTML = '<span>កំពុងបង្កើត ABA QR...</span>';
-
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
-          body: {
-            cart,
-            username: usernameVal,
-            customer_name: customerNameVal,
-            phone: phoneVal,
-            order_type: selectedOrderType,
-            address: document.getElementById('input-address').value,
-            location_link: gpsLink,
-            lat: clientLat,
-            lng: clientLng,
-            remark: document.getElementById('input-remark').value,
-            initData: tg?.initData || '',
-            tg_login: getStoredLogin()
-          }
-        });
-
-        if (error) {
-          let errorMsg = error.message, errCode = null;
-          if (error.context && typeof error.context.json === 'function') {
-            try {
-              const errJson = await error.context.json();
-              if (errJson.error) errorMsg = errJson.error;
-              errCode = errJson.code || null;
-            } catch (e) {}
-          }
-          const ex = new Error(errorMsg); ex.code = errCode; throw ex;
-        }
-        if (data && data.error) throw new Error(data.error);
-        if (!data?.abapay_deeplink) throw new Error("មិនទទួលបាន ABA deeplink ពីប្រព័ន្ធ");
-
-        const info = { ...data, started_at: Date.now() };
-        localStorage.setItem('pending_payment', JSON.stringify(info));
-        showPayModal(info);
-      } catch (err) {
-        if (err.code === 'NO_USERNAME') showNoUsernameModal();
-        else alert("កំហុស: " + (err.message || err));
-      } finally {
-        resetSendButton();
-      }
-    }
-
-// --- LISTEN FOR REALTIME RELOAD BROADCAST ---
-let isForceReloading = false;
-
-const userChannel = supabaseClient.channel('admin-actions');
-
-userChannel
-  .on('broadcast', { event: 'force_reload' }, payload => {
-    console.log("Received reload signal from admin. Clearing session and reloading page...");
-    
-    isForceReloading = true;
-    localStorage.removeItem('davin_app_session');
-    
-    cart = [];
-    clientLat = null;
-    clientLng = null;
-    gpsLink = "";
-    isLocationPinned = false;
-    currentDeliveryFee = 0.00;
-    
-    window.location.href = window.location.pathname + '?v=' + Date.now();
-  })
-  .subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      console.log("Listening for admin reload broadcasts.");
-    }
+      return str || fallback;
+    };
+
+    const active = activeItem ? (activeItem.value === true || activeItem.value === 'true') : false;
+    const text = cleanVal(textItem?.value, "");
+    const badge = cleanVal(badgeItem?.value, "");
+
+    $("promo-toggle").checked = active;
+    setText($("promo-status-text"), active ? "កំពុងបើកបង្ហាញ" : "បានបិទ", active ? "ok" : "bad");
+    $("promo-badge-input").value = badge;
+    $("promo-msg-input").value = text;
+  }
+}
+
+$("promo-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("promo-status-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "promo_active", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកប្រូម៉ូសិនបដា" : "បានបិទប្រូម៉ូសិនបដា", "ok");
+  loadPromoBanner();
+});
+
+$("promo-save-btn").addEventListener("click", async () => {
+  const badge = $("promo-badge-input").value.trim();
+  const text = $("promo-msg-input").value.trim();
+  
+  await admin({ action: "update_setting", key: "promo_badge", value: badge });
+  const { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
+  
+  if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
+  loadPromoBanner();
+});
+
+function setText(el, text, cls) { el.textContent = text; el.className = "val " + cls; }
+
+async function loadStore() {
+  const { data, error } = await supa.from("app_settings").select("value").eq("key", "is_store_open").single();
+  const open = (error || !data) ? true : !!data.value;
+  $("store-toggle").checked = open;
+  setText($("store-text"), open ? "បើកដំណើរការ" : "បិទហាង", open ? "ok" : "bad");
+}
+
+async function loadDelivery() {
+  const { data, error } = await supa.from("delivery_status")
+    .select("is_delivery_available, estimated_wait_minutes").eq("id", 1).single();
+  if (error || !data) return;
+  $("delivery-toggle").checked = !!data.is_delivery_available;
+  setText($("delivery-text"), data.is_delivery_available ? "មានជើងដឹកជញ្ចូន" : "ផ្អាកដឹកបណ្តោះអាសន្ន",
+          data.is_delivery_available ? "ok" : "warn");
+  $("wait-input").value = data.estimated_wait_minutes || 15;
+}
+
+$("store-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("store-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "is_store_open", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកហាង" : "បានបិទហាង", "ok");
+  loadStore();
+});
+
+$("delivery-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  const { error } = await admin({ action: "update_delivery", updates: { is_delivery_available: want } });
+  if (error) { toast(error, "err"); } else { toast(want ? "បានបើកសេវាដឹកជញ្ជូន" : "បានផ្អាកសេវាដឹកជញ្ជូន", "ok"); }
+  loadDelivery();
+});
+
+$("wait-save").addEventListener("click", async () => {
+  let m = parseInt($("wait-input").value, 10);
+  if (!m || m < 1 || m > 180) { toast("សូមបញ្ចូលចន្លោះ 1 – 180 នាទី", "err"); return; }
+  const { error } = await admin({ action: "update_delivery", updates: { estimated_wait_minutes: m } });
+  if (error) { toast(error, "err"); } else { toast(`បានរក្សាុករយៈពេលរង់ចាំ ${m} នាទី`, "ok"); }
+  loadDelivery();
+});
+
+async function loadMenu() {
+  if (!items.length) $("menu").innerHTML = '<div class="skeleton"></div>'.repeat(3);
+  const { data, error } = await supa.from("menu_items").select("*");
+  if (error) {
+    $("menu").innerHTML = `<div class="empty"><div class="big">⚠️</div>មិនអាចទាញយកទិន្នន័យបាន<br><small>${esc(error.message)}</small></div>`;
+    return;
+  }
+  items = (data || []).sort((a, b) =>
+    CATEGORIES.findIndex(c => c.key === a.category) - CATEGORIES.findIndex(c => c.key === b.category)
+    || String(a.name_kh).localeCompare(String(b.name_kh)));
+  renderAll();
+}
+
+const stockOf = i => Number.isFinite(+i.stock_quantity) ? +i.stock_quantity : 0;
+const isOn = i => i.is_available !== false;
+
+function renderAll() { renderStats(); renderLow(); renderPills(); renderMenu(); }
+
+function renderStats() {
+  const total = items.length;
+  const sold = items.filter(i => isOn(i) && stockOf(i) > 0).length;
+  const low  = items.filter(i => stockOf(i) > 0 && stockOf(i) <= LOW_STOCK).length;
+  const out  = items.filter(i => stockOf(i) <= 0).length;
+  const off  = items.filter(i => !isOn(i)).length;
+  $("stats").innerHTML = `
+    <button class="stat" data-go="all"><b>${total}</b><span>មុខម្ហូបសរុប</span></button>
+    <button class="stat ok" data-go="sell"><b>${sold}</b><span>កំពុងលក់</span></button>
+    <button class="stat warn" data-go="low"><b>${low}</b><span>ស្តុកជិតអស់</span></button>
+    <button class="stat bad" data-go="out"><b>${out}</b><span>អស់ស្តុក${off ? ` • បិទ ${off}` : ""}</span></button>`;
+  const need = low + out;
+  const dot = $("low-dot");
+  dot.style.display = need ? "flex" : "none";
+  dot.textContent = need;
+}
+
+function renderLow() {
+  $("low-n").textContent = LOW_STOCK;
+  const list = items.filter(i => stockOf(i) <= LOW_STOCK).sort((a, b) => stockOf(a) - stockOf(b));
+  if (!list.length) {
+    $("low-list").innerHTML = `<div class="empty" style="padding:26px 0"><div class="big">👍</div>ស្តុកគ្រប់គ្រាន់ទាំងអស់</div>`;
+    return;
+  }
+  $("low-list").innerHTML = list.map(i => `
+    <div class="low-row">
+      <div class="nm">${esc(i.name_kh)}<small>${esc(i.name_en)}</small></div>
+      <span class="pill ${stockOf(i) <= 0 ? "bad" : "warn"}">${stockOf(i) <= 0 ? "អស់" : "នៅសល់ " + stockOf(i)}</span>
+      <button class="btn btn-p btn-s" data-act="plus10" data-key="${esc(i.item_key)}">+10</button>
+    </div>`).join("");
+}
+
+function renderPills() {
+  const all = [{ key: "all", label: "ទាំងអស់" }, ...CATEGORIES];
+  $("cat-pills").innerHTML = all.map(c =>
+    `<button class="pill-b ${cat === c.key ? "on" : ""}" data-cat="${c.key}">${c.label}</button>`).join("");
+}
+
+let special = ""; 
+
+function renderMenu() {
+  const q = query.trim().toLowerCase();
+  const list = items.filter(i => {
+    if (cat !== "all" && i.category !== cat) return false;
+    if (q && !(`${i.name_kh} ${i.name_en} ${i.item_key}`.toLowerCase().includes(q))) return false;
+    if (special === "low"  && !(stockOf(i) > 0 && stockOf(i) <= LOW_STOCK)) return false;
+    if (special === "out"  && stockOf(i) > 0) return false;
+    if (special === "sell" && !(isOn(i) && stockOf(i) > 0)) return false;
+    return true;
   });
 
-function saveSessionState() {
-  if (isForceReloading) return;
+  const chip = special
+    ? `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px"><span class="pill warn">ត្រង៖ ${{low:"ស្តុកជិតអស់",out:"អស់ស្តុក",sell:"កំពុងលក់"}[special]}</span><button class="btn btn-g btn-s" data-act="clear-filter">លុបការត្រង</button></div>`
+    : "";
 
-  const state = {
-    cart: cart,
-    customerName: document.getElementById('input-customer-name')?.value || '',
-    phone: document.getElementById('input-phone')?.value || '',
-    remark: document.getElementById('input-remark')?.value || '',
-    orderType: selectedOrderType,
-    clientLat: clientLat,
-    clientLng: clientLng,
-    gpsLink: gpsLink,
-    isLocationPinned: isLocationPinned,
-    currentDeliveryFee: currentDeliveryFee,
-    address: document.getElementById('input-address')?.value || '',
-    scrollPosition: window.scrollY
-  };
-  state.tgId = currentTgKey();
-      localStorage.setItem('davin_app_session', JSON.stringify(state));
+  if (!list.length) {
+    $("menu").innerHTML = chip + `<div class="empty"><div class="big">🍽️</div>មិនមានមុខម្ហូបត្រូវនឹងការស្វែងរកទេ</div>`;
+    return;
+  }
+
+  $("menu").innerHTML = chip + list.map(i => {
+    const s = stockOf(i), on = isOn(i);
+    const img = coverOf(i);
+    const prices = Object.entries(i.sizes || {}).map(([k, v]) => `${esc(k)} ${money(v)}`).join(" • ");
+    const badge = s <= 0 ? '<span class="pill bad">អស់ស្តុក</span>'
+                : s <= LOW_STOCK ? '<span class="pill warn">ជិតអស់</span>' : "";
+    return `
+    <article class="item ${on ? "" : "off"}" data-key="${esc(i.item_key)}">
+      <div class="item-h">
+        <div class="thumb"><img src="${esc(img)}" alt="" data-fb="${esc(i.icon || "🍜")}" loading="lazy"></div>
+        <div class="t">
+          <b>${esc(i.name_kh)}</b>
+          <small>${esc(i.name_en)}</small>
+          <div class="price">${prices || "—"}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill ok" style="background:var(--brand-l);color:var(--brand)">${esc(catLabel(i.category))}</span>
+        ${i.is_popular ? '<span class="pill pop">ពេញនិយម</span>' : ""}${badge}
+      </div>
+      <div class="item-m">
+        <div class="step">
+          <button data-act="dec" aria-label="បន្ថយ">−</button>
+          <input type="number" min="0" inputmode="numeric" value="${s}" data-act="stock-input" aria-label="ស្តុក">
+          <button data-act="inc" aria-label="បន្ថែម">+</button>
+        </div>
+        <div class="avail">${on ? "កំពុងលក់" : "បិទលក់"}
+          <label class="sw"><input type="checkbox" data-act="avail" ${on ? "checked" : ""}><span></span></label>
+        </div>
+      </div>
+      <div class="item-f">
+        <button class="btn btn-g btn-s" data-act="edit">✏️ កែប្រែ</button>
+        <button class="btn btn-d btn-s" data-act="del">🗑️ លុប</button>
+      </div>
+    </article>`;
+  }).join("");
 }
-  </script>
+
+function coverOf(i) {
+  if (Array.isArray(i.images) && i.images.length) return i.images[0];
+  if (i.image_url) return i.image_url;
+  return `./images/${i.item_key}.png`;
+}
+
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t.tagName === "IMG" && t.dataset.fb) t.replaceWith(document.createTextNode(t.dataset.fb));
+}, true);
+
+$("search").addEventListener("input", e => { query = e.target.value; renderMenu(); });
+
+$("cat-pills").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  cat = b.dataset.cat; renderPills(); renderMenu(); haptic();
+});
+
+$("stats").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  special = ["low", "out", "sell"].includes(b.dataset.go) ? b.dataset.go : "";
+  cat = "all"; query = ""; $("search").value = "";
+  renderPills(); renderMenu(); showTab("menu");
+});
+
+$("low-list").addEventListener("click", e => {
+  const b = e.target.closest('[data-act="plus10"]'); if (!b) return;
+  const it = items.find(x => x.item_key === b.dataset.key);
+  if (it) setStock(it.item_key, stockOf(it) + 10, true);
+});
+
+$("menu").addEventListener("click", e => {
+  const clr = e.target.closest('[data-act="clear-filter"]');
+  if (clr) { special = ""; renderMenu(); return; }
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if (act === "inc") setStock(key, stockOf(it) + 1);
+  else if (act === "dec") setStock(key, Math.max(0, stockOf(it) - 1));
+  else if (act === "edit") openItem(key);
+  else if (act === "del") confirmDelete(it);
+});
+
+$("menu").addEventListener("change", e => {
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  if (e.target.dataset.act === "stock-input") {
+    const v = Math.max(0, parseInt(e.target.value, 10) || 0);
+    setStock(key, v, true);
+  } else if (e.target.dataset.act === "avail") {
+    setAvail(key, e.target.checked);
+  }
+});
+
+function setStock(key, value, immediate = false) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.stock_quantity = value;
+  renderAll();
+  haptic();
+  clearTimeout(stockTimers[key]);
+  const send = async () => {
+    const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { stock_quantity: value } });
+    if (error) { toast(error, "err"); loadMenu(); }
+    else toast("បានរក្សាទុកស្តុក", "ok");
+  };
+  if (immediate) send(); else stockTimers[key] = setTimeout(send, 650);
+}
+
+async function setAvail(key, on) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.is_available = on; renderAll();
+  const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { is_available: on } });
+  if (error) { toast(error, "err"); loadMenu(); }
+  else toast(on ? "បើកលក់ហើយ" : "បិទលក់ហើយ", "ok");
+}
+
+$("f-cat").innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join("");
+
+function sizeRow(name = "", price = "") {
+  const d = document.createElement("div");
+  d.className = "size-row";
+  d.innerHTML = `
+    <input type="text" placeholder="ឈ្មោះទំហំ (normal)" value="${esc(name)}" aria-label="ឈ្មោះទំហំ">
+    <input type="number" step="0.05" min="0" inputmode="decimal" placeholder="2.50" value="${esc(price)}" aria-label="តម្លៃ">
+    <button type="button" aria-label="លុបទំហំ">✕</button>`;
+  d.querySelector("button").onclick = () => { d.remove(); };
+  $("size-list").appendChild(d);
+}
+$("size-add").onclick = () => sizeRow();
+
+function openItem(key) {
+  const it = key ? items.find(x => x.item_key === key) : null;
+  $("sheet-title").textContent = it ? "កែប្រែមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
+  $("f-edit").value = it ? it.item_key : "";
+  $("f-key").value = it ? it.item_key : "";
+  $("f-key").disabled = !!it;
+  $("f-kh").value = it?.name_kh || "";
+  $("f-en").value = it?.name_en || "";
+  $("f-cat").value = it?.category || (cat !== "all" ? cat : "kuy_teav");
+  $("f-stock").value = it ? stockOf(it) : 50;
+  $("f-pop").checked = !!it?.is_popular;
+  $("f-img").value = it ? (Array.isArray(it.images) ? it.images : (it.image_url ? [it.image_url] : [])).join("\n") : "";
+  $("size-list").innerHTML = "";
+  const sizes = it?.sizes && Object.keys(it.sizes).length ? it.sizes : { normal: 2.5 };
+  Object.entries(sizes).forEach(([k, v]) => sizeRow(k, v));
+  $("item-ov").classList.add("show");
+  if (tg?.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeItem); }
+}
+
+function closeItem() {
+  $("item-ov").classList.remove("show");
+  if (tg?.BackButton) { tg.BackButton.offClick(closeItem); tg.BackButton.hide(); }
+}
+$("fab-add").onclick = () => openItem(null);
+$("sheet-x").onclick = $("sheet-cancel").onclick = closeItem;
+$("item-ov").addEventListener("click", e => { if (e.target.id === "item-ov") closeItem(); });
+
+$("sheet-save").addEventListener("click", async () => {
+  const editKey = $("f-edit").value;
+  const key = $("f-key").value.trim();
+  const kh = $("f-kh").value.trim();
+  const en = $("f-en").value.trim();
+
+  if (!/^[a-z0-9_]{2,40}$/.test(key)) return toast("កូដមុខម្ហូប៖ a-z, 0-9, _ (2–40 តួអក្សរ)", "err");
+  if (!kh || !en) return toast("សូមបំពេញឈ្មោះខ្មែរ និងអង់គ្លេស", "err");
+  if (!editKey && items.some(i => i.item_key === key)) return toast("កូដនេះមានរួចហើយ", "err");
+
+  const sizes = {};
+  for (const row of $("size-list").children) {
+    const [n, p] = row.querySelectorAll("input");
+    const name = n.value.trim(), price = parseFloat(p.value);
+    if (!name && !p.value) continue;
+    if (!name || !(price >= 0)) return toast("ទំហំ និងតម្លៃមិនត្រឹមត្រូវ", "err");
+    if (name in sizes) return toast(`ឈ្មោះទំហំស្ទួន៖ ${name}`, "err");
+    sizes[name] = Math.round(price * 100) / 100;
+  }
+  if (!Object.keys(sizes).length) return toast("សូមបន្ថែមយ៉ាងហោចណាស់ ១ ទំហំ", "err");
+
+  const images = $("f-img").value.split("\n").map(s => s.trim()).filter(Boolean);
+  const updates = {
+    name_kh: kh, name_en: en, category: $("f-cat").value,
+    stock_quantity: Math.max(0, parseInt($("f-stock").value, 10) || 0),
+    sizes, images: images.length ? images : [`./images/${key}.png`],
+    is_popular: $("f-pop").checked,
+  };
+
+  const btn = $("sheet-save");
+  btn.disabled = true; btn.textContent = "កំពុងរក្សាទុក…";
+  const body = editKey
+    ? { action: "update_stock", match: { item_key: editKey }, updates }
+    : { action: "add_item", updates: { ...updates, item_key: key, is_available: true } };
+  const { error } = await admin(body);
+  btn.disabled = false; btn.textContent = "រក្សាទុក";
+
+  if (error) return toast(error, "err");
+  toast("បានរក្សាទុកមុខម្ហូប", "ok");
+  closeItem();
+  loadMenu();
+});
+
+let pendingDelete = null;
+function confirmDelete(it) {
+  pendingDelete = it;
+  $("cf-msg").textContent = `លុបមុខម្ហូប "${it.name_kh}" មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។`;
+  $("cf-ov").classList.add("show");
+}
+const closeConfirm = () => { $("cf-ov").classList.remove("show"); pendingDelete = null; };
+$("cf-no").onclick = closeConfirm;
+$("cf-ov").addEventListener("click", e => { if (e.target.id === "cf-ov") closeConfirm(); });
+$("cf-yes").onclick = async () => {
+  const it = pendingDelete; closeConfirm(); if (!it) return;
+  const { error } = await admin({ action: "delete_item", match: { item_key: it.item_key } });
+  if (error) return toast(error, "err");
+  toast("បានលុបមុខម្ហូប", "ok");
+  items = items.filter(x => x.item_key !== it.item_key);
+  renderAll();
+};
+
+async function bulk(list, updates, okMsg) {
+  if (!list.length) return toast("គ្មានមុខម្ហូបត្រូវកែប្រែ");
+  let fail = 0;
+  for (const it of list) {
+    const { error } = await admin({ action: "update_stock", match: { item_key: it.item_key }, updates });
+    if (error) { fail++; if (fail === 1) toast(error, "err"); }
+  }
+  if (!fail) toast(`${okMsg} (${list.length})`, "ok");
+  loadMenu();
+}
+$("bulk-enable").onclick = () => bulk(items.filter(i => !isOn(i) && stockOf(i) > 0), { is_available: true }, "បានបើកលក់");
+$("bulk-disable-zero").onclick = () => bulk(items.filter(i => isOn(i) && stockOf(i) <= 0), { is_available: false }, "បានបិទលក់");
+
+async function refresh() {
+  const ic = $("refresh-ic"); ic.classList.add("spin");
+  localStorage.removeItem('davin_app_session');
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu()]);
+  ic.classList.remove("spin");
+}
+$("btn-refresh").onclick = refresh;
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+const u = tg?.initDataUnsafe?.user;
+$("who").textContent = u ? `${[u.first_name, u.last_name].filter(Boolean).join(" ")}${u.username ? "  @" + u.username : ""}  (ID ${u.id})` : "មិនទាន់ភ្ជាប់ Telegram";
+
+if (!hasTG) {
+  $("gate").classList.add("show");
+  $("gate-view").onclick = () => { viewOnly = true; $("gate").classList.remove("show"); toast("របៀបមើលប៉ុណ្ណោះ"); };
+}
+refresh();
+
+const adminChannel = supa.channel('admin-actions', {
+  config: { broadcast: { self: false } }
+});
+adminChannel.subscribe();
+
+async function triggerReloadForAllUsers() {
+  if (viewOnly || !hasTG) {
+    toast("មុខងារនេះសម្រាប់តែអ្នកគ្រប់គ្រងប៉ុណ្ណោះ", "err");
+    return;
+  }
+  await adminChannel.send({
+    type: 'broadcast',
+    event: 'force_reload',
+    payload: { timestamp: Date.now() }
+  });
+  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!", "ok");
+  hapticN("success");
+}
+document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
+
+const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "រួចរាល់"], ["done", "ប្រគល់ហើយ"]];
+async function loadOrders() {
+  const box = $("ord-list");
+  const r = await admin({ action: "list_orders" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.orders || [];
+  if (!rows.length) { box.textContent = "មិនទាន់មានការកម្មង់ទេ"; return; }
+  box.innerHTML = rows.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
+      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${STAGES.map(([k, l]) =>
+        `<button class="btn ${o.fulfillment === k ? "btn-p" : "btn-g"} btn-s" data-id="${esc(o.tran_id)}" data-f="${k}">${l}</button>`).join("")}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("button[data-f]").forEach(b => b.addEventListener("click", async () => {
+    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: b.dataset.f });
+    if (res.error) toast(res.error, "bad"); else { toast("បានរក្សាទុក", "ok"); loadOrders(); }
+  }));
+}
+$("ord-refresh").addEventListener("click", loadOrders);
+if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
+</script>
 </body>
 </html>
