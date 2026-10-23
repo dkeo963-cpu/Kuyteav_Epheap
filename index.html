@@ -423,8 +423,10 @@
     🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល <span id="banner-wait-time">១៥</span> នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។
   </div>
 
+  <div id="tg-login-box" style="display:none; margin:10px 16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); text-align:center; font-size:13px;"></div>
+
   <div id="no-username-banner" class="username-warning">
-    ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ! សូមដាក់ Telegram Username ជាមុនសិន ទើបអាចធ្វើការកម្មង់បាន។
+    ℹ️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ អ្នកនៅតែអាចកម្មង់បាន ហាងនឹងទាក់ទងអ្នកតាមលេខទូរស័ព្ទ។
   </div>
 
   <div class="banner-container">
@@ -566,9 +568,9 @@
           <div class="option-title">កម្រិតស្ករ (Sugar Level)</div>
           <div class="option-pills" id="sugar-pills">
             <div class="pill" onclick="setDrinkOption('sugar', '10%', this)">10%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '20%', this)">30%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '20%', this)">50%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '20%', this)">70%</div>
+            <div class="pill" onclick="setDrinkOption('sugar', '30%', this)">30%</div>
+            <div class="pill" onclick="setDrinkOption('sugar', '50%', this)">50%</div>
+            <div class="pill" onclick="setDrinkOption('sugar', '70%', this)">70%</div>
             <div class="pill active" onclick="setDrinkOption('sugar', '100%', this)">100%</div>
           </div>
         </div>
@@ -725,6 +727,7 @@
       return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
+    const MAX_QTY_PER_ITEM = 50; // abuse protection only; there is no stock counting
     const tg = window.Telegram?.WebApp;
     if (tg) tg.expand();
 
@@ -750,6 +753,7 @@
       }
       
       checkStoreStatus();
+      checkLoginRequirement();
       checkDeliveryStatus();
       checkPromoBanner();
       initBanners();
@@ -779,6 +783,14 @@
     let currentSlideIndex = 0;
 
     // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
+    // Which Telegram account is using the page right now ("guest" in a plain browser without login).
+    function currentTgKey() {
+      try {
+        const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || (typeof getStoredLogin === 'function' && getStoredLogin()?.id);
+        return id ? String(id) : 'guest';
+      } catch (e) { return 'guest'; }
+    }
+
     function saveSessionState() {
       if (isForceReloading) return;
 
@@ -796,6 +808,7 @@
         address: document.getElementById('input-address')?.value || '',
         scrollPosition: window.scrollY
       };
+      state.tgId = currentTgKey();
       localStorage.setItem('davin_app_session', JSON.stringify(state));
     }
 
@@ -805,6 +818,8 @@
 
       try {
         const state = JSON.parse(savedState);
+        // A session saved by another Telegram account (or an old session with no owner) must not fill this account's name, phone or cart.
+        if (String(state.tgId ?? '') !== currentTgKey()) { localStorage.removeItem('davin_app_session'); return; }
         
         if (Array.isArray(state.cart)) {
           cart = state.cart;
@@ -1006,13 +1021,11 @@
 
       container.innerHTML = filtered.map(item => {
         const firstSize = Object.keys(item.sizes)[0];
-        const stockLimit = item.stock_quantity !== undefined && item.stock_quantity !== null ? Number(item.stock_quantity) : 0;
-        
         const totalInCart = cart
           .filter(c => c.id === item.item_key)
           .reduce((sum, c) => sum + c.quantity, 0);
 
-        const isAvailable = item.is_available !== false && stockLimit > 0 && totalInCart < stockLimit;
+        const isAvailable = item.is_available !== false; // no stock counting: the menu on/off switch decides
         const itemImgs = getItemImages(item);
 
         return `
@@ -1067,14 +1080,6 @@
       activeModalItem = menuItems.find(i => i.item_key === itemKey);
       if (!activeModalItem || activeModalItem.is_available === false) { alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!"); return; }
       
-      const stockLimit = activeModalItem.stock_quantity !== undefined && activeModalItem.stock_quantity !== null ? Number(activeModalItem.stock_quantity) : 0;
-      const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
-
-      if (totalInCart >= stockLimit) {
-        alert("មុខម្ហូបនេះបានឈានដល់កម្រិតស្តុកអតិបរមាហើយ!");
-        return;
-      }
-
       document.getElementById('modal-title').innerText = activeModalItem.name_kh;
       
       // Dynamic Customization options for Drinks category
@@ -1116,14 +1121,12 @@
     function confirmAddToCart() {
       if (!activeModalItem || !selectedSize) return;
 
-      const stockLimit = activeModalItem.stock_quantity !== undefined && activeModalItem.stock_quantity !== null ? Number(activeModalItem.stock_quantity) : 0;
-      
       const optionsPayload = activeModalItem.category === 'drinks' ? { ...selectedOptions } : null;
       const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize && JSON.stringify(c.options) === JSON.stringify(optionsPayload));
       const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
 
-      if (totalInCart + 1 > stockLimit) {
-        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ប៉ុណ្ណោះ!`);
+      if (totalInCart + 1 > MAX_QTY_PER_ITEM) {
+        alert(`មុខម្ហូប "${activeModalItem.name_kh}" កម្មង់បានអតិបរមា ${MAX_QTY_PER_ITEM} ក្នុងមួយដង!`);
         return;
       }
 
@@ -1145,11 +1148,10 @@
     function changeQty(index, delta) {
       const cartItem = cart[index];
       const product = menuItems.find(m => m.item_key === cartItem.id);
-      const stockLimit = product && product.stock_quantity !== undefined && product.stock_quantity !== null ? Number(product.stock_quantity) : 0;
       const totalInCartExceptThis = cart.filter(c => c.id === cartItem.id).reduce((sum, c) => sum + c.quantity, 0) - cartItem.quantity;
 
-      if (delta > 0 && totalInCartExceptThis + cartItem.quantity + delta > stockLimit) {
-        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកសរុបត្រឹមតែ ${stockLimit} ប៉ុណ្ណោះ!`);
+      if (delta > 0 && totalInCartExceptThis + cartItem.quantity + delta > MAX_QTY_PER_ITEM) {
+        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" កម្មង់បានអតិបរមា ${MAX_QTY_PER_ITEM} ក្នុងមួយដង!`);
         return;
       }
 
@@ -1463,6 +1465,73 @@
       updateCartState();
     }
 
+
+    /* ===== Telegram login (normal browser) + "require username" mode, switched in the admin panel ===== */
+    const BOT_USERNAME = 'Kuyteav_Epheap_bot';
+    const SHOP_CONTACT_URL = 'https://t.me/YOUR_SHOP_TELEGRAM'; // TODO: put the shop's Telegram link here
+    const inTelegram = !!(tg && tg.initData);
+    let requireLogin = false;
+
+    function getStoredLogin() {
+      try {
+        const o = JSON.parse(localStorage.getItem('tg_login') || 'null');
+        if (o && Date.now() / 1000 - Number(o.auth_date) < 23 * 3600) return o;
+      } catch (e) {}
+      try { localStorage.removeItem('tg_login'); } catch (e) {}
+      return null;
+    }
+    function onTelegramAuth(user) {
+      try { localStorage.setItem('tg_login', JSON.stringify(user)); } catch (e) {}
+      applyLogin(user);
+    }
+    function applyLogin(user) {
+      const box = document.getElementById('tg-login-box');
+      const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
+      box.style.display = 'block';
+      box.innerHTML = '';
+      const span = document.createElement('span');
+      span.textContent = '✅ ចូលជា ' + name + (user.username ? ' (@' + user.username + ')' : '') + ' ';
+      const out = document.createElement('button');
+      out.type = 'button'; out.className = 'btn btn-g'; out.style.cssText = 'margin-left:8px;padding:4px 10px';
+      out.textContent = 'ចាកចេញ'; out.onclick = () => { localStorage.removeItem('tg_login'); location.reload(); };
+      box.append(span, out);
+      const nameInput = document.getElementById('input-customer-name');
+      if (nameInput && !nameInput.value) nameInput.value = name;
+      document.getElementById('input-username').value = user.username ? '@' + user.username : '';
+    }
+    function showLoginWidget() {
+      const box = document.getElementById('tg-login-box');
+      box.style.display = 'block';
+      box.innerHTML = '<div style="margin-bottom:8px;font-weight:700">សូមចូលតាម Telegram ដើម្បីកម្មង់</div><div id="tg-widget-slot"></div>';
+      const sc = document.createElement('script');
+      sc.async = true; sc.src = 'https://telegram.org/js/telegram-widget.js?22';
+      sc.setAttribute('data-telegram-login', BOT_USERNAME);
+      sc.setAttribute('data-size', 'large'); sc.setAttribute('data-radius', '10');
+      sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
+      document.getElementById('tg-widget-slot').appendChild(sc);
+    }
+    function openShopContact() {
+      if (tg && tg.openTelegramLink) tg.openTelegramLink(SHOP_CONTACT_URL); else window.open(SHOP_CONTACT_URL, '_blank');
+    }
+    async function checkLoginRequirement() {
+      try {
+        const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
+        requireLogin = !!data && (data.value === true || data.value === 'true');
+      } catch (e) {}
+      const banner = document.getElementById('no-username-banner');
+      if (inTelegram) {
+        if (requireLogin && !tgUsername) {
+          banner.innerText = '⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ឬចុចកម្មង់ ដើម្បីបញ្ជូនសំណើសុំការអនុញ្ញាតទៅហាង។';
+          banner.style.display = 'block';
+        }
+        return;
+      }
+      banner.style.display = 'none';           // not in Telegram: the "no username" note does not apply
+      const stored = getStoredLogin();
+      if (stored) applyLogin(stored);
+      else if (requireLogin) showLoginWidget();
+    }
+
     async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
@@ -1477,8 +1546,9 @@
       const usernameVal = document.getElementById('input-username').value.trim();
       const customerNameVal = document.getElementById('input-customer-name').value.trim();
       const phoneVal = document.getElementById('input-phone').value.trim();
-      if (!usernameVal) { alert("ត្រូវការ Telegram Username!"); return; }
       if (!customerNameVal || !phoneVal) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
+
+      if (requireLogin && !inTelegram && !getStoredLogin()) { alert("សូមចូលតាម Telegram ជាមុនសិន!"); return; }
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true; btn.innerHTML = '<span>កំពុងបង្កើត ABA QR...</span>';
@@ -1495,19 +1565,22 @@
             location_link: gpsLink,
             lat: clientLat,
             lng: clientLng,
-            remark: document.getElementById('input-remark').value
+            remark: document.getElementById('input-remark').value,
+            initData: tg?.initData || '',
+            tg_login: getStoredLogin()
           }
         });
 
         if (error) {
-          let errorMsg = error.message;
+          let errorMsg = error.message, errCode = null;
           if (error.context && typeof error.context.json === 'function') {
             try {
               const errJson = await error.context.json();
               if (errJson.error) errorMsg = errJson.error;
+              errCode = errJson.code || null;
             } catch (e) {}
           }
-          throw new Error(errorMsg);
+          const ex = new Error(errorMsg); ex.code = errCode; throw ex;
         }
         if (data && data.error) throw new Error(data.error);
         if (!data?.abapay_deeplink) throw new Error("មិនទទួលបាន ABA deeplink ពីប្រព័ន្ធ");
@@ -1517,6 +1590,7 @@
         showPayModal(info);
       } catch (err) {
         alert("កំហុស: " + (err.message || err));
+        if (err.code === 'NO_USERNAME' && confirm("ចង់ទាក់ទងហាងតាម Telegram ឥឡូវនេះទេ?")) openShopContact();
       } finally {
         resetSendButton();
       }
@@ -1566,7 +1640,8 @@ function saveSessionState() {
     address: document.getElementById('input-address')?.value || '',
     scrollPosition: window.scrollY
   };
-  localStorage.setItem('davin_app_session', JSON.stringify(state));
+  state.tgId = currentTgKey();
+      localStorage.setItem('davin_app_session', JSON.stringify(state));
 }
   </script>
 </body>
