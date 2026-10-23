@@ -367,6 +367,7 @@
     .leaflet-tooltip.store-tip::before { display:none; }
     .leaflet-container .leaflet-control-attribution { font-size:9px; background:rgba(255,255,255,.7); }
     #map-modal .lifted { translate: 0 -10px; transition: translate .15s ease; }
+    #picker-map .gm-style-cc, #picker-map .gmnoprint a { font-size: 10px; }
   </style>
 </head>
 <body>
@@ -719,6 +720,7 @@
       return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
+    const GOOGLE_MAPS_KEY = ''; // <-- paste your Google Maps JavaScript API key here (restrict it to your domain). Empty = fallback to the OpenStreetMap map.
     const MAPTILER_KEY = ''; // optional: your MapTiler API key (restrict it to your domain in the MapTiler dashboard)
     const MAX_QTY_PER_ITEM = 50; // hard cap per item per order
     // How many of this item can be ordered: the stock number if it is set (blank = unlimited), never more than the cap.
@@ -1240,6 +1242,70 @@
     }
 
     /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
+    let gMap = null, gUserDot = null, gMapsPromise = null;
+    const liftPin = on => document.querySelector('#map-modal .center-pin-marker')?.classList.toggle('lifted', on);
+
+    function loadGoogleMaps() {
+      if (window.google && google.maps) return Promise.resolve();
+      if (gMapsPromise) return gMapsPromise;
+      gMapsPromise = new Promise((resolve, reject) => {
+        window.__gmReady = resolve;
+        // If Google rejects the key / domain / billing, fall back to the free map instead of showing a grey box.
+        window.gm_authFailure = () => { console.warn('Google Maps key rejected'); if (gMap) { gMap = null; document.getElementById('picker-map').innerHTML = ''; openLeafletMap(tempLat, tempLng); } };
+        const sc = document.createElement('script');
+        sc.async = true;
+        sc.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(GOOGLE_MAPS_KEY) + '&callback=__gmReady&language=km&region=KH';
+        sc.onerror = () => { gMapsPromise = null; reject(new Error('Google Maps failed to load')); };
+        document.head.appendChild(sc);
+      });
+      return gMapsPromise;
+    }
+
+    function openGoogleMap(lat, lng) {
+      if (!gMap) {
+        gMap = new google.maps.Map(document.getElementById('picker-map'), {
+          center: { lat, lng }, zoom: 17, maxZoom: 20,
+          disableDefaultUI: true, zoomControl: true,
+          zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
+          gestureHandling: 'greedy', clickableIcons: false, keyboardShortcuts: false
+        });
+
+        // Delivery area
+        new google.maps.Circle({
+          map: gMap, center: { lat: STORE_LAT, lng: STORE_LNG }, radius: MAX_DELIVERY_KM * 1000,
+          strokeColor: '#0f766e', strokeOpacity: 0.8, strokeWeight: 1.5,
+          fillColor: '#0f766e', fillOpacity: 0.05, clickable: false
+        });
+
+        // Store marker, named Kuyteav_Epheap
+        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="15" fill="#005d7b" stroke="#fff" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">🍜</text></svg>';
+        new google.maps.Marker({
+          map: gMap, position: { lat: STORE_LAT, lng: STORE_LNG }, title: 'Kuyteav_Epheap', clickable: false,
+          icon: { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(36, 36), anchor: new google.maps.Point(18, 18), labelOrigin: new google.maps.Point(18, -8) },
+          label: { text: 'Kuyteav_Epheap', color: '#005d7b', fontWeight: '800', fontSize: '12px' }
+        });
+
+        // The centre pin stays fixed; read the map centre as it moves
+        let raf = 0;
+        gMap.addListener('center_changed', () => {
+          if (raf) return;
+          raf = requestAnimationFrame(() => {
+            raf = 0;
+            const c = gMap.getCenter();
+            tempLat = c.lat(); tempLng = c.lng();
+            updateMapDisplayCoords(tempLat, tempLng);
+          });
+        });
+        gMap.addListener('dragstart', () => liftPin(true));
+        gMap.addListener('idle', () => liftPin(false));
+      } else {
+        gMap.setCenter({ lat, lng }); gMap.setZoom(17);
+      }
+      google.maps.event.trigger(gMap, 'resize');
+      gMap.setCenter({ lat, lng });
+      updateMapDisplayCoords(lat, lng);
+    }
+
     function openMapModal() {
       document.getElementById('map-modal').style.display = 'flex';
 
@@ -1248,6 +1314,22 @@
       tempLat = initialLat;
       tempLng = initialLng;
 
+      const afterOpen = () => {
+        // Auto-locate user on open if no custom position saved yet
+        if (!clientLat && navigator.geolocation) recenterMapToUser();
+      };
+
+      if (GOOGLE_MAPS_KEY && !(pickerMap && !gMap)) {
+        loadGoogleMaps()
+          .then(() => { openGoogleMap(initialLat, initialLng); afterOpen(); })
+          .catch(() => { openLeafletMap(initialLat, initialLng); afterOpen(); });
+      } else {
+        openLeafletMap(initialLat, initialLng);
+        afterOpen();
+      }
+    }
+
+    function openLeafletMap(initialLat, initialLng) {
       if (!pickerMap) {
         pickerMap = L.map('picker-map', {
           zoomControl: false, attributionControl: false,
@@ -1285,7 +1367,7 @@
 
         // Smooth centre tracking (one update per frame) + the centre pin lifts while the map moves
         let moveRaf = 0;
-        const pinEl = () => document.querySelector('#map-modal [class*="pin"], #map-modal [id*="pin"]');
+        const pinEl = () => document.querySelector('#map-modal .center-pin-marker');
         pickerMap.on('move', () => {
           if (moveRaf) return;
           moveRaf = requestAnimationFrame(() => {
@@ -1307,10 +1389,6 @@
         updateMapDisplayCoords(tempLat, tempLng);
       }, 250);
 
-      // Auto-locate user on open if no custom position saved yet
-      if (!clientLat && navigator.geolocation) {
-        recenterMapToUser();
-      }
     }
 
     function updateMapDisplayCoords(lat, lng) {
@@ -1332,7 +1410,14 @@
         pos => {
           tempLat = pos.coords.latitude;
           tempLng = pos.coords.longitude;
-          if (pickerMap) {
+          if (gMap) {
+            gMap.panTo({ lat: tempLat, lng: tempLng }); gMap.setZoom(18);
+            if (gUserDot) gUserDot.setMap(null);
+            gUserDot = new google.maps.Marker({
+              map: gMap, position: { lat: tempLat, lng: tempLng }, clickable: false, zIndex: 5,
+              icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 }
+            });
+          } else if (pickerMap) {
             pickerMap.flyTo([tempLat, tempLng], 18, { animate: true, duration: 1.4, easeLinearity: 0.25 });
             if (window.userDot) pickerMap.removeLayer(window.userDot);
             window.userDot = L.circleMarker([tempLat, tempLng], { radius: 8, color: '#fff', weight: 3, fillColor: '#2563eb', fillOpacity: 1, interactive: false }).addTo(pickerMap);
