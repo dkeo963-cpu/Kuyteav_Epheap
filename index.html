@@ -416,7 +416,7 @@
   <div id="tg-login-box" style="display:none; margin:10px 16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); text-align:center; font-size:13px;"></div>
 
   <div id="no-username-banner" class="username-warning">
-    ℹ️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ អ្នកនៅតែអាចកម្មង់បាន ហាងនឹងទាក់ទងអ្នកតាមលេខទូរស័ព្ទ។
+    ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន ទើបអាចកម្មង់បាន។
   </div>
 
   <div class="banner-container">
@@ -649,22 +649,6 @@
     <button type="button" class="go" onclick="reopenPayment()">បន្ត</button>
     <button type="button" class="x" onclick="dismissResume()">✕</button>
   </div>
-  <!-- No-username popup -->
-  <div id="nouser-modal" class="pay-overlay">
-    <div class="pay-card">
-      <div style="font-size:38px">🙏</div>
-      <div style="font-weight:800;font-size:16px;margin:6px 0 8px;color:var(--ink)">គណនី Telegram មិនមាន Username</div>
-      <div class="pay-sub" style="line-height:1.7;text-align:left">
-        ដើម្បីកម្មង់ដោយមិនមាន Username សូមទាក់ទងហាងតាម Telegram ដើម្បីទទួលកូដ រួចបញ្ចូលកូដខាងក្រោម។<br>
-        ឬអ្នកអាចដាក់ Username ខ្លួនឯងក្នុង Telegram៖ <b>Settings → Username</b>។
-      </div>
-      <input id="nouser-code" class="custom-input" placeholder="បញ្ចូលកូដ (ឧ. K7M2QX9P)" maxlength="12" autocomplete="off" style="margin-top:12px;text-align:center;text-transform:uppercase;letter-spacing:2px">
-      <button type="button" class="pay-btn" id="nouser-redeem" onclick="redeemAccessCode()">🎟️ ប្រើកូដ</button>
-      <button type="button" class="pay-btn ghost" id="nouser-contact" onclick="openShopContact()">💬 ទាក់ទងហាងតាម Telegram</button>
-      <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="closeNoUsernameModal()">បិទ</button>
-    </div>
-  </div>
-
   <!-- ABA Pay Modal -->
   <div id="pay-modal" class="pay-overlay">
     <div class="pay-card">
@@ -713,8 +697,8 @@
   </div>
 
   <script>
-    const STORE_LAT = 11.5512207;
-    const STORE_LNG = 104.8882844;
+    const STORE_LAT = 11.5300546;
+    const STORE_LNG = 104.8039416;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -1525,7 +1509,6 @@
 
     /* ===== Telegram login (normal browser) + "require username" mode, switched in the admin panel ===== */
     const BOT_USERNAME = 'Kuyteav_Epheap_bot';
-    const SHOP_CONTACT_URL = 'https://t.me/YOUR_SHOP_TELEGRAM'; // TODO: put the shop's Telegram link here
     const inTelegram = !!(tg && tg.initData);
     let requireLogin = true; // strict by default; the admin can switch it off
 
@@ -1567,35 +1550,6 @@
       sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
       document.getElementById('tg-widget-slot').appendChild(sc);
     }
-    async function redeemAccessCode() {
-      const input = document.getElementById('nouser-code');
-      const btn = document.getElementById('nouser-redeem');
-      const code = input.value.trim().toUpperCase();
-      if (!code) { alert("សូមបញ្ចូលកូដ!"); return; }
-      btn.disabled = true;
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
-          body: { action: 'redeem_code', code, initData: tg?.initData || '', tg_login: getStoredLogin() }
-        });
-        if (error) {
-          let msg = error.message;
-          if (error.context && typeof error.context.json === 'function') { try { const j = await error.context.json(); if (j.error) msg = j.error; } catch (e) {} }
-          throw new Error(msg);
-        }
-        if (data && data.error) throw new Error(data.error);
-        input.value = '';
-        closeNoUsernameModal();
-        alert("✅ កូដត្រឹមត្រូវ! ឥឡូវអ្នកអាចកម្មង់បានហើយ។");
-      } catch (e) {
-        alert("កំហុស: " + (e.message || e));
-      } finally { btn.disabled = false; }
-    }
-    function showNoUsernameModal() {
-      const hasLink = SHOP_CONTACT_URL && !SHOP_CONTACT_URL.includes('YOUR_SHOP_TELEGRAM');
-      document.getElementById('nouser-contact').style.display = hasLink ? '' : 'none';
-      document.getElementById('nouser-modal').style.display = 'flex';
-    }
-    function closeNoUsernameModal() { document.getElementById('nouser-modal').style.display = 'none'; }
     // Cambodian mobile numbers (TRC prefix table). Prefixes marked * in the table have 7 digits after the prefix (10 digits total).
     const KH_PREFIX_9 = ['010','011','012','013','015','016','017','060','061','066','067','068','069','070','077','078','079','080','081','083','084','085','086','087','089','090','092','093','095','098','099'];
     const KH_PREFIX_10 = ['018','031','038','071','076','088','096','097'];
@@ -1620,9 +1574,6 @@
       });
     });
 
-    function openShopContact() {
-      if (tg && tg.openTelegramLink) tg.openTelegramLink(SHOP_CONTACT_URL); else window.open(SHOP_CONTACT_URL, '_blank');
-    }
     async function checkLoginRequirement() {
       try {
         const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
@@ -1630,11 +1581,7 @@
       } catch (e) {}
       const banner = document.getElementById('no-username-banner');
       if (inTelegram) {
-        if (requireLogin && !tgUsername) {
-          banner.innerText = '⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ ចុចទីនេះដើម្បីបញ្ចូលកូដពីហាង។';
-          banner.style.cursor = 'pointer'; banner.onclick = showNoUsernameModal;
-          banner.style.display = 'block';
-        }
+        if (!tgUsername) banner.style.display = 'block'; // no username = cannot order
         return;
       }
       banner.style.display = 'none';           // not in Telegram: the "no username" note does not apply
@@ -1662,6 +1609,7 @@
       if (!phoneVal) { alert("លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678 ឬ 096 123 4567"); return; }
 
       if (requireLogin && !inTelegram && !getStoredLogin()) { alert("សូមចូលតាម Telegram ជាមុនសិន!"); return; }
+      if (!usernameVal) { alert("គណនី Telegram របស់អ្នកមិនមាន Username ទេ! សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន។"); return; }
 
       const btn = document.getElementById('send-order-btn');
       btn.disabled = true; btn.innerHTML = '<span>កំពុងបង្កើត ABA QR...</span>';
@@ -1702,8 +1650,7 @@
         localStorage.setItem('pending_payment', JSON.stringify(info));
         showPayModal(info);
       } catch (err) {
-        if (err.code === 'NO_USERNAME') showNoUsernameModal();
-        else alert("កំហុស: " + (err.message || err));
+        alert("កំហុស: " + (err.message || err));
       } finally {
         resetSendButton();
       }
