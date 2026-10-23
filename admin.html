@@ -304,6 +304,29 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       </div>
     </div>
     <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧾 ការកម្មង់ដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">ចុចដំណាក់កាល ដើម្បីឱ្យអតិថិជនឃើញក្នុងទំព័រតាមដាន។</p>
+      <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🔐 ការចូលតាម Telegram</h2>
+      <p class="muted" style="margin:4px 0 10px">បើក: អតិថិជនត្រូវចូលតាម Telegram (ក្នុង browser) ហើយត្រូវមាន Username ។ បិទ: កម្មង់បានដោយសេរី។</p>
+      <div class="switch-row"><span>តម្រូវឱ្យចូលតាម Telegram និងមាន Username</span>
+        <label class="sw"><input type="checkbox" id="req-login"><span></span></label></div>
+      <h3 style="font-size:14px;margin:14px 0 6px">🎟️ សិទ្ធិកម្មង់ដោយគ្មាន Username</h3>
+      <p class="muted" style="margin:0 0 8px">១ ជួរ = ១ នាក់។ ចុច «បន្ថែមជួរ» ដើម្បីបង្កើតកូដ រួចផ្ញើកូដឱ្យគាត់។ កូដនឹងចងជាមួយគណនី Telegram របស់គាត់ ពេលគាត់ប្រើលើកដំបូង។</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <input id="acc-label" placeholder="ឈ្មោះអ្នកទទួល (ឈ្មោះ Telegram)" style="flex:2;min-width:140px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <input id="acc-note" placeholder="កំណត់ចំណាំ (ជម្រើស)" style="flex:1;min-width:100px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <button class="btn btn-p btn-s" id="acc-add">➕ បន្ថែមជួរ</button>
+      </div>
+      <div id="acc-list" class="muted">កំពុងផ្ទុក…</div>
+      <h3 style="font-size:14px;margin:16px 0 6px">📋 អ្នកដែលបានស្នើសុំ (គ្មាន Username)</h3>
+      <div id="req-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="req-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
       <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
       <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)។</p>
     </div>
@@ -968,6 +991,114 @@ async function triggerReloadForAllUsers() {
 document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
 
 
+
+/* =====================================================
+   TELEGRAM LOGIN REQUIREMENT + NO-USERNAME ACCESS CODES
+   ===================================================== */
+async function loadLoginSetting() {
+  const { data } = await supa.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
+  $("req-login").checked = !(data && (data.value === false || data.value === "false"));
+}
+$("req-login").addEventListener("change", async (e) => {
+  const on = e.target.checked;
+  const r = await admin({ action: "update_setting", key: "require_telegram_login", value: on });
+  if (r.error) { e.target.checked = !on; toast(r.error, "bad"); return; }
+  toast(on ? "បានបើក៖ ត្រូវចូលតាម Telegram" : "បានបិទ៖ កម្មង់បានដោយសេរី", "ok");
+});
+
+function copyText(txt) {
+  try { navigator.clipboard.writeText(txt); toast("បានចម្លងកូដ: " + txt, "ok"); } catch (_) { toast("កូដ: " + txt, "ok"); }
+}
+
+async function loadAccess() {
+  const box = $("acc-list");
+  const r = await admin({ action: "list_access" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.access || [];
+  if (!rows.length) { box.textContent = "មិនទាន់មានជួរទេ — បន្ថែមខាងលើ"; return; }
+  const th = 'text-align:left;padding:6px 4px;border-bottom:1px solid var(--line)';
+  const td = 'padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)';
+  box.innerHTML = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">' +
+    `<tr class="muted"><th style="${th}">ឈ្មោះ / ចំណាំ</th><th style="${th}">កូដ</th><th style="${th}">Telegram</th><th style="${th}"></th></tr>` +
+    rows.map(x => `<tr>
+      <td style="${td}"><b>${esc(x.label)}</b>${x.note ? `<div class="muted">${esc(x.note)}</div>` : ''}</td>
+      <td style="${td};font-family:monospace;letter-spacing:1px;font-weight:700">${esc(x.code)}</td>
+      <td style="${td}">${x.tg_id ? `✅ ${esc(x.tg_name || '')}<div class="muted">ID ${esc(x.tg_id)}</div>` : '<span class="muted">មិនទាន់ប្រើ</span>'}${x.status === 'blocked' ? '<div style="color:var(--bad)">⛔ ត្រូវបានបិទ</div>' : ''}</td>
+      <td style="${td};white-space:nowrap">
+        <button class="btn btn-g btn-s" data-act="copy" data-code="${esc(x.code)}">ចម្លង</button>
+        <button class="btn btn-g btn-s" data-act="toggle" data-code="${esc(x.code)}" data-st="${x.status === 'active' ? 'blocked' : 'active'}">${x.status === 'active' ? 'បិទ' : 'បើក'}</button>
+        <button class="btn btn-d btn-s" data-act="del" data-code="${esc(x.code)}">លុប</button>
+      </td></tr>`).join('') + '</table></div>';
+  box.querySelectorAll('button[data-act]').forEach(b => b.addEventListener('click', async () => {
+    const code = b.dataset.code;
+    if (b.dataset.act === 'copy') return copyText(code);
+    if (b.dataset.act === 'del' && !confirm('លុបជួរនេះ? អ្នកនេះនឹងមិនអាចកម្មង់ដោយគ្មាន Username ទៀតទេ។')) return;
+    const res = b.dataset.act === 'del'
+      ? await admin({ action: 'delete_access', code })
+      : await admin({ action: 'set_access_status', code, status: b.dataset.st });
+    if (res.error) toast(res.error, 'bad'); else { toast('បានរក្សាទុក', 'ok'); loadAccess(); }
+  }));
+}
+
+async function createAccess(label, note) {
+  const r = await admin({ action: "create_access", label, note });
+  if (r.error) { toast(r.error, "bad"); return false; }
+  copyText(r.data.code);
+  loadAccess();
+  return true;
+}
+$("acc-add").addEventListener("click", async () => {
+  const label = $("acc-label").value.trim();
+  if (!label) { toast("សូមបញ្ចូលឈ្មោះអ្នកទទួល", "bad"); return; }
+  if (await createAccess(label, $("acc-note").value.trim())) { $("acc-label").value = ""; $("acc-note").value = ""; }
+});
+
+async function loadRequests() {
+  const box = $("req-list");
+  const r = await admin({ action: "list_requests" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.requests || [];
+  if (!rows.length) { box.textContent = "មិនទាន់មានសំណើទេ"; return; }
+  box.innerHTML = rows.map(q => `
+    <div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(q.first_name || "—")} <span class="muted">· ID ${esc(q.tg_id)}</span></div>
+      <div class="muted">📞 ${esc(q.phone || "—")}</div>
+      <button class="btn btn-p btn-s" style="margin-top:8px" data-name="${esc(q.first_name || '')}" data-phone="${esc(q.phone || '')}">🎟️ បង្កើតកូដឱ្យគាត់</button>
+    </div>`).join("");
+  box.querySelectorAll("button[data-name]").forEach(b => b.addEventListener("click", () =>
+    createAccess(b.dataset.name || "គ្មានឈ្មោះ", b.dataset.phone ? "ទូរស័ព្ទ " + b.dataset.phone : "")));
+}
+$("req-refresh").addEventListener("click", () => { loadAccess(); loadRequests(); });
+loadLoginSetting();
+if (hasTG) { loadAccess(); loadRequests(); } else { $("acc-list").textContent = $("req-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល"; }
+
+/* ===== PAID ORDERS + TRACKING STAGE ===== */
+const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "រួចរាល់"], ["done", "ប្រគល់ហើយ"]];
+async function loadOrders() {
+  const box = $("ord-list");
+  const r = await admin({ action: "list_orders" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.orders || [];
+  if (!rows.length) { box.textContent = "មិនទាន់មានការកម្មង់ទេ"; return; }
+  box.innerHTML = rows.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
+      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${STAGES.map(([k, l]) =>
+        `<button class="btn ${o.fulfillment === k ? "btn-p" : "btn-g"} btn-s" data-id="${esc(o.tran_id)}" data-f="${k}">${l}</button>`).join("")}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("button[data-f]").forEach(b => b.addEventListener("click", async () => {
+    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: b.dataset.f });
+    if (res.error) toast(res.error, "bad"); else { toast("បានរក្សាទុក", "ok"); loadOrders(); }
+  }));
+}
+$("ord-refresh").addEventListener("click", loadOrders);
+if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
 </script>
 </body>
 </html>
