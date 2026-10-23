@@ -655,10 +655,12 @@
       <div style="font-size:38px">🙏</div>
       <div style="font-weight:800;font-size:16px;margin:6px 0 8px;color:var(--ink)">គណនី Telegram មិនមាន Username</div>
       <div class="pay-sub" style="line-height:1.7;text-align:left">
-        យើងបានកត់ត្រាសំណើរបស់អ្នកហើយ។ សូមទាក់ទងហាងតាម Telegram ដើម្បីសុំការអនុញ្ញាតកម្មង់ ដោយមិនមាន Username។<br>
-        ឬអ្នកអាចដាក់ Username ខ្លួនឯងក្នុង Telegram៖ <b>Settings → Username</b> រួចកម្មង់ម្ដងទៀត។
+        ដើម្បីកម្មង់ដោយមិនមាន Username សូមទាក់ទងហាងតាម Telegram ដើម្បីទទួលកូដ រួចបញ្ចូលកូដខាងក្រោម។<br>
+        ឬអ្នកអាចដាក់ Username ខ្លួនឯងក្នុង Telegram៖ <b>Settings → Username</b>។
       </div>
-      <button type="button" class="pay-btn" id="nouser-contact" onclick="openShopContact()">💬 ទាក់ទងហាងតាម Telegram</button>
+      <input id="nouser-code" class="custom-input" placeholder="បញ្ចូលកូដ (ឧ. K7M2QX9P)" maxlength="12" autocomplete="off" style="margin-top:12px;text-align:center;text-transform:uppercase;letter-spacing:2px">
+      <button type="button" class="pay-btn" id="nouser-redeem" onclick="redeemAccessCode()">🎟️ ប្រើកូដ</button>
+      <button type="button" class="pay-btn ghost" id="nouser-contact" onclick="openShopContact()">💬 ទាក់ទងហាងតាម Telegram</button>
       <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="closeNoUsernameModal()">បិទ</button>
     </div>
   </div>
@@ -674,6 +676,7 @@
       <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
       <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
       <button type="button" class="pay-btn ghost" id="pay-check-btn" onclick="checkPaymentNow()">🔄 ខ្ញុំបានបង់ហើយ (ពិនិត្យ)</button>
+      <button type="button" class="pay-btn" id="pay-track-btn" style="display:none" onclick="openTrack()">🔎 តាមដានការកម្មង់ (បើកក្នុង browser)</button>
       <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="cancelPaymentUi()">បិទ</button>
     </div>
   </div>
@@ -732,6 +735,7 @@
       return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
+    const MAPTILER_KEY = ''; // optional: your MapTiler API key (restrict it to your domain in the MapTiler dashboard)
     const MAX_QTY_PER_ITEM = 50; // hard cap per item per order
     // How many of this item can be ordered: the stock number if it is set (blank = unlimited), never more than the cap.
     function itemLimit(item) {
@@ -1268,13 +1272,14 @@
           zoomAnimation: true, fadeAnimation: true, markerZoomAnimation: true
         }).setView([initialLat, initialLng], 17);
 
-        // Clean, Google-Maps-like tiles (OpenStreetMap data, CARTO "Voyager" style)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-          subdomains: 'abcd', maxZoom: 20, maxNativeZoom: 19,
-          keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
+        // Free OpenStreetMap tiles. For a Google-like look, put a MapTiler key in MAPTILER_KEY.
+        L.tileLayer(MAPTILER_KEY
+          ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
+          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
         }).addTo(pickerMap);
         // Map-data credits only (the licence requires them); no Leaflet logo.
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution('© OpenStreetMap © CARTO').addTo(pickerMap);
+        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(pickerMap);
 
         L.control.zoom({ position: 'topright' }).addTo(pickerMap);
 
@@ -1413,10 +1418,19 @@
       if (info.qr_image) { qr.src = info.qr_image; qr.style.display = 'block'; } else { qr.style.display = 'none'; }
       setPayState('⏳ កំពុងរង់ចាំការបង់ប្រាក់...', 'wait');
       document.getElementById('pay-check-btn').style.display = '';
+      document.getElementById('pay-track-btn').style.display = 'none';
       document.getElementById('pay-modal').style.display = 'flex';
       startPaymentPolling();
     }
 
+    let lastTrackId = null;
+    function openTrack() {
+      if (!lastTrackId) return;
+      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
+      const url = base + 'track.html?o=' + encodeURIComponent(lastTrackId);
+      try { if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true }); else window.open(url, '_blank'); }
+      catch (e) { window.open(url, '_blank'); }
+    }
     function openAbaApp() {
       if (!payDeeplink || !payTranId) return;
       const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
@@ -1449,7 +1463,8 @@
           setPayState('✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង', 'ok');
           document.getElementById('pay-check-btn').style.display = 'none';
           resetAfterOrder();
-          setTimeout(() => { document.getElementById('pay-modal').style.display = 'none'; payTranId = null; }, 2500);
+          lastTrackId = payTranId;
+          document.getElementById('pay-track-btn').style.display = '';
         } else if (data?.status === 'expired' || Date.now() - payStartedAt > PAY_MAX_MS) {
           stopPaymentPolling();
           localStorage.removeItem('pending_payment');
@@ -1512,7 +1527,7 @@
     const BOT_USERNAME = 'Kuyteav_Epheap_bot';
     const SHOP_CONTACT_URL = 'https://t.me/YOUR_SHOP_TELEGRAM'; // TODO: put the shop's Telegram link here
     const inTelegram = !!(tg && tg.initData);
-    let requireLogin = false;
+    let requireLogin = true; // strict by default; the admin can switch it off
 
     function getStoredLogin() {
       try {
@@ -1552,6 +1567,29 @@
       sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
       document.getElementById('tg-widget-slot').appendChild(sc);
     }
+    async function redeemAccessCode() {
+      const input = document.getElementById('nouser-code');
+      const btn = document.getElementById('nouser-redeem');
+      const code = input.value.trim().toUpperCase();
+      if (!code) { alert("សូមបញ្ចូលកូដ!"); return; }
+      btn.disabled = true;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
+          body: { action: 'redeem_code', code, initData: tg?.initData || '', tg_login: getStoredLogin() }
+        });
+        if (error) {
+          let msg = error.message;
+          if (error.context && typeof error.context.json === 'function') { try { const j = await error.context.json(); if (j.error) msg = j.error; } catch (e) {} }
+          throw new Error(msg);
+        }
+        if (data && data.error) throw new Error(data.error);
+        input.value = '';
+        closeNoUsernameModal();
+        alert("✅ កូដត្រឹមត្រូវ! ឥឡូវអ្នកអាចកម្មង់បានហើយ។");
+      } catch (e) {
+        alert("កំហុស: " + (e.message || e));
+      } finally { btn.disabled = false; }
+    }
     function showNoUsernameModal() {
       const hasLink = SHOP_CONTACT_URL && !SHOP_CONTACT_URL.includes('YOUR_SHOP_TELEGRAM');
       document.getElementById('nouser-contact').style.display = hasLink ? '' : 'none';
@@ -1588,12 +1626,13 @@
     async function checkLoginRequirement() {
       try {
         const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
-        requireLogin = !!data && (data.value === true || data.value === 'true');
+        requireLogin = !(data && (data.value === false || data.value === 'false'));
       } catch (e) {}
       const banner = document.getElementById('no-username-banner');
       if (inTelegram) {
         if (requireLogin && !tgUsername) {
-          banner.innerText = '⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ឬចុចកម្មង់ ដើម្បីបញ្ជូនសំណើសុំការអនុញ្ញាតទៅហាង។';
+          banner.innerText = '⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ ចុចទីនេះដើម្បីបញ្ចូលកូដពីហាង។';
+          banner.style.cursor = 'pointer'; banner.onclick = showNoUsernameModal;
           banner.style.display = 'block';
         }
         return;
