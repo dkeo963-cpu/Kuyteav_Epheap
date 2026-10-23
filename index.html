@@ -82,14 +82,21 @@
     .top-l { flex: 1; min-width: 0; }
     .greeting { font-size: 14px; font-weight: 600; color: var(--sub); }
     
-    /* Branding Header with Chef Girl Icon */
+    /* Branding Header with Chef Girl Icon & Menu Icon */
     .shop-title-container {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
+    .shop-title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
     .chef-girl-icon {
-      width: 44px;            /* logo circle size: change this number to make it bigger or smaller */
+      width: 44px;
       height: 44px;
       flex-shrink: 0;
       display: inline-flex;
@@ -106,12 +113,33 @@
       height: 100%;
       object-fit: contain;
       border-radius: 50%;
-      mix-blend-mode: multiply;   /* the logo's white background melts into the circle colour */
     }
-    .shop-title { font-size: 25px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .shop-title { font-size: 22px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    /* Header Menu Dropdown / Icon Button */
+    .header-menu-btn {
+      background: var(--brand-l);
+      border: 1.5px solid var(--brand);
+      color: var(--brand);
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .header-menu-btn:active {
+      background: var(--brand);
+      color: #fff;
+    }
+
     main.wrap { padding-top: 14px; }
 
-    /* Store Status Badge with Back-and-Forth Moving Glow Light Effect */
+    /* Store Status Badge with Glow Effect */
     @keyframes borderGlowBackAndForth {
       0% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
       50% { border-color: rgba(21, 128, 61, 1); box-shadow: inset 0 0 10px rgba(21, 128, 61, 0.4), 0 0 12px rgba(21, 128, 61, 0.6); background: #dcfce7; }
@@ -142,11 +170,12 @@
     .closed-banner { background: var(--bad-l); color: var(--bad); border: 1px solid #f1c0c0; }
     .delivery-limit-banner, .username-warning { background: var(--warn-l); color: var(--warn); border: 1px solid #f0d9a8; display: none; }
 
+    /* Banner Slider */
     .banner-container {
       width: 100%; height: 150px; border-radius: var(--r); overflow: hidden;
       margin-bottom: 12px; position: relative; border: 1px solid var(--line); background: var(--surface);
     }
-    .banner-slider { display: flex; width: 100%; height: 100%; transition: transform .4s ease-in-out; }
+    .banner-slider { display: flex; width: 100%; height: 100%; transition: transform .5s ease-in-out; }
     .banner-slide { min-width: 100%; height: 100%; }
     .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -158,7 +187,7 @@
     }
     .search-input:focus { border-color: var(--brand); }
 
-    /* ===== Category tabs (top tab bar style) ===== */
+    /* Category tabs */
     .category-grid {
       display: flex; gap: 22px; overflow-x: auto; margin: 0 -14px 14px; padding: 0 14px;
       background: var(--surface); border-bottom: 1px solid var(--line);
@@ -169,22 +198,22 @@
       flex: 0 0 auto; background: none; border: 0; border-bottom: 3px solid transparent;
       padding: 13px 2px 10px; cursor: pointer; transition: color .15s, border-color .15s;
     }
-    .category-card.active { border-bottom-color: #f0364b; }
+    .category-card.active { border-bottom-color: var(--brand); }
     .category-name { font-size: 15px; font-weight: 600; color: var(--sub); white-space: nowrap; }
     .category-card.active .category-name { color: var(--ink); font-weight: 800; }
 
-    /* ===== Food card (big photo on top) ===== */
+    /* ===== Food Card Layout & Sizing ===== */
     #food-list { display: grid; grid-template-columns: 1fr; gap: 14px; }
     #food-list > div:not(.food-card) { grid-column: 1 / -1; text-align: center; color: var(--sub); padding: 30px 0; }
     @media (min-width: 700px) { #food-list { grid-template-columns: 1fr 1fr; } }
 
     .food-card {
-      background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-      padding: 10px; display: flex; flex-direction: column; gap: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+      padding: 12px; display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
     }
     .food-img {
-      position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden;
+      position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden;
       background: #e8eeec; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 3rem;
     }
     .food-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -194,31 +223,37 @@
       cursor: pointer; color: #b9c2c0; box-shadow: 0 1px 4px rgba(0,0,0,.2);
     }
     .heart-btn svg { width: 18px; height: 18px; fill: currentColor; }
-    .heart-btn.on { color: #f0364b; }
+    .heart-btn.on { color: var(--brand); }
     .photo-count-badge {
       position: absolute; bottom: 6px; right: 6px; background: rgba(20,32,31,.78); color: #fff;
       font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px;
     }
-    .food-body { display: flex; flex-direction: column; gap: 2px; }
-    .food-name { font-weight: 800; font-size: 15px; }
+    .food-body { display: flex; flex-direction: column; gap: 3px; }
+    .food-name { font-weight: 800; font-size: 15px; color: var(--ink); }
     .food-sub { font-size: 12px; color: var(--sub); }
-    .pop-badge { background: #ffe9e0; color: #c2410c; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 4px; white-space: nowrap; }
-    .food-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
-    .card-stepper { display: flex; align-items: center; gap: 8px; }
+    .pop-badge { background: var(--brand-l); color: var(--brand); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 4px; white-space: nowrap; }
+    
+    .food-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+    .card-stepper { display: flex; align-items: center; gap: 8px; background: #f6f9f8; padding: 3px 6px; border-radius: 20px; border: 1px solid var(--line); }
+    
+    /* Updated Green Stepper & Buy Buttons */
     .card-step-btn {
-      width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #f0364b; background: #fff; color: #f0364b;
+      width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--brand); background: #fff; color: var(--brand);
       font-size: 16px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
     }
-    .card-step-btn:active { background: #fde8ea; }
+    .card-step-btn:active { background: var(--brand-l); }
     .card-step-btn:disabled { border-color: #d5dcda; color: #b9c2c0; cursor: not-allowed; }
-    .card-qty { min-width: 14px; text-align: center; font-weight: 800; font-size: 14px; }
-    .food-price { font-weight: 800; font-size: 17px; color: #f0364b; white-space: nowrap; }
+    .card-qty { min-width: 14px; text-align: center; font-weight: 800; font-size: 14px; color: var(--ink); }
+    
+    .food-price { font-weight: 800; font-size: 16px; color: var(--brand); white-space: nowrap; }
+    
     .buy-btn {
-      height: 32px; padding: 0 14px; border-radius: 6px; background: #fff; color: #f0364b;
-      border: 1.5px solid #f0364b; font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap;
+      height: 34px; padding: 0 14px; border-radius: 8px; background: var(--brand); color: #fff;
+      border: 1.5px solid var(--brand); font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
     }
-    .buy-btn:active { background: #fde8ea; }
-    .buy-btn:disabled { border-color: #d5dcda; color: #9aa8a5; cursor: not-allowed; }
+    .buy-btn:active { background: var(--brand-d); }
+    .buy-btn:disabled { background: #e3e9e7; border-color: #d5dcda; color: #9aa8a5; cursor: not-allowed; box-shadow: none; }
 
     .bottom-icons-bar { display: flex; gap: 8px; margin: 22px 0 10px; }
     .icon-action-btn {
@@ -238,12 +273,12 @@
 
     .guide-float-btn {
       position: fixed; right: 14px; bottom: calc(92px + var(--safe-b)); z-index: 150;
-      height: 42px; padding: 0 16px; border-radius: 21px; background: #e11d48; color: #fff;
+      height: 42px; padding: 0 16px; border-radius: 21px; background: var(--brand); color: #fff;
       border: 0; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer;
-      box-shadow: 0 8px 20px rgba(225, 29, 72, 0.4);
+      box-shadow: 0 8px 20px rgba(15, 118, 110, 0.3);
       animation: floatBounce 1.8s ease-in-out infinite !important;
     }
-    .guide-float-btn:active { transform: scale(.96); background: #be123c; }
+    .guide-float-btn:active { transform: scale(.96); background: var(--brand-d); }
 
     .btn { height: 46px; padding: 0 16px; border: 0; border-radius: var(--r-s); font-weight: 800; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform .08s; }
     .btn:active { transform: scale(.98); }
@@ -394,7 +429,6 @@
         <span class="top-promo-badge promo-badge-text">Free Delivery</span>
         <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
       </div>
-      <!-- Duplicate content for seamless infinite looping scroll -->
       <div class="top-promo-content">
         <span class="top-promo-badge promo-badge-text">Free Delivery</span>
         <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
@@ -409,12 +443,16 @@
         <div class="top-l">
           <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
           <div class="shop-title-container">
-            <!-- Chef Girl Icon holding kitchen accessories -->
-            <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
-              <!-- IMPORTANT: replace the src below with your ORIGINAL logo (the long data:image/png;base64,... string from your old file) -->
-              <img id="shop-logo" alt="Shop logo" src="./images/Logo.JPG">
+            <div class="shop-title-left">
+              <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
+                <img id="shop-logo" alt="Shop logo" src="./images/Logo.JPG">
+              </div>
+              <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
             </div>
-            <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+            <!-- Added Menu/Dropdown Icon Button on the Right Side -->
+            <button class="header-menu-btn" onclick="openInfoModal()" title="Menu / Info">
+              ☰
+            </button>
           </div>
         </div>
       </div>
@@ -437,6 +475,7 @@
     ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន ទើបអាចកម្មង់បាន។
   </div>
 
+  <!-- Auto-sliding multi-banner container -->
   <div class="banner-container">
     <div class="banner-slider" id="banner-slider"></div>
   </div>
@@ -489,10 +528,7 @@
     </div>
 
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
-
       <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
-
-      <!-- Store Hours & Policy -->
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⏰ ម៉ោងដំណើរការហាង</div>
         <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
@@ -500,8 +536,6 @@
           • ក្រៅពីម៉ោងនេះ អតិថិជនអាចផ្ញើសារកម្មង់ទុកមុនបាន តាមរយៈ Telegram។
         </div>
       </div>
-
-      <!-- Delivery Policy -->
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">🛵 គោលការណ៍សេវាដឹកជញ្ជូន</div>
         <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
@@ -511,8 +545,6 @@
           • ហាងកំណត់សេវាដឹកជញ្ជូនក្នុងរង្វង់អតិបរមា <b>៥ គីឡូម៉ែត្រ</b> ប៉ុណ្ណោះ។
         </div>
       </div>
-
-      <!-- Order & Cancellation Policy -->
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⚠️ គោលការណ៍ការកម្មង់</div>
         <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
@@ -520,32 +552,13 @@
           • សូមពិនិត្យទីតាំង GPS និងលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវមុនពេលបញ្ជូនការកម្មង់ ឬ បង់ប្រាក់តាមរយៈ ABA ។
         </div>
       </div>
-
-      <!-- Contact Support Section -->
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;"> Contact Me</div>
         <a href="https://t.me/dddda11999" target="_blank" rel="noopener noreferrer" class="btn btn-p btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px; background: #0088cc; color: #fff;">
           Click Here for Support
         </a>
       </div>
-
-      <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
-
-      <!-- Websites Section -->
-      <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;">🌐 គេហទំព័រពួកយើង</div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <a href="https://davin-store.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
-            🛒 Davin Store (davin-store.com)
-          </a>
-          <a href="https://auraarchitecturemalin.com" target="_blank" rel="noopener noreferrer" class="btn btn-g btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px;">
-            🏛️ Aura Architecture (auraarchitecturemalin.com)
-          </a>
-        </div>
-      </div>
-
     </div>
-
     <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
       <button onclick="closeInfoModal()" class="btn btn-p btn-block">យល់ព្រម / បិទ</button>
     </div>
@@ -570,8 +583,6 @@
       <h3 id="modal-title" style="margin: 0 0 16px 0; font-size: 1.1rem;">ជ្រើសរើសទំហំ</h3>
       <div class="option-title">ជ្រើសរើសទំហំ</div>
       <div id="size-options-container"></div>
-
-      <!-- Dynamic Customization Section for Drinks -->
       <div id="drink-customization-section" style="display: none; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px;">
         <div class="option-group">
           <div class="option-title">កម្រិតស្ករ (Sugar Level)</div>
@@ -583,7 +594,6 @@
             <div class="pill active" onclick="setDrinkOption('sugar', '100%', this)">100%</div>
           </div>
         </div>
-
         <div class="option-group">
           <div class="option-title">កម្រិតទឹកកក (Ice Level)</div>
           <div class="option-pills" id="ice-pills">
@@ -594,7 +604,6 @@
           </div>
         </div>
       </div>
-
       <button id="confirm-add-btn" onclick="confirmAddToCart()" class="btn btn-p btn-block" style="margin-top: 16px;">បន្ថែមទៅក្នុងកន្ត្រក</button>
       <button onclick="closeSizeModal()" class="btn btn-g btn-block" style="margin-top: 8px;">បោះបង់</button>
     </div>
@@ -667,7 +676,7 @@
     <button type="button" class="go" onclick="reopenPayment()">បន្ត</button>
     <button type="button" class="x" onclick="dismissResume()">✕</button>
   </div>
-  <!-- ABA Pay Modal -->
+
   <div id="pay-modal" class="pay-overlay">
     <div class="pay-card">
       <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
@@ -683,7 +692,6 @@
     </div>
   </div>
 
-  <!-- Interactive Map Location Picker Modal (Grab / Eget Style) -->
   <div id="map-modal" class="map-modal-overlay">
     <div class="map-card">
       <div class="map-header">
@@ -723,7 +731,6 @@
     let clientLng = null;
     let currentDeliveryFee = 0.00;
 
-    // Interactive Leaflet Map Variables
     let pickerMap = null;
     let tempLat = STORE_LAT;
     let tempLng = STORE_LNG;
@@ -737,16 +744,17 @@
       return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
-    const GOOGLE_MAPS_KEY = ''; // <-- paste your Google Maps JavaScript API key here (restrict it to your domain). Empty = fallback to the OpenStreetMap map.
-    const MAPTILER_KEY = ''; // optional: your MapTiler API key (restrict it to your domain in the MapTiler dashboard)
-    const MAX_QTY_PER_ITEM = 50; // hard cap per item per order
-    // How many of this item can be ordered: the stock number if it is set (blank = unlimited), never more than the cap.
+    const GOOGLE_MAPS_KEY = '';
+    const MAPTILER_KEY = '';
+    const MAX_QTY_PER_ITEM = 50;
+    
     function itemLimit(item) {
       const n = item ? item.stock_quantity : null;
       if (n === null || n === undefined || n === '') return MAX_QTY_PER_ITEM;
       const v = Number(n);
       return Number.isFinite(v) ? Math.min(Math.max(v, 0), MAX_QTY_PER_ITEM) : MAX_QTY_PER_ITEM;
     }
+    
     const tg = window.Telegram?.WebApp;
     if (tg) tg.expand();
 
@@ -777,7 +785,6 @@
       checkPromoBanner();
       initBanners();
 
-      // Restore saved cart, selections, and form fields automatically after page reload
       restoreSessionState();
       resumePendingPayment();
     });
@@ -801,8 +808,6 @@
     let activeImagesList = [];
     let currentSlideIndex = 0;
 
-    // --- AUTO-RELOAD EVERY 30 MINUTES WITH STATE PERSISTENCE ---
-    // Which Telegram account is using the page right now ("guest" in a plain browser without login).
     function currentTgKey() {
       try {
         const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || (typeof getStoredLogin === 'function' && getStoredLogin()?.id);
@@ -812,7 +817,6 @@
 
     function saveSessionState() {
       if (isForceReloading) return;
-
       const state = {
         cart: cart,
         customerName: document.getElementById('input-customer-name')?.value || '',
@@ -834,16 +838,10 @@
     function restoreSessionState() {
       const savedState = localStorage.getItem('davin_app_session');
       if (!savedState) return;
-
       try {
         const state = JSON.parse(savedState);
-        // A session saved by another Telegram account (or an old session with no owner) must not fill this account's name, phone or cart.
         if (String(state.tgId ?? '') !== currentTgKey()) { localStorage.removeItem('davin_app_session'); return; }
-        
-        if (Array.isArray(state.cart)) {
-          cart = state.cart;
-        }
-
+        if (Array.isArray(state.cart)) cart = state.cart;
         if (state.customerName) document.getElementById('input-customer-name').value = state.customerName;
         if (state.phone) document.getElementById('input-phone').value = state.phone;
         if (state.remark) document.getElementById('input-remark').value = state.remark;
@@ -875,28 +873,20 @@
         }
 
         updateCartState();
-
-        setTimeout(() => {
-          window.scrollTo(0, state.scrollPosition || 0);
-        }, 200);
-
+        setTimeout(() => { window.scrollTo(0, state.scrollPosition || 0); }, 200);
       } catch (e) {
         console.error("Failed to restore session state", e);
       }
-
       localStorage.removeItem('davin_app_session');
     }
 
-    const RELOAD_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+    const RELOAD_INTERVAL_MS = 30 * 60 * 1000;
     setTimeout(() => {
       saveSessionState();
       window.location.reload();
     }, RELOAD_INTERVAL_MS);
 
-    window.addEventListener('beforeunload', () => {
-      saveSessionState();
-    });
-    // ----------------------------------------------------------
+    window.addEventListener('beforeunload', () => { saveSessionState(); });
 
     function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
     function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
@@ -993,10 +983,25 @@
       }
     }
 
+    // Auto-sliding multi-banner logic
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner3.png"];
+    let currentBannerIndex = 0;
+    let bannerInterval = null;
+
     function initBanners() {
       const slider = document.getElementById('banner-slider');
-      slider.innerHTML = bannerImages.map(path => `<div class="banner-slide"><img src="${path}" alt="Banner" onerror="this.src='https://placehold.co/600x250/0284c7/fff?text=Longlay+Kitchen'"></div>`).join('');
+      slider.innerHTML = bannerImages.map(path => `
+        <div class="banner-slide">
+          <img src="${path}" alt="Banner" onerror="this.src='https://placehold.co/600x250/0f766e/fff?text=Kuyteav+Epheap'">
+        </div>
+      `).join('');
+
+      // Start automatic slide timer (every 3.5 seconds)
+      if (bannerInterval) clearInterval(bannerInterval);
+      bannerInterval = setInterval(() => {
+        currentBannerIndex = (currentBannerIndex + 1) % bannerImages.length;
+        slider.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
+      }, 3500);
     }
 
     async function loadMenu() {
@@ -1004,7 +1009,6 @@
       if (data) { menuItems = data; renderCategories(); renderMenu(); }
     }
 
-    /* ===== Category tabs (text only, tab-bar style) ===== */
     function renderCategories() {
       const container = document.getElementById('category-cards-container');
       const categories = [
@@ -1028,7 +1032,6 @@
       return [`./images/${item.item_key}.png`];
     }
 
-    /* ===== Favorites (visual only, resets on reload) + minus button helper ===== */
     const favItems = new Set();
     function toggleFav(key) {
       favItems.has(key) ? favItems.delete(key) : favItems.add(key);
@@ -1125,13 +1128,10 @@
       
       document.getElementById('modal-title').innerText = activeModalItem.name_kh;
       
-      // Dynamic Customization options for Drinks category
       const drinkSection = document.getElementById('drink-customization-section');
       if (activeModalItem.category === 'drinks') {
         drinkSection.style.display = 'block';
         selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
-        
-        // Reset pills UI active states
         document.querySelectorAll('#sugar-pills .pill').forEach(p => {
           p.classList.toggle('active', p.innerText.trim() === '100%');
         });
@@ -1235,7 +1235,6 @@
     function renderCartDrawer() {
       document.getElementById('drawer-cart-items').innerHTML = cart.map((c, idx) => {
         const product = menuItems.find(m => m.item_key === c.id);
-        
         let optionsHtml = '';
         if (c.options) {
           optionsHtml = `<div style="font-size: 0.75rem; color: var(--warn); font-weight: 600;">• ស្ករ: ${c.options.sugar} | ទឹកកក: ${c.options.ice}</div>`;
@@ -1263,12 +1262,10 @@
 
     async function setOrderType(type, element) {
       await checkDeliveryStatus();
-      
       if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
         alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។`);
         return;
       }
-
       element.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
       element.classList.add('active');
       selectedOrderType = type;
@@ -1277,7 +1274,6 @@
       updateCartState();
     }
 
-    /* --- INTERACTIVE MAP PICKER LOGIC (GRAB / EGET STYLE) --- */
     let gMap = null, gUserDot = null, gMapsPromise = null;
     const liftPin = on => document.querySelector('#map-modal .center-pin-marker')?.classList.toggle('lifted', on);
 
@@ -1286,7 +1282,6 @@
       if (gMapsPromise) return gMapsPromise;
       gMapsPromise = new Promise((resolve, reject) => {
         window.__gmReady = resolve;
-        // If Google rejects the key / domain / billing, fall back to the free map instead of showing a grey box.
         window.gm_authFailure = () => { console.warn('Google Maps key rejected'); if (gMap) { gMap = null; document.getElementById('picker-map').innerHTML = ''; openLeafletMap(tempLat, tempLng); } };
         const sc = document.createElement('script');
         sc.async = true;
@@ -1306,14 +1301,12 @@
           gestureHandling: 'greedy', clickableIcons: false, keyboardShortcuts: false
         });
 
-        // Delivery area
         new google.maps.Circle({
           map: gMap, center: { lat: STORE_LAT, lng: STORE_LNG }, radius: MAX_DELIVERY_KM * 1000,
           strokeColor: '#0f766e', strokeOpacity: 0.8, strokeWeight: 1.5,
           fillColor: '#0f766e', fillOpacity: 0.05, clickable: false
         });
 
-        // Store marker, named Kuyteav_Epheap
         const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="15" fill="#005d7b" stroke="#fff" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">🍜</text></svg>';
         new google.maps.Marker({
           map: gMap, position: { lat: STORE_LAT, lng: STORE_LNG }, title: 'Kuyteav_Epheap', clickable: false,
@@ -1321,7 +1314,6 @@
           label: { text: 'Kuyteav_Epheap', color: '#005d7b', fontWeight: '800', fontSize: '12px' }
         });
 
-        // The centre pin stays fixed; read the map centre as it moves
         let raf = 0;
         gMap.addListener('center_changed', () => {
           if (raf) return;
@@ -1344,14 +1336,12 @@
 
     function openMapModal() {
       document.getElementById('map-modal').style.display = 'flex';
-
       const initialLat = clientLat || STORE_LAT;
       const initialLng = clientLng || STORE_LNG;
       tempLat = initialLat;
       tempLng = initialLng;
 
       const afterOpen = () => {
-        // Auto-locate user on open if no custom position saved yet
         if (!clientLat && navigator.geolocation) recenterMapToUser();
       };
 
@@ -1374,24 +1364,20 @@
           zoomAnimation: true, fadeAnimation: true, markerZoomAnimation: true
         }).setView([initialLat, initialLng], 17);
 
-        // Free OpenStreetMap tiles. For a Google-like look, put a MapTiler key in MAPTILER_KEY.
         L.tileLayer(MAPTILER_KEY
           ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
           : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
         }).addTo(pickerMap);
-        // Map-data credits only (the licence requires them); no Leaflet logo.
         L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(pickerMap);
 
         L.control.zoom({ position: 'topright' }).addTo(pickerMap);
 
-        // Delivery area
         L.circle([STORE_LAT, STORE_LNG], {
           radius: MAX_DELIVERY_KM * 1000, color: '#0f766e', weight: 1.5, dashArray: '6 6',
           fillColor: '#0f766e', fillOpacity: 0.05, interactive: false
         }).addTo(pickerMap);
 
-        // Store marker, named Kuyteav_Epheap
         const shopIcon = L.divIcon({
           className: 'custom-shop-icon',
           html: `<div style="background:#005d7b; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.35);">🍜</div>`,
@@ -1401,7 +1387,6 @@
         storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: shopIcon, title: 'Kuyteav_Epheap' }).addTo(pickerMap);
         storeMarker.bindTooltip('Kuyteav_Epheap', { permanent: true, direction: 'top', offset: [0, -18], className: 'store-tip' });
 
-        // Smooth centre tracking (one update per frame) + the centre pin lifts while the map moves
         let moveRaf = 0;
         const pinEl = () => document.querySelector('#map-modal .center-pin-marker');
         pickerMap.on('move', () => {
@@ -1424,7 +1409,6 @@
         pickerMap.invalidateSize();
         updateMapDisplayCoords(tempLat, tempLng);
       }, 250);
-
     }
 
     function updateMapDisplayCoords(lat, lng) {
@@ -1468,7 +1452,6 @@
 
     function confirmMapLocation() {
       const distance = calculateDistance(STORE_LAT, STORE_LNG, tempLat, tempLng);
-
       if (distance > MAX_DELIVERY_KM) {
         alert(`📍 ទីតាំងដែលបានជ្រើសរើសនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
         return;
@@ -1494,7 +1477,6 @@
       document.getElementById('map-modal').style.display = 'none';
     }
 
-    /* ================= ABA PAY FLOW ================= */
     let payTranId = null, payDeeplink = "", payPollTimer = null, payStartedAt = 0;
     const PAY_MAX_MS = 12 * 60 * 1000;
 
@@ -1536,6 +1518,7 @@
       try { if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true }); else window.open(url, '_blank'); }
       catch (e) { window.open(url, '_blank'); }
     }
+    
     function openAbaApp() {
       if (!payDeeplink || !payTranId) return;
       const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
@@ -1627,11 +1610,9 @@
       updateCartState();
     }
 
-
-    /* ===== Telegram login (normal browser) + "require username" mode, switched in the admin panel ===== */
     const BOT_USERNAME = 'Kuyteav_Epheap_bot';
     const inTelegram = !!(tg && tg.initData);
-    let requireLogin = true; // strict by default; the admin can switch it off
+    let requireLogin = true;
 
     function getStoredLogin() {
       try {
@@ -1671,7 +1652,7 @@
       sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
       document.getElementById('tg-widget-slot').appendChild(sc);
     }
-    // Cambodian mobile numbers (TRC prefix table). Prefixes marked * in the table have 7 digits after the prefix (10 digits total).
+
     const KH_PREFIX_9 = ['010','011','012','013','015','016','017','060','061','066','067','068','069','070','077','078','079','080','081','083','084','085','086','087','089','090','092','093','095','098','099'];
     const KH_PREFIX_10 = ['018','031','038','071','076','088','096','097'];
     function normalizeKhPhone(raw) {
@@ -1702,10 +1683,10 @@
       } catch (e) {}
       const banner = document.getElementById('no-username-banner');
       if (inTelegram) {
-        if (!tgUsername) banner.style.display = 'block'; // no username = cannot order
+        if (!tgUsername) banner.style.display = 'block';
         return;
       }
-      banner.style.display = 'none';           // not in Telegram: the "no username" note does not apply
+      banner.style.display = 'none';
       const stored = getStoredLogin();
       if (stored) applyLogin(stored);
       else if (requireLogin) showLoginWidget();
@@ -1777,53 +1758,19 @@
       }
     }
 
-// --- LISTEN FOR REALTIME RELOAD BROADCAST ---
-let isForceReloading = false;
+    let isForceReloading = false;
+    const userChannel = supabaseClient.channel('admin-actions');
 
-const userChannel = supabaseClient.channel('admin-actions');
-
-userChannel
-  .on('broadcast', { event: 'force_reload' }, payload => {
-    console.log("Received reload signal from admin. Clearing session and reloading page...");
-    
-    isForceReloading = true;
-    localStorage.removeItem('davin_app_session');
-    
-    cart = [];
-    clientLat = null;
-    clientLng = null;
-    gpsLink = "";
-    isLocationPinned = false;
-    currentDeliveryFee = 0.00;
-    
-    window.location.href = window.location.pathname + '?v=' + Date.now();
-  })
-  .subscribe((status) => {
-    if (status === 'SUBSCRIBED') {
-      console.log("Listening for admin reload broadcasts.");
-    }
-  });
-
-function saveSessionState() {
-  if (isForceReloading) return;
-
-  const state = {
-    cart: cart,
-    customerName: document.getElementById('input-customer-name')?.value || '',
-    phone: document.getElementById('input-phone')?.value || '',
-    remark: document.getElementById('input-remark')?.value || '',
-    orderType: selectedOrderType,
-    clientLat: clientLat,
-    clientLng: clientLng,
-    gpsLink: gpsLink,
-    isLocationPinned: isLocationPinned,
-    currentDeliveryFee: currentDeliveryFee,
-    address: document.getElementById('input-address')?.value || '',
-    scrollPosition: window.scrollY
-  };
-  state.tgId = currentTgKey();
-      localStorage.setItem('davin_app_session', JSON.stringify(state));
-}
+    userChannel
+      .on('broadcast', { event: 'force_reload' }, payload => {
+        isForceReloading = true;
+        localStorage.removeItem('davin_app_session');
+        cart = [];
+        clientLat = null; clientLng = null; gpsLink = "";
+        isLocationPinned = false; currentDeliveryFee = 0.00;
+        window.location.href = window.location.pathname + '?v=' + Date.now();
+      })
+      .subscribe();
   </script>
 </body>
 </html>
