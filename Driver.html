@@ -8,53 +8,101 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap">
 <style>
-  :root { --brand:#0f766e; --ink:#17212b; --sub:#667; --line:#e3e7ec; --bg:#f2f4f7; --surface:#fff; --bad:#c0392b; --warn:#b7791f; }
-  * { box-sizing: border-box; } body { font-family: 'Kantumruy Pro', 'Noto Sans Khmer', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif; line-height: 1.65; -webkit-font-smoothing: antialiased; background: var(--bg); color: var(--ink); margin: 0; padding: 14px; padding-bottom: 60px; }
-  .wrap { max-width: 480px; margin: 0 auto; } .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
-  h1 { font-size: 18px; margin: 0 0 10px; color: var(--brand); } h2 { font-size: 15px; margin: 6px 0 10px; }
-  input, button { font-family: inherit; }
-  input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; margin-bottom: 10px; }
-  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 700; background: var(--brand); color: #fff; }
-  button.g { background: #eef1f4; color: var(--ink); } button.b { background: var(--bad); } button.w { width: 100%; margin-top: 8px; } button:disabled { opacity: .5; }
-  .muted { color: var(--sub); font-size: 12.5px; } .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .pill { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; } .on { background: #d9f2ee; color: var(--brand); } .off { background: #eceff3; color: var(--sub); }
-  .job { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; } .job ul { margin: 6px 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; }
-  .job a { color: var(--brand); font-weight: 700; } .tot { font-weight: 800; } .hide { display: none; } .dim { opacity: .45; pointer-events: none; }
+:root{--ink:#10211f;--sub:#5d6f6c;--line:#dfe7e5;--bg:#eef2f1;--deep:#0b3d39;--brand:#0f766e;--mint:#d9f2ee;--amber:#b45309;--amber-l:#fdf1dc;--bad:#c62828;--sb:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Kantumruy Pro','Noto Sans Khmer','Khmer OS Battambang',system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--ink);font-size:14px}
+button,input{font:inherit;color:inherit}
+.hide{display:none!important}.muted{color:var(--sub);font-size:12.5px}
+/* login */
+#login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;background:linear-gradient(170deg,var(--deep) 0 42%,var(--bg) 42%)}
+#login .box{background:#fff;border-radius:24px;padding:24px 20px;max-width:420px;width:100%;margin:0 auto;box-shadow:0 18px 40px rgba(11,61,57,.18)}
+#login h1{margin:0 0 4px;font-size:22px;color:var(--deep)}
+.hero{color:#fff;max-width:420px;width:100%;margin:0 auto 18px;font-size:40px}
+input{width:100%;height:52px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;font-size:16px;background:#f8fbfa;margin-top:10px;outline:0}
+input:focus{border-color:var(--brand);background:#fff}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:15.5px;cursor:pointer;margin-top:12px;transition:transform .1s}
+.btn:active{transform:scale(.98)}.btn:disabled{opacity:.5}
+.btn.soft{background:var(--mint);color:var(--brand)}.btn.red{background:#fde8e8;color:var(--bad)}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--deep);color:#fff;padding:14px 16px 16px;border-radius:0 0 24px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top b{font-size:17px;display:block}.top small{opacity:.7}
+.sw{display:flex;align-items:center;gap:10px;border:0;border-radius:99px;background:rgba(255,255,255,.12);padding:6px 6px 6px 14px;color:#fff;font-weight:800;cursor:pointer}
+.sw .tr{width:52px;height:30px;border-radius:99px;background:#46605d;position:relative;transition:.2s}
+.sw .tr::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on .tr{background:#34d399}.sw.on .tr::after{left:25px}
+/* content */
+main{padding:14px 14px calc(96px + var(--sb));max-width:520px;margin:0 auto}
+h2{font-size:16px;margin:4px 2px 12px}
+.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(16,33,31,.06)}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.price{font-weight:800;font-size:20px;color:var(--brand)}
+.name{font-weight:800;font-size:16px}
+.rail{display:flex;align-items:center;margin:14px 4px 4px}
+.rail i{width:14px;height:14px;border-radius:50%;background:#cfdad8;flex:none}
+.rail b{flex:1;height:4px;background:#cfdad8;margin:0 2px;border-radius:2px}
+.rail .d{background:var(--brand)}
+.lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub)}.lbl .c{color:var(--brand);font-weight:800}
+.acts{display:flex;gap:8px;margin:12px 0 4px}
+.chip{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border-radius:14px;background:var(--mint);color:var(--brand);font-weight:700;text-decoration:none}
+.items{margin:10px 0 2px;padding:10px 12px;background:#f5f8f7;border-radius:14px;font-size:13.5px}
+.items div{display:flex;justify-content:space-between;gap:8px}
+.addr{margin-top:8px;font-size:13px;color:var(--sub)}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--amber-l);color:var(--amber);font-size:12px;font-weight:700}
+.empty{text-align:center;padding:36px 16px;color:var(--sub)}.empty span{font-size:42px;display:block}
+/* tabs */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:6px 8px calc(6px + var(--sb))}
+nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;color:var(--sub);font-size:11.5px;font-weight:700;position:relative;cursor:pointer}
+nav button.on{color:var(--brand);background:var(--mint)}
+nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-style:normal;line-height:18px;text-align:center;padding:0 5px}
+#toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;z-index:99;max-width:90%;font-weight:600}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card" id="login">
-    <h1>🛵 Delivery · ចូលគណនី</h1>
+<div id="login">
+  <div class="hero">🛵</div>
+  <div class="box">
+    <h1>ចូលគណនីអ្នកដឹក</h1><div class="muted">Epheap Delivery</div>
     <input id="lid" placeholder="ID របស់អ្នកដឹក" autocomplete="username" autocapitalize="off">
     <input id="lpw" type="password" placeholder="ពាក្យសម្ងាត់" autocomplete="current-password">
-    <button class="w" id="lbtn">ចូល</button>
-    <div class="muted" id="lerr" style="margin-top:8px;color:var(--bad)"></div>
-  </div>
-
-  <div id="app" class="hide">
-    <div class="card">
-      <div class="row"><div><b id="dname"></b><div class="muted">ID: <span id="did"></span></div></div><span class="pill off" id="state">បិទ</span></div>
-      <div class="row" style="margin-top:10px">
-        <button id="tgl" style="flex:1">🟢 បើកសកម្ម (Active)</button>
-        <button class="g" id="out">ចាកចេញ</button>
-      </div>
-      <div class="muted" id="inactive" style="margin-top:8px">ពេលបិទ អ្នកមិនអាចជ្រើសរើសការដឹកបានទេ។ សូមបើក «សកម្ម» ដើម្បីមើលបញ្ជី។</div>
-    </div>
-
-    <div class="card" id="mineBox"><h2>📦 ការងាររបស់ខ្ញុំ</h2><div id="mine" class="muted">គ្មាន</div></div>
-    <div class="card" id="openBox"><h2>🆕 ការកម្មង់ត្រូវការអ្នកដឹក</h2><div id="open" class="muted">គ្មាន</div></div>
+    <button class="btn" id="lbtn">ចូល</button>
+    <div class="muted" id="lerr" style="margin-top:10px;color:var(--bad)"></div>
   </div>
 </div>
+
+<div id="app" class="hide">
+  <header class="top">
+    <div><b id="dname"></b><small>ID: <span id="did"></span></small></div>
+    <button class="sw" id="tgl" role="switch" aria-checked="false"><span id="swl">បិទ</span><span class="tr"></span></button>
+  </header>
+  <main>
+    <section id="p-mine"><h2>📦 ការងាររបស់ខ្ញុំ</h2><div id="mine"></div></section>
+    <section id="p-open" class="hide"><h2>🆕 ការកម្មង់ត្រូវការអ្នកដឹក</h2><div id="open"></div></section>
+    <section id="p-me" class="hide">
+      <h2>👤 គណនី</h2>
+      <div class="card"><div class="name" id="mname"></div><div class="muted">ID: <span id="mid"></span></div>
+        <div style="margin-top:10px"><span class="tag" id="mstate"></span></div>
+        <button class="btn red" id="out">ចាកចេញ</button></div>
+    </section>
+  </main>
+  <nav>
+    <button data-t="mine" class="on"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/></svg>ការងារ<em id="b-mine" class="hide"></em></button>
+    <button data-t="open"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ការកម្មង់ថ្មី<em id="b-open" class="hide"></em></button>
+    <button data-t="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>គណនី</button>
+  </nav>
+</div>
+<div id="toast" class="hide"></div>
+
 <script>
 (function () {
   var API = 'https://lykgwttlhqedyrkxfoja.supabase.co/functions/v1/driver-api';
   var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs';
   var $ = function (id) { return document.getElementById(id); };
   var token = localStorage.getItem('drv_token') || '';
-  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null;
+  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine';
 
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function toast(m) { var t = $('toast'); t.textContent = m; t.classList.remove('hide'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.add('hide'); }, 3000); }
   function call(body) {
     body.token = token;
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(body) })
@@ -62,6 +110,13 @@
       .catch(function () { return { error: 'មិនអាចភ្ជាប់បានទេ' }; });
   }
   function logout() { token = ''; localStorage.removeItem('drv_token'); stopTracking(); clearInterval(timer); $('app').classList.add('hide'); $('login').classList.remove('hide'); }
+  function setTab(t) {
+    tab = t;
+    ['mine', 'open', 'me'].forEach(function (k) { $('p-' + k).classList.toggle('hide', k !== t); });
+    document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('nav button').forEach(function (b) { b.onclick = function () { setTab(b.dataset.t); }; });
 
   $('lbtn').onclick = function () {
     $('lerr').textContent = ''; $('lbtn').disabled = true;
@@ -72,70 +127,72 @@
     });
   };
   $('out').onclick = logout;
-  $('tgl').onclick = function () {
-    call({ action: 'set_active', active: !active }).then(function (j) { if (j.error) alert(j.error); refresh(); });
-  };
+  function toggle() { call({ action: 'set_active', active: !active }).then(function (j) { if (j.error) toast(j.error); refresh(); }); }
+  $('tgl').onclick = toggle;
 
   function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(refresh, 8000); }
 
   function itemsHtml(items) {
-    return '<ul>' + (items || []).map(function (i) {
-      return '<li>' + esc(i.name) + ' ×' + esc(i.qty) + (i.sugar ? ' <span class="muted">(ស្ករ ' + esc(i.sugar) + ', ' + esc(i.ice) + ')</span>' : '') + '</li>';
-    }).join('') + '</ul>';
+    return '<div class="items">' + (items || []).map(function (i) {
+      return '<div><span>' + esc(i.name) + (i.sugar ? ' <span class="muted">(ស្ករ ' + esc(i.sugar) + ', ' + esc(i.ice) + ')</span>' : '') + '</span><b>×' + esc(i.qty) + '</b></div>';
+    }).join('') + '</div>';
   }
+  function badge(id, n) { var e = $(id); e.textContent = n; e.classList.toggle('hide', !n); }
 
   function refresh() {
     call({ action: 'list' }).then(function (j) {
       if (j.code === 'LOGIN') { logout(); return; }
       if (j.error) return;
       active = j.is_active; me = j.driver;
-      $('dname').textContent = me.name; $('did').textContent = me.login_id;
-      $('state').textContent = active ? 'សកម្ម' : 'បិទ'; $('state').className = 'pill ' + (active ? 'on' : 'off');
-      $('tgl').textContent = active ? '🔴 បិទកម្មវិធី (Close)' : '🟢 បើកសកម្ម (Active)';
-      $('tgl').className = active ? 'b' : '';
-      $('inactive').classList.toggle('hide', active);
-      $('openBox').classList.toggle('dim', !active);
+      $('dname').textContent = me.name; $('did').textContent = me.login_id; $('mname').textContent = me.name; $('mid').textContent = me.login_id;
+      $('tgl').classList.toggle('on', active); $('tgl').setAttribute('aria-checked', active); $('swl').textContent = active ? 'សកម្ម' : 'បិទ';
+      $('mstate').textContent = active ? '🟢 កំពុងសកម្ម' : '⚪ បិទ';
 
-      // ----- my approved jobs: details are unhidden here -----
       var m = j.mine || [];
+      badge('b-mine', m.length);
       $('mine').innerHTML = m.length ? m.map(function (o) {
         var map = o.lat != null ? 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng : (o.location_link || '');
-        var st = o.delivery_status, btn = '';
-        // 3 stages only: not yet -> delivering -> delivered (old 'pickup' / 'arrived' rows are treated as the nearest stage)
-        if (st === 'not_yet' || st === 'pickup') btn = '<button class="w" data-s="delivering" data-id="' + esc(o.tran_id) + '">🛵 ចាប់ផ្ដើមដឹក (Start delivery)</button><div class="muted" style="margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ។</div>';
-        if (st === 'delivering' || st === 'arrived') btn = '<button class="w" data-s="delivered" data-id="' + esc(o.tran_id) + '">✅ អតិថិជនបានទទួលអីវ៉ាន់ (Finish)</button><div class="muted" style="margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>';
-        return '<div class="job"><b>' + esc(o.customer_name) + '</b> <span class="tot">$' + Number(o.total).toFixed(2) + '</span>' +
-          '<div>📞 <a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></div>' +
-          (o.address ? '<div class="muted">📍 ' + esc(o.address) + '</div>' : '') +
-          (map ? '<div><a href="' + esc(map) + '" target="_blank" rel="noopener">🗺️ បើកផែនទី / ណែនាំផ្លូវ</a></div>' : '') +
+        var st = o.delivery_status, go = (st === 'delivering' || st === 'arrived'), id = esc(o.tran_id);
+        var btn = go
+          ? '<button class="btn" data-s="delivered" data-id="' + id + '">✅ អតិថិជនបានទទួលអីវ៉ាន់ (Finish)</button><div class="muted" style="text-align:center;margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>'
+          : '<button class="btn" data-s="delivering" data-id="' + id + '">🛵 ចាប់ផ្ដើមដឹក (Start)</button><div class="muted" style="text-align:center;margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ</div>';
+        return '<div class="card"><div class="row"><div class="name">' + esc(o.customer_name) + '</div><div class="price">$' + Number(o.total).toFixed(2) + '</div></div>' +
+          '<div class="rail"><i class="d"></i><b class="' + (go ? 'd' : '') + '"></b><i class="' + (go ? 'd' : '') + '"></i><b></b><i></i></div>' +
+          '<div class="lbl"><span class="' + (go ? '' : 'c') + '">មិនទាន់ដឹក</span><span class="' + (go ? 'c' : '') + '">កំពុងដឹក</span><span>បានទទួល</span></div>' +
+          (o.address ? '<div class="addr">📍 ' + esc(o.address) + '</div>' : '') +
+          '<div class="acts"><a class="chip" href="tel:' + esc(o.phone) + '">📞 ' + esc(o.phone) + '</a>' +
+          (map ? '<a class="chip" href="' + esc(map) + '" target="_blank" rel="noopener">🗺️ ផែនទី</a>' : '') + '</div>' +
           itemsHtml(o.items) + btn + '</div>';
-      }).join('') : '<span class="muted">គ្មានការងារទេ</span>';
+      }).join('') : '<div class="empty"><span>📭</span>គ្មានការងារទេ<br>ចូលទៅ «ការកម្មង់ថ្មី» ដើម្បីស្នើសុំដឹក</div>';
       document.querySelectorAll('#mine button[data-s]').forEach(function (b) {
-        b.onclick = function () { b.disabled = true; call({ action: 'stage', tran_id: b.dataset.id, stage: b.dataset.s }).then(function (r) { if (r.error) alert(r.error); refresh(); }); };
+        b.onclick = function () { b.disabled = true; call({ action: 'stage', tran_id: b.dataset.id, stage: b.dataset.s }).then(function (r) { if (r.error) toast(r.error); refresh(); }); };
       });
 
-      // ----- only one delivery is tracked at a time -----
       var d = m.filter(function (o) { return o.delivery_status === 'delivering'; })[0];
       if (d) startTracking(d.tran_id); else stopTracking();
 
-      // ----- open list: NO phone / address / map pin until the admin approves -----
       var o2 = j.open || [], req = j.requested || [];
-      $('open').innerHTML = !active ? '<span class="muted">សូមបើក «សកម្ម» ជាមុនសិន</span>' : o2.length ? o2.map(function (o) {
-        var asked = req.indexOf(o.tran_id) >= 0;
-        return '<div class="job"><span class="tot">$' + Number(o.total).toFixed(2) + '</span> <span class="muted">· អាសយដ្ឋាន និងផែនទី នឹងបង្ហាញពេលអនុម័ត</span>' + itemsHtml(o.items) +
-          (asked ? '<button class="w g" disabled>⏳ បានស្នើហើយ — រង់ចាំអនុម័ត</button>' : '<button class="w" data-r="' + esc(o.tran_id) + '">🙋 ស្នើសុំដឹក (Request)</button>') + '</div>';
-      }).join('') : '<span class="muted">មិនទាន់មានការកម្មង់ថ្មីទេ</span>';
+      badge('b-open', active ? o2.length : 0);
+      $('open').innerHTML = !active
+        ? '<div class="empty"><span>😴</span>អ្នកកំពុងបិទ<br>សូមបើក «សកម្ម» ដើម្បីមើលបញ្ជី<button class="btn" id="goon">🟢 បើកសកម្ម</button></div>'
+        : o2.length ? o2.map(function (o) {
+          var asked = req.indexOf(o.tran_id) >= 0;
+          return '<div class="card"><div class="row"><span class="price">$' + Number(o.total).toFixed(2) + '</span><span class="tag">ថ្មី</span></div>' +
+            '<div class="muted" style="margin-top:4px">អាសយដ្ឋាន និងផែនទី នឹងបង្ហាញពេលអនុម័ត</div>' + itemsHtml(o.items) +
+            (asked ? '<button class="btn soft" disabled>⏳ បានស្នើហើយ — រង់ចាំអនុម័ត</button>' : '<button class="btn" data-r="' + esc(o.tran_id) + '">🙋 ស្នើសុំដឹក (Request)</button>') + '</div>';
+        }).join('') : '<div class="empty"><span>🍃</span>មិនទាន់មានការកម្មង់ថ្មីទេ</div>';
+      if ($('goon')) $('goon').onclick = toggle;
       document.querySelectorAll('#open button[data-r]').forEach(function (b) {
-        b.onclick = function () { b.disabled = true; call({ action: 'request', tran_id: b.dataset.r }).then(function (r) { if (r.error) alert(r.error); refresh(); }); };
+        b.onclick = function () { b.disabled = true; call({ action: 'request', tran_id: b.dataset.r }).then(function (r) { if (r.error) toast(r.error); else toast('បានស្នើសុំហើយ'); refresh(); }); };
       });
     });
   }
 
-  /* ---- live location: ONLY while the stage is "delivering" ---- */
+  /* live location: ONLY while the stage is "delivering" */
   function startTracking(id) {
     if (trackingId === id) return;
     stopTracking(); trackingId = id;
-    if (!navigator.geolocation) { alert('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
+    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
     watchId = navigator.geolocation.watchPosition(function (p) { lastPos = p.coords; }, function () {}, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
     postTimer = setInterval(function () {
       if (lastPos) call({ action: 'location', tran_id: trackingId, lat: lastPos.latitude, lng: lastPos.longitude });
