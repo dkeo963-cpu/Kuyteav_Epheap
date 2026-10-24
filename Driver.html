@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Delivery · Kuyteav_Epheap</title>
+<style>
+  :root { --brand:#0f766e; --ink:#17212b; --sub:#667; --line:#e3e7ec; --bg:#f2f4f7; --surface:#fff; --bad:#c0392b; --warn:#b7791f; }
+  * { box-sizing: border-box; } body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--ink); margin: 0; padding: 14px; padding-bottom: 60px; }
+  .wrap { max-width: 480px; margin: 0 auto; } .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  h1 { font-size: 18px; margin: 0 0 10px; color: var(--brand); } h2 { font-size: 15px; margin: 6px 0 10px; }
+  input { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; margin-bottom: 10px; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 12px 14px; font-weight: 700; background: var(--brand); color: #fff; }
+  button.g { background: #eef1f4; color: var(--ink); } button.b { background: var(--bad); } button.w { width: 100%; margin-top: 8px; } button:disabled { opacity: .5; }
+  .muted { color: var(--sub); font-size: 12.5px; } .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .pill { padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; } .on { background: #d9f2ee; color: var(--brand); } .off { background: #eceff3; color: var(--sub); }
+  .job { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; } .job ul { margin: 6px 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; }
+  .job a { color: var(--brand); font-weight: 700; } .tot { font-weight: 800; } .hide { display: none; } .dim { opacity: .45; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" id="login">
+    <h1>🛵 Delivery · ចូលគណនី</h1>
+    <input id="lid" placeholder="ID របស់អ្នកដឹក" autocomplete="username" autocapitalize="off">
+    <input id="lpw" type="password" placeholder="ពាក្យសម្ងាត់" autocomplete="current-password">
+    <button class="w" id="lbtn">ចូល</button>
+    <div class="muted" id="lerr" style="margin-top:8px;color:var(--bad)"></div>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="card">
+      <div class="row"><div><b id="dname"></b><div class="muted">ID: <span id="did"></span></div></div><span class="pill off" id="state">បិទ</span></div>
+      <div class="row" style="margin-top:10px">
+        <button id="tgl" style="flex:1">🟢 បើកសកម្ម (Active)</button>
+        <button class="g" id="out">ចាកចេញ</button>
+      </div>
+      <div class="muted" id="inactive" style="margin-top:8px">ពេលបិទ អ្នកមិនអាចជ្រើសរើសការដឹកបានទេ។ សូមបើក «សកម្ម» ដើម្បីមើលបញ្ជី។</div>
+    </div>
+
+    <div class="card" id="mineBox"><h2>📦 ការងាររបស់ខ្ញុំ</h2><div id="mine" class="muted">គ្មាន</div></div>
+    <div class="card" id="openBox"><h2>🆕 ការកម្មង់ត្រូវការអ្នកដឹក</h2><div id="open" class="muted">គ្មាន</div></div>
+  </div>
+</div>
+<script>
+(function () {
+  var API = 'https://lykgwttlhqedyrkxfoja.supabase.co/functions/v1/driver-api';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs';
+  var $ = function (id) { return document.getElementById(id); };
+  var token = localStorage.getItem('drv_token') || '';
+  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null;
+
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function call(body) {
+    body.token = token;
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }); })
+      .catch(function () { return { error: 'មិនអាចភ្ជាប់បានទេ' }; });
+  }
+  function logout() { token = ''; localStorage.removeItem('drv_token'); stopTracking(); clearInterval(timer); $('app').classList.add('hide'); $('login').classList.remove('hide'); }
+
+  $('lbtn').onclick = function () {
+    $('lerr').textContent = ''; $('lbtn').disabled = true;
+    call({ action: 'login', login_id: $('lid').value.trim(), password: $('lpw').value }).then(function (j) {
+      $('lbtn').disabled = false;
+      if (j.error) { $('lerr').textContent = j.error; return; }
+      token = j.token; localStorage.setItem('drv_token', token); $('lpw').value = ''; start();
+    });
+  };
+  $('out').onclick = logout;
+  $('tgl').onclick = function () {
+    call({ action: 'set_active', active: !active }).then(function (j) { if (j.error) alert(j.error); refresh(); });
+  };
+
+  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(refresh, 8000); }
+
+  function itemsHtml(items) {
+    return '<ul>' + (items || []).map(function (i) {
+      return '<li>' + esc(i.name) + ' ×' + esc(i.qty) + (i.sugar ? ' <span class="muted">(ស្ករ ' + esc(i.sugar) + ', ' + esc(i.ice) + ')</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  function refresh() {
+    call({ action: 'list' }).then(function (j) {
+      if (j.code === 'LOGIN') { logout(); return; }
+      if (j.error) return;
+      active = j.is_active; me = j.driver;
+      $('dname').textContent = me.name; $('did').textContent = me.login_id;
+      $('state').textContent = active ? 'សកម្ម' : 'បិទ'; $('state').className = 'pill ' + (active ? 'on' : 'off');
+      $('tgl').textContent = active ? '🔴 បិទកម្មវិធី (Close)' : '🟢 បើកសកម្ម (Active)';
+      $('tgl').className = active ? 'b' : '';
+      $('inactive').classList.toggle('hide', active);
+      $('openBox').classList.toggle('dim', !active);
+
+      // ----- my approved jobs: details are unhidden here -----
+      var m = j.mine || [];
+      $('mine').innerHTML = m.length ? m.map(function (o) {
+        var map = o.lat != null ? 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng : (o.location_link || '');
+        var st = o.delivery_status, btn = '';
+        if (st === 'not_yet') btn = '<button class="w" data-s="pickup" data-id="' + esc(o.tran_id) + '">🏪 ចាប់ផ្តើមដឹក (Start)</button>';
+        if (st === 'pickup') btn = '<button class="w" data-s="delivering" data-id="' + esc(o.tran_id) + '">🛵 ដល់ហាងហើយ — ចាប់ផ្ដើមដឹក (Start delivery)</button><div class="muted" style="margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ។</div>';
+        if (st === 'delivering') btn = '<button class="w" data-s="arrived" data-id="' + esc(o.tran_id) + '">📍 ដល់មកទីតាំងហើយ (Arrived)</button><div class="muted" style="margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>';
+        if (st === 'arrived') btn = '<button class="w" data-s="delivered" data-id="' + esc(o.tran_id) + '">✅ អតិថិជនបានយកអីវ៉ាន់ (Finish)</button>';
+        return '<div class="job"><b>' + esc(o.customer_name) + '</b> <span class="tot">$' + Number(o.total).toFixed(2) + '</span>' +
+          '<div>📞 <a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></div>' +
+          (o.address ? '<div class="muted">📍 ' + esc(o.address) + '</div>' : '') +
+          (map ? '<div><a href="' + esc(map) + '" target="_blank" rel="noopener">🗺️ បើកផែនទី / ណែនាំផ្លូវ</a></div>' : '') +
+          itemsHtml(o.items) + btn + '</div>';
+      }).join('') : '<span class="muted">គ្មានការងារទេ</span>';
+      document.querySelectorAll('#mine button[data-s]').forEach(function (b) {
+        b.onclick = function () { b.disabled = true; call({ action: 'stage', tran_id: b.dataset.id, stage: b.dataset.s }).then(function (r) { if (r.error) alert(r.error); refresh(); }); };
+      });
+
+      // ----- only one delivery is tracked at a time -----
+      var d = m.filter(function (o) { return o.delivery_status === 'delivering'; })[0];
+      if (d) startTracking(d.tran_id); else stopTracking();
+
+      // ----- open list: NO phone / address / map pin until the admin approves -----
+      var o2 = j.open || [], req = j.requested || [];
+      $('open').innerHTML = !active ? '<span class="muted">សូមបើក «សកម្ម» ជាមុនសិន</span>' : o2.length ? o2.map(function (o) {
+        var asked = req.indexOf(o.tran_id) >= 0;
+        return '<div class="job"><span class="tot">$' + Number(o.total).toFixed(2) + '</span> <span class="muted">· អាសយដ្ឋាន និងផែនទី នឹងបង្ហាញពេលអនុម័ត</span>' + itemsHtml(o.items) +
+          (asked ? '<button class="w g" disabled>⏳ បានស្នើហើយ — រង់ចាំអនុម័ត</button>' : '<button class="w" data-r="' + esc(o.tran_id) + '">🙋 ស្នើសុំដឹក (Request)</button>') + '</div>';
+      }).join('') : '<span class="muted">មិនទាន់មានការកម្មង់ថ្មីទេ</span>';
+      document.querySelectorAll('#open button[data-r]').forEach(function (b) {
+        b.onclick = function () { b.disabled = true; call({ action: 'request', tran_id: b.dataset.r }).then(function (r) { if (r.error) alert(r.error); refresh(); }); };
+      });
+    });
+  }
+
+  /* ---- live location: ONLY while the stage is "delivering" ---- */
+  function startTracking(id) {
+    if (trackingId === id) return;
+    stopTracking(); trackingId = id;
+    if (!navigator.geolocation) { alert('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
+    watchId = navigator.geolocation.watchPosition(function (p) { lastPos = p.coords; }, function () {}, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
+    postTimer = setInterval(function () {
+      if (lastPos) call({ action: 'location', tran_id: trackingId, lat: lastPos.latitude, lng: lastPos.longitude });
+    }, 6000);
+    if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
+  }
+  function stopTracking() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = null; clearInterval(postTimer); postTimer = null; trackingId = null; lastPos = null;
+    if (wake) { try { wake.release(); } catch (e) {} wake = null; }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && trackingId && navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
+  });
+
+  if (token) start();
+})();
+</script>
+</body>
+</html>
