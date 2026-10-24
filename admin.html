@@ -1048,14 +1048,19 @@ if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកត
 
 /* ===== DELIVERY: drivers + dispatching ===== */
 let DL = { orders: [], requests: [], drivers: [] };
-const DSTAT = { not_yet: "មិនទាន់ដឹក", pickup: "ចាប់ផ្តើមដឹក", delivering: "កំពុងដឹក", arrived: "ដល់មកទីតាំង", delivered: "បានយកអីវ៉ាន់" };
+const DSTAT = { not_yet: "មិនទាន់ដឹក", delivering: "កំពុងដឹក", delivered: "បានទទួលអីវ៉ាន់" };
+const dnorm = s => !s || s === "pickup" ? "not_yet" : s === "arrived" ? "delivering" : s;   // old values -> nearest of the 3 stages
+let dlLoaded = false;;
 const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
 
 async function loadDelivery() {
   const r = await admin({ action: "list_delivery" });
   if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
   DL = { orders: r.data.orders || [], requests: r.data.requests || [], drivers: r.data.drivers || [] };
+  dlLoaded = true;
+  const keep = {}; document.querySelectorAll("#dl-list select").forEach(x => { if (x.value) keep[x.id] = x.value; });
   renderDrivers(); renderDelivery();
+  Object.keys(keep).forEach(k => { const x = $(k); if (x) x.value = keep[k]; });
 }
 function renderDrivers() {
   const box = $("drv-list");
@@ -1082,10 +1087,15 @@ function renderDelivery() {
     const reqs = DL.requests.filter(q => q.tran_id === o.tran_id);
     let state = "", actions = "";
     if (o.dispatch === "approved") {
-      state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b> · ${DSTAT[o.delivery_status] || ""}`;
-      if (o.delivery_status === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
-      actions += `<div class="muted" style="width:100%;margin-top:6px">ជំហាន (ជាធម្មតាអ្នកដឹកចុចខ្លួនឯង):</div>` +
-        Object.entries(DSTAT).map(([k, l]) => `<button class="btn ${o.delivery_status === k ? "btn-p" : "btn-g"} btn-s" data-a="dstat" data-id="${esc(o.tran_id)}" data-v="${k}">${l}</button>`).join("");
+      const cur = dnorm(o.delivery_status);
+      state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b>` +
+        `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${Object.entries(DSTAT).map(([k, l]) =>
+          `<span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${k === cur ? "var(--brand,#0f766e)" : "#eceff3"};color:${k === cur ? "#fff" : "#667"}">${k === cur ? "● " : ""}${l}</span>`).join("")}</div>` +
+        `<div class="muted" style="margin-top:4px">📡 ស្ថានភាពមកពីអ្នកដឹកចុចក្នុង app (admin មិនអាចកែបានទេ)</div>`;
+      if (cur === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
+      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — អាចលុបបាន</div>` +
+        `<button class="btn btn-d btn-s" data-a="delorder" data-id="${esc(o.tran_id)}">🗑 លុបការដឹកនេះ</button>` +
+        `<button class="btn btn-d btn-s" data-a="deldriver" data-id="${esc(o.tran_id)}" data-drv="${esc(o.driver_id)}">🗑 លុបអ្នកដឹក ${esc(drvName(o.driver_id))}</button>`;
     } else {
       state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
       actions = (o.dispatch === "open"
@@ -1117,13 +1127,17 @@ $("dl-list").addEventListener("click", async (e) => {
   else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
   else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
   else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
-  else if (act === "dstat") dlAct({ action: "set_delivery_status", tran_id: id, status: b.dataset.v });
+  else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
+  else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
   else if (act === "approve") {
     const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
     if (!drv) { toast("សូមជ្រើសអ្នកដឹកជាមុន", "bad"); return; }
     if (confirm("អនុម័តអ្នកដឹកនេះសម្រាប់កញ្ចប់នេះ?")) dlAct({ action: "approve_driver", tran_id: id, driver_id: Number(drv) }, "បានអនុម័ត");
   }
 });
+setInterval(() => {   // live refresh of what the drivers are doing
+  if (dlLoaded && !document.hidden && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#dl-list"))) loadDelivery();
+}, 10000);
 $("drv-list").addEventListener("click", async (e) => {
   const b = e.target.closest("button[data-d]"); if (!b) return;
   const id = Number(b.dataset.id), act = b.dataset.d;
