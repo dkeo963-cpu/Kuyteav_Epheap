@@ -690,8 +690,8 @@
   <div id="track-modal" class="pay-overlay">
     <div class="pay-card">
       <div class="row-h" style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">🔎 តាមដានអីវ៉ាន់</b><button type="button" class="pay-btn ghost" style="width:auto;margin:0;height:36px;padding:0 14px" onclick="closeTrackModal()">✕</button></div>
-      <div class="pay-sub" style="margin:8px 0;text-align:left">បញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើពេលកម្មង់</div>
-      <input id="track-phone" class="custom-input" inputmode="tel" placeholder="012 345 678" maxlength="16">
+      <div class="pay-sub" style="margin:8px 0;text-align:left">បញ្ចូលលេខតាមដាន (Tracking number) ដែលហាងបានផ្ញើជូនតាម Telegram</div>
+      <input id="track-code" class="custom-input" autocomplete="off" autocapitalize="characters" placeholder="12345678" maxlength="16">
       <button type="button" class="pay-btn" onclick="lookupOrders()">ស្វែងរក</button>
       <div id="track-results"></div>
       <div id="live-box" style="display:none">
@@ -1726,9 +1726,9 @@
     let liveMap = null, liveMarker = null, liveTimer = null, liveId = null, trackTimer = null;
     const FULFIL = { new: 'បានទទួលការកម្មង់', preparing: 'កំពុងរៀបចំ', ready: 'រួចរាល់', done: 'ប្រគល់ហើយ' };
     function openTrackModal() {
-      const el = document.getElementById('track-phone');
-      let saved = ''; try { saved = localStorage.getItem('track_phone') || ''; } catch (e) {}
-      if (!el.value) el.value = (document.getElementById('input-phone') || {}).value || saved;
+      const el = document.getElementById('track-code');
+      let saved = ''; try { saved = localStorage.getItem('track_code') || ''; } catch (e) {}
+      if (!el.value) el.value = saved;
       document.getElementById('track-modal').style.display = 'flex';
       if (el.value) lookupOrders();
       clearInterval(trackTimer); trackTimer = setInterval(() => { if (document.getElementById('track-modal').style.display === 'flex') lookupOrders(true); }, 10000);   // status follows the driver's taps
@@ -1737,15 +1737,15 @@
     function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; document.getElementById('live-box').style.display = 'none'; }
     async function lookupOrders(silent) {
       const box = document.getElementById('track-results');
-      const phone = normalizeKhPhone(document.getElementById('track-phone').value);
-      if (!phone) { if (!silent) alert('លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678'); return; }
-      try { localStorage.setItem('track_phone', phone); } catch (e) {}
+      const code = document.getElementById('track-code').value.replace(/\s/g, '').toUpperCase();
+      if (!/^[A-Z0-9]{4,12}$/.test(code)) { if (!silent) alert('លេខតាមដានមិនត្រឹមត្រូវ! សូមបញ្ចូលលេខដែលហាងបានផ្ញើជូន'); return; }
       if (!silent) box.textContent = 'កំពុងស្វែងរក…';
-      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'lookup_phone', phone } });
+      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'lookup_code', code } });
+      try { if (data && data.orders && data.orders.length) localStorage.setItem('track_code', code); } catch (e) {}
       if (silent && (error || !data || data.error)) return;   // keep what is on screen if a background refresh fails
       box.innerHTML = '';
       if (error || !data || data.error) { box.textContent = (data && data.error) || 'មិនអាចភ្ជាប់បានទេ'; return; }
-      if (!data.orders.length) { box.textContent = 'រកមិនឃើញការកម្មង់ក្នុង ៣ ថ្ងៃចុងក្រោយទេ។'; return; }
+      if (!data.orders.length) { box.textContent = 'រកមិនឃើញលេខតាមដាននេះទេ។ សូមពិនិត្យលេខ ឬសួរហាង។'; return; }
       data.orders.forEach(o => box.appendChild(orderCard(o)));
     }
     function orderCard(o) {
@@ -1756,6 +1756,7 @@
       const qty = (o.items || []).reduce((n, i) => n + Number(i.qty || 0), 0);
 
       c.append(el('div', '🧾 ' + o.tran_id, 'font-size:11.5px;color:var(--sub)'));
+      if (o.track_code) c.append(row('🔢 លេខតាមដាន', o.track_code));
       c.append(row('👤 អតិថិជន', o.name));
       c.append(row('🛵 ប្រភេទ', isDel ? 'ដឹកជញ្ជូន (Delivery)' : 'ទៅយក (Pick Up)'));
       c.append(row('💳 ទូទាត់', 'បានបង់តាម ABA ✅'));
