@@ -97,10 +97,9 @@
       $('mine').innerHTML = m.length ? m.map(function (o) {
         var map = o.lat != null ? 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng : (o.location_link || '');
         var st = o.delivery_status, btn = '';
-        if (st === 'not_yet') btn = '<button class="w" data-s="pickup" data-id="' + esc(o.tran_id) + '">🏪 ចាប់ផ្តើមដឹក (Start)</button>';
-        if (st === 'pickup') btn = '<button class="w" data-s="delivering" data-id="' + esc(o.tran_id) + '">🛵 ដល់ហាងហើយ — ចាប់ផ្ដើមដឹក (Start delivery)</button><div class="muted" style="margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ។</div>';
-        if (st === 'delivering') btn = '<button class="w" data-s="arrived" data-id="' + esc(o.tran_id) + '">📍 ដល់មកទីតាំងហើយ (Arrived)</button><div class="muted" style="margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>';
-        if (st === 'arrived') btn = '<button class="w" data-s="delivered" data-id="' + esc(o.tran_id) + '">✅ អតិថិជនបានយកអីវ៉ាន់ (Finish)</button>';
+        // 3 stages only: not yet -> delivering -> delivered (old 'pickup' / 'arrived' rows are treated as the nearest stage)
+        if (st === 'not_yet' || st === 'pickup') btn = '<button class="w" data-s="delivering" data-id="' + esc(o.tran_id) + '">🛵 ចាប់ផ្ដើមដឹក (Start delivery)</button><div class="muted" style="margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ។</div>';
+        if (st === 'delivering' || st === 'arrived') btn = '<button class="w" data-s="delivered" data-id="' + esc(o.tran_id) + '">✅ អតិថិជនបានទទួលអីវ៉ាន់ (Finish)</button><div class="muted" style="margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>';
         return '<div class="job"><b>' + esc(o.customer_name) + '</b> <span class="tot">$' + Number(o.total).toFixed(2) + '</span>' +
           '<div>📞 <a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></div>' +
           (o.address ? '<div class="muted">📍 ' + esc(o.address) + '</div>' : '') +
