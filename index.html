@@ -189,20 +189,28 @@
     }
     .search-input:focus { border-color: var(--brand); }
 
-    /* Category tabs */
+    /* Category buttons (pop style) */
     .category-grid {
-      display: flex; gap: 22px; overflow-x: auto; margin: 0 -14px 14px; padding: 0 14px;
+      display: flex; gap: 10px; overflow-x: auto; margin: 0 -14px 14px; padding: 12px 14px 14px;
       background: var(--surface); border-bottom: 1px solid var(--line);
       scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
     .category-grid::-webkit-scrollbar { display: none; }
     .category-card {
-      flex: 0 0 auto; background: none; border: 0; border-bottom: 3px solid transparent;
-      padding: 13px 2px 10px; cursor: pointer; transition: color .15s, border-color .15s;
+      flex: 0 0 auto; background: var(--surface); border: 1.5px solid var(--line); border-radius: 99px;
+      padding: 9px 20px; cursor: pointer; box-shadow: 0 3px 0 var(--line);
+      transition: transform .12s ease, box-shadow .12s ease, background .15s, border-color .15s;
     }
-    .category-card.active { border-bottom-color: var(--brand); }
-    .category-name { font-size: 15px; font-weight: 600; color: var(--sub); white-space: nowrap; }
-    .category-card.active .category-name { color: var(--ink); font-weight: 800; }
+    .category-card:active { transform: translateY(3px) scale(.96); box-shadow: 0 0 0 var(--line); }
+    .category-card.active {
+      background: var(--brand); border-color: var(--brand); box-shadow: 0 3px 0 var(--brand-d);
+      animation: catPop .38s cubic-bezier(.2,.9,.3,1.5);
+    }
+    .category-card.active:active { box-shadow: 0 0 0 var(--brand-d); }
+    .category-name { font-size: 15px; font-weight: 700; color: var(--sub); white-space: nowrap; }
+    .category-card.active .category-name { color: #fff; font-weight: 800; }
+    @keyframes catPop { 0% { transform: scale(.88); } 55% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @media (prefers-reduced-motion: reduce) { .category-card.active { animation: none; } }
 
     /* ===== Food Card Layout & Sizing ===== */
     #food-list { display: grid; grid-template-columns: 1fr; gap: 14px; }
