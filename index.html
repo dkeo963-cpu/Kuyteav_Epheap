@@ -617,6 +617,9 @@
 
     /* ===== Header: spacing close to the earlier look ===== */
     .top { padding: 10px 0 6px; }
+
+    .food-card.flash { animation: cardFlash 2.2s ease; }
+    @keyframes cardFlash { 0%,100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); } 20%,70% { box-shadow: 0 0 0 4px rgba(15,118,110,.55); border-color: var(--brand); } }
 </style>
 </head>
 <body>
@@ -655,7 +658,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="promo-cta" onclick="goMenu()">កម្មង់ឥឡូវ</button>
+    <button type="button" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
     <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
   </div>
 
@@ -1233,6 +1236,7 @@
     // Auto-sliding multi-banner logic
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner1.png"];
     const imgUrl = u => String(u).startsWith('tg:') ? SUPABASE_URL + '/functions/v1/tg-image?f=' + encodeURIComponent(String(u).slice(3)) : u;
+    let promoItemKey = '';   // food the promo button jumps to (set in admin)
     let catImages = {};   // category pictures set from the admin page (stored in Telegram)
     let currentBannerIndex = 0;
     let bannerInterval = null;
@@ -1241,10 +1245,13 @@
       const slider = document.getElementById('banner-slider');
       let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
       try {
-        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images']);
+        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'promo_item', 'greet_text']);
         const row = k => (data || []).find(r => r.key === k);
         let ci = row('category_images') && row('category_images').value; if (typeof ci === 'string') ci = JSON.parse(ci);
         if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
+        const sv = k => { let x = row(k) && row(k).value; try { if (typeof x === 'string' && x.startsWith('"')) x = JSON.parse(x); } catch (e) {} return typeof x === 'string' ? x : ''; };
+        promoItemKey = sv('promo_item');
+        const gt = sv('greet_text'); if (gt) { const g = document.querySelector('.greet-q'); if (g) g.textContent = gt; }
         let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
         const lg = row('shop_logo') && row('shop_logo').value;
@@ -1345,7 +1352,7 @@
         const isFav = favItems.has(item.item_key);
 
         return `
-          <div class="food-card">
+          <div class="food-card" data-key="${item.item_key}">
             <div class="food-img" onclick="openImageModal('${item.item_key}')">
               <img src="${itemImgs[0]}" alt="${item.name_kh}" onerror="this.outerHTML='<span>${item.icon || '🍜'}</span>'">
               ${itemImgs.length > 1 ? `<span class="photo-count-badge">📷 ${itemImgs.length}</span>` : ''}
@@ -2172,6 +2179,19 @@
 
   <script>
   // header helpers: scroll to menu + cart count badge
+  function goPromo() {
+    try {
+      var it = promoItemKey && menuItems.find(function (m) { return m.item_key === promoItemKey; });
+      if (!it) return goMenu();
+      currentCategory = it.category;
+      var si = document.getElementById('search-input'); if (si) si.value = '';
+      renderCategories(); renderMenu();
+      var card = document.querySelector('.food-card[data-key="' + promoItemKey + '"]');
+      if (!card) return goMenu();
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('flash'); setTimeout(function () { card.classList.remove('flash'); }, 2200);
+    } catch (e) { goMenu(); }
+  }
   function goMenu() {
     var el = document.getElementById('category-cards-container');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
