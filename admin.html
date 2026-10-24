@@ -26,7 +26,7 @@ html,body{margin:0}
 body{
   font-family:'Kantumruy Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   background:var(--bg); color:var(--ink); font-size:14px; line-height:1.45;
-  padding-bottom:calc(76px + var(--safe-b));
+  padding-bottom:calc(120px + var(--safe-b));
 }
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 input,select,textarea{font:inherit;color:inherit}
@@ -45,7 +45,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* ---------- Bottom tabs ---------- */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
-.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding:0}
+.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
 .tab{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--sub);position:relative}
 .tab .ic{font-size:20px;line-height:1}
 .tab.on{color:var(--brand)}
@@ -1065,15 +1065,28 @@ async function loadDelivery() {
 function renderDrivers() {
   const box = $("drv-list");
   if (!DL.drivers.length) { box.textContent = "មិនទាន់មានអ្នកដឹកទេ"; return; }
-  box.innerHTML = DL.drivers.map(d => `
+  const live = DL.drivers.filter(d => !d.blocked && d.is_active).length;
+  const off = DL.drivers.filter(d => !d.blocked && !d.is_active).length;
+  const busy = d => DL.orders.some(o => o.driver_id === d.id && o.dispatch === "approved" && dnorm(o.delivery_status) !== "delivered");
+  const seen = t => { try { return new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } };
+  const sorted = DL.drivers.slice().sort((x, y) => (Number(!x.blocked && x.is_active) < Number(!y.blocked && y.is_active)) - (Number(!x.blocked && x.is_active) > Number(!y.blocked && y.is_active)));
+  box.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-weight:700;color:var(--ink)">
+      <span style="padding:5px 12px;border-radius:99px;background:#d9f2ee;color:#0f766e">🟢 សកម្ម ${live}</span>
+      <span style="padding:5px 12px;border-radius:99px;background:#eceff3;color:#667">⚪ បិទ ${off}</span></div>` +
+    sorted.map(d => {
+      const on = !d.blocked && d.is_active;
+      const pill = d.blocked ? ["⛔ ត្រូវបានបិទ", "#fde8e8", "#c62828"] : on ? ["🟢 សកម្ម (ON)", "#d9f2ee", "#0f766e"] : ["⚪ បិទ (OFF)", "#eceff3", "#667"];
+      return `
     <div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
-      <div style="font-weight:700">${d.blocked ? "⛔" : d.is_active ? "🟢" : "⚪"} ${esc(d.name)} <span class="muted">· ID ${esc(d.login_id)}</span></div>
-      <div class="muted">${d.blocked ? "ត្រូវបានបិទ" : d.is_active ? "សកម្ម" : "មិនសកម្ម"}${d.last_seen ? " · ឃើញចុងក្រោយ " + esc(String(d.last_seen).slice(11, 16)) : ""}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:700">${esc(d.name)} <span class="muted">· ID ${esc(d.login_id)}</span></div>
+        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${pill[1]};color:${pill[2]};white-space:nowrap">${pill[0]}</span></div>
+      <div class="muted">${busy(d) ? "🛵 កំពុងមានការងារដឹក" : on ? "រង់ចាំការងារ" : ""}${d.last_seen ? " · ឃើញចុងក្រោយ " + esc(seen(d.last_seen)) : ""}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
         <button class="btn btn-g btn-s" data-d="${d.blocked ? "unblock" : "block"}" data-id="${d.id}">${d.blocked ? "បើកវិញ" : "បិទ"}</button>
         <button class="btn btn-g btn-s" data-d="pw" data-id="${d.id}">ប្ដូរពាក្យសម្ងាត់</button>
         <button class="btn btn-d btn-s" data-d="del" data-id="${d.id}">លុប</button>
-      </div></div>`).join("");
+      </div></div>`;
+    }).join("");
 }
 function trackBox(o) {
   const id = esc(o.tran_id);
