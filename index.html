@@ -524,6 +524,61 @@
     .add-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; transform: none; }
     .food-side .card-stepper { padding: 2px 4px; gap: 6px; background: var(--brand-l); border-color: transparent; }
     .food-side .card-step-btn { width: 28px; height: 28px; }
+
+    /* ===== Mixed colors (gradients instead of one flat color) ===== */
+    :root {
+      --grad: linear-gradient(135deg, #0f766e 0%, #0f766e 100%);
+      --grad-soft: linear-gradient(135deg, #e3f3f1 0%, #e6f4ea 100%);
+    }
+    .buy-btn, .guide-float-btn, .btn-p, .trigger-btn, .gps-btn, .submit-order-btn, .add-btn,
+    .pill.active, .toggle-item.active, .tbtn.on {
+      background: var(--grad); border-color: transparent;
+    }
+    .buy-btn:active, .guide-float-btn:active, .trigger-btn:active, .gps-btn:active,
+    .submit-order-btn:active, .add-btn:active { background: var(--grad); filter: brightness(.9); }
+    .tl li.done .d { background: var(--grad); }
+    .header-menu-btn { background: var(--grad-soft); }
+    .pop-badge { background: linear-gradient(135deg, #fde68a, #fcd34d); color: #7c2d12; }
+    .food-price { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+    .size-tile.selected { background: var(--grad-soft); }
+    /* category icons: each category gets its own mix */
+    .category-card:nth-child(1) .category-icon { background: linear-gradient(135deg, #fee2e2, #fed7aa); }
+    .category-card:nth-child(2) .category-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+    .category-card:nth-child(3) .category-icon { background: linear-gradient(135deg, #ede9fe, #fbcfe8); }
+    .category-card:nth-child(4) .category-icon { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+    .category-card.active { background: var(--grad-soft); }
+    .category-card.active .category-icon { box-shadow: 0 4px 10px rgba(15,118,110,.25); }
+
+    /* ===== Davin-style top: promo banner, header, tabs, hero ===== */
+    .top-promo-banner { background: linear-gradient(90deg, #e3f3f1, #e6f4ea); color: var(--ink); border-bottom: 1px solid var(--line); padding: 10px 40px 10px 12px; overflow: visible; text-align: center; }
+    .promo-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; font-size: 13.5px; font-weight: 600; line-height: 1.5; }
+    .top-promo-banner .top-promo-badge { background: #fde68a; color: #92400e; font-size: 12px; font-weight: 800; text-transform: none; padding: 3px 12px; }
+    .promo-cta { background: #14201f; color: #fff; border: 0; border-radius: 99px; padding: 6px 16px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    .promo-x { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 26px; height: 26px; border: 0; background: none; color: var(--sub); font-size: 15px; cursor: pointer; }
+
+    .top { padding: 10px 0 0; }
+    .top .wrap { gap: 8px; }
+    .hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .hdr-brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .hdr-brand .shop-title { font-size: 19px; }
+    .hdr-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .hdr-link { display: flex; align-items: center; gap: 5px; background: none; border: 0; padding: 4px; font-weight: 700; font-size: 14px; color: var(--ink); cursor: pointer; }
+    .hdr-ico { position: relative; background: none; border: 0; padding: 4px; color: var(--ink); cursor: pointer; display: flex; }
+    .hdr-ico b { position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; background: var(--brand); color: #fff; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; }
+    .hdr-tabs { background: #e6f4ea; margin-top: 4px; }
+    .hdr-tabs .wrap { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; flex-direction: row; }
+    .hdr-tabs .wrap::-webkit-scrollbar { display: none; }
+    .hdr-tab { flex: 0 0 auto; background: none; border: 0; border-bottom: 3px solid transparent; padding: 11px 2px 8px; font-weight: 800; font-size: 14.5px; color: #1d3b2b; cursor: pointer; }
+    .hdr-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+
+    .hero { background: #eef5f3; border-radius: 24px; padding: 26px 18px 24px; margin-bottom: 14px; text-align: center; }
+    .hero-eyebrow { color: var(--brand); font-weight: 800; font-size: 13.5px; line-height: 1.6; }
+    .hero-title { margin: 10px 0 8px; font-size: 27px; line-height: 1.5; font-weight: 800; color: var(--ink); }
+    .hero-sub { margin: 0 auto; max-width: 320px; font-size: 14px; color: var(--sub); }
+    .hero-btns { display: flex; justify-content: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .hero-btn { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; padding: 12px 20px; font-weight: 800; font-size: 14.5px; cursor: pointer; }
+    .hero-btn.primary { background: var(--grad); border-color: transparent; color: #fff; }
+    #category-cards-container { scroll-margin-top: 150px; }
 </style>
 </head>
 <body>
@@ -542,39 +597,43 @@
   </div>
 
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
-    <div class="top-promo-track">
-      <div class="top-promo-content">
-        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
-      </div>
-      <div class="top-promo-content">
-        <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-        <span class="promo-msg-text">we willdelivery for more than 10 items for you</span>
-      </div>
+    <div class="promo-inner">
+      <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+      <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
+      <button type="button" class="promo-cta" onclick="goMenu()">កម្មង់ឥឡូវ</button>
     </div>
+    <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
   </div>
 
   <header class="top">
     <div class="wrap">
       <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
-      <div class="top-row-main">
-        <div class="top-l">
-          <div class="greeting">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-          <div class="shop-title-container">
-            <div class="shop-title-left">
-              <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
-                <img id="shop-logo" alt="Shop logo" src="./images/Logo.JPG">
-              </div>
-              <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
-            </div>
-            <!-- Added Menu/Dropdown Icon Button on the Right Side -->
-            <button class="header-menu-btn" onclick="openInfoModal()" title="Menu / Info">
-              ☰
-            </button>
+      <div class="hdr-row">
+        <div class="hdr-brand">
+          <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
+            <img id="shop-logo" alt="Shop logo" src="./images/Logo.JPG">
           </div>
+          <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+        </div>
+        <div class="hdr-actions">
+          <button type="button" class="hdr-link" onclick="openInfoModal()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+            <span>អំពីយើង</span>
+          </button>
+          <button type="button" class="hdr-ico" aria-label="Cart" onclick="openCartDrawer()">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19 8H6.2"/><circle cx="9" cy="19.5" r="1.2"/><circle cx="17" cy="19.5" r="1.2"/></svg>
+            <b id="hdr-cart-count" style="display:none">0</b>
+          </button>
         </div>
       </div>
     </div>
+    <nav class="hdr-tabs" aria-label="Menu">
+      <div class="wrap">
+        <button type="button" class="hdr-tab active" onclick="window.scrollTo({top:0,behavior:'smooth'})">ទំព័រដើម</button>
+        <button type="button" class="hdr-tab" onclick="goMenu()">ម៉ឺនុយ</button>
+        <button type="button" class="hdr-tab" onclick="openTrackModal()">តាមដានការកម្មង់</button>
+      </div>
+    </nav>
   </header>
 
   <main class="wrap">
@@ -592,6 +651,16 @@
   <div id="no-username-banner" class="username-warning">
     ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន ទើបអាចកម្មង់បាន។
   </div>
+
+  <section class="hero">
+    <div class="hero-eyebrow">សួស្ដី <span id="user-name">អតិថិជន</span> 👋 សូមស្វាគមន៍មកកាន់ តូបគុយទាវ អ៊ីភាព</div>
+    <h1 class="hero-title">គុយទាវឆ្ងាញ់ ស្រស់ថ្មី ដឹកដល់ផ្ទះអ្នក</h1>
+    <p class="hero-sub">មុខម្ហូបខ្មែរ និងភេសជ្ជៈ គុណភាពល្អ ក្នុងតម្លៃសមរម្យ។</p>
+    <div class="hero-btns">
+      <button type="button" class="hero-btn primary" onclick="goMenu()">កម្មង់ឥឡូវនេះ</button>
+      <button type="button" class="hero-btn" onclick="goMenu()">ពេញនិយមបំផុត</button>
+    </div>
+  </section>
 
   <!-- Auto-sliding multi-banner container -->
   <div class="banner-container">
@@ -2037,6 +2106,25 @@
     }
     w.addEventListener('click', closeWelcome);
     setTimeout(closeWelcome, 3200);
+  })();
+  </script>
+
+  <script>
+  // header helpers: scroll to menu + cart count badge
+  function goMenu() {
+    var el = document.getElementById('category-cards-container');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  (function () {
+    var tot = document.getElementById('trigger-total'), badge = document.getElementById('hdr-cart-count');
+    if (!tot || !badge) return;
+    function sync() {
+      var n = 0;
+      try { n = cart.reduce(function (a, c) { return a + c.quantity; }, 0); } catch (e) {}
+      badge.textContent = n; badge.style.display = n > 0 ? 'block' : 'none';
+    }
+    new MutationObserver(sync).observe(tot, { childList: true, characterData: true, subtree: true });
+    sync();
   })();
   </script>
 </body>
