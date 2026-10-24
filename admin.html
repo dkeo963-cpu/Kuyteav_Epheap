@@ -289,6 +289,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <div class="menu" id="menu"></div>
   </section>
 
+  <!-- ========== DELIVERY ========== -->
+  <section id="page-delivery" class="page">
+    <div class="card">
+      <h2 class="h2">🛵 អ្នកដឹក (Drivers)</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <input id="drv-name" placeholder="ឈ្មោះ" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <input id="drv-id" placeholder="ID ចូលកម្មវិធី" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px" autocapitalize="off">
+        <input id="drv-pw" placeholder="ពាក្យសម្ងាត់ (≥6)" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <button class="btn btn-p btn-s" id="drv-add">➕ បន្ថែម</button>
+      </div>
+      <div id="drv-list" class="muted">កំពុងផ្ទុក…</div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📦 ការដឹកជញ្ជូនដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">១) «ផ្ញើទៅ Delivery app» ឱ្យអ្នកដឹកស្នើ ឬ ២) ជ្រើសអ្នកដឹកផ្ទាល់ រួចចុច «អនុម័ត»។ ក្រោយអនុម័ត ព័ត៌មាន និងផែនទីទើបបង្ហាញក្នុងកម្មវិធីអ្នកដឹក។</p>
+      <div id="dl-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="dl-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+  </section>
+
   <!-- ========== SETTINGS / ABOUT ========== -->
   <section id="page-more" class="page">
     <div class="card">
@@ -329,6 +349,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="wrap">
     <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
     <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
+    <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន</button>
     <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
   </div>
 </nav>
@@ -1024,6 +1045,97 @@ async function loadOrders() {
 }
 $("ord-refresh").addEventListener("click", loadOrders);
 if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
+
+/* ===== DELIVERY: drivers + dispatching ===== */
+let DL = { orders: [], requests: [], drivers: [] };
+const DSTAT = { not_yet: "មិនទាន់ដឹក", pickup: "កំពុងទៅយកអីវ៉ាន់", delivering: "កំពុងដឹក", delivered: "ដឹកដល់ហើយ" };
+const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
+
+async function loadDelivery() {
+  const r = await admin({ action: "list_delivery" });
+  if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
+  DL = { orders: r.data.orders || [], requests: r.data.requests || [], drivers: r.data.drivers || [] };
+  renderDrivers(); renderDelivery();
+}
+function renderDrivers() {
+  const box = $("drv-list");
+  if (!DL.drivers.length) { box.textContent = "មិនទាន់មានអ្នកដឹកទេ"; return; }
+  box.innerHTML = DL.drivers.map(d => `
+    <div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${d.blocked ? "⛔" : d.is_active ? "🟢" : "⚪"} ${esc(d.name)} <span class="muted">· ID ${esc(d.login_id)}</span></div>
+      <div class="muted">${d.blocked ? "ត្រូវបានបិទ" : d.is_active ? "សកម្ម" : "មិនសកម្ម"}${d.last_seen ? " · ឃើញចុងក្រោយ " + esc(String(d.last_seen).slice(11, 16)) : ""}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-g btn-s" data-d="${d.blocked ? "unblock" : "block"}" data-id="${d.id}">${d.blocked ? "បើកវិញ" : "បិទ"}</button>
+        <button class="btn btn-g btn-s" data-d="pw" data-id="${d.id}">ប្ដូរពាក្យសម្ងាត់</button>
+        <button class="btn btn-d btn-s" data-d="del" data-id="${d.id}">លុប</button>
+      </div></div>`).join("");
+}
+function renderDelivery() {
+  const box = $("dl-list");
+  if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ"; return; }
+  const usable = DL.drivers.filter(d => !d.blocked).sort((x, y) => Number(y.is_active) - Number(x.is_active));
+  box.innerHTML = DL.orders.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    const map = o.lat != null ? `https://www.google.com/maps?q=${o.lat},${o.lng}` : (o.location_link || "");
+    const reqs = DL.requests.filter(q => q.tran_id === o.tran_id);
+    let state = "", actions = "";
+    if (o.dispatch === "approved") {
+      state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b> · ${DSTAT[o.delivery_status] || ""}`;
+      if (o.delivery_status === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
+    } else {
+      state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
+      actions = (o.dispatch === "open"
+        ? `<button class="btn btn-g btn-s" data-a="unsend" data-id="${esc(o.tran_id)}">↩️ ដកចេញពី app</button>`
+        : `<button class="btn btn-p btn-s" data-a="send" data-id="${esc(o.tran_id)}">📤 ផ្ញើទៅ Delivery app</button>`);
+      actions += `<div style="display:flex;gap:6px;width:100%;margin-top:6px"><select id="sel-${esc(o.tran_id)}" style="flex:1;${"border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:var(--ink)"}">
+          <option value="">— ជ្រើសអ្នកដឹក —</option>${usable.map(d => `<option value="${d.id}">${d.is_active ? "🟢" : "⚪"} ${esc(d.name)}</option>`).join("")}</select>
+          <button class="btn btn-p btn-s" data-a="approve" data-id="${esc(o.tran_id)}">✅ អនុម័ត</button></div>`;
+    }
+    const reqHtml = reqs.length ? `<div style="margin-top:6px"><div class="muted">🙋 អ្នកស្នើសុំ:</div>${reqs.map(q =>
+      `<button class="btn btn-g btn-s" style="margin:3px 4px 0 0" data-a="approve" data-id="${esc(o.tran_id)}" data-drv="${q.driver_id}">✅ ${esc(drvName(q.driver_id))}</button>`).join("")}</div>` : "";
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)}</div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} <button class="btn btn-g btn-s" style="padding:2px 8px" data-a="phone" data-id="${esc(o.tran_id)}" data-p="${esc(o.phone)}">✏️ កែលេខ</button></div>
+      <div style="font-size:12.5px;margin:4px 0">${items}</div>
+      <div class="muted">📍 ${esc(o.address || "—")} ${map ? `· <a href="${esc(map)}" target="_blank" rel="noopener">🗺️ មើលផែនទី (Pin)</a>` : ""}</div>
+      <div style="margin:6px 0">${state}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div>${reqHtml}</div>`;
+  }).join("");
+}
+async function dlAct(body, okMsg) {
+  const r = await admin(body);
+  if (r.error) toast(r.error, "bad"); else { toast(okMsg || "បានរក្សាទុក", "ok"); loadDelivery(); }
+}
+$("dl-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const id = b.dataset.id, act = b.dataset.a;
+  if (act === "phone") { const p = prompt("លេខទូរស័ព្ទថ្មី (សម្រាប់ទាក់ទងអ្នកទទួល):", b.dataset.p || ""); if (p) dlAct({ action: "edit_order_phone", tran_id: id, phone: p }); }
+  else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
+  else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
+  else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
+  else if (act === "approve") {
+    const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
+    if (!drv) { toast("សូមជ្រើសអ្នកដឹកជាមុន", "bad"); return; }
+    if (confirm("អនុម័តអ្នកដឹកនេះសម្រាប់កញ្ចប់នេះ?")) dlAct({ action: "approve_driver", tran_id: id, driver_id: Number(drv) }, "បានអនុម័ត");
+  }
+});
+$("drv-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-d]"); if (!b) return;
+  const id = Number(b.dataset.id), act = b.dataset.d;
+  if (act === "block" || act === "unblock") dlAct({ action: "set_driver", id, blocked: act === "block" });
+  else if (act === "pw") { const p = prompt("ពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៦ តួ):"); if (p) dlAct({ action: "set_driver", id, password: p }); }
+  else if (act === "del" && confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id, delete: true });
+});
+$("drv-add").addEventListener("click", async () => {
+  const r = await admin({ action: "create_driver", name: $("drv-name").value.trim(), login_id: $("drv-id").value.trim(), password: $("drv-pw").value });
+  if (r.error) { toast(r.error, "bad"); return; }
+  $("drv-name").value = $("drv-id").value = $("drv-pw").value = ""; toast("បានបន្ថែមអ្នកដឹក", "ok"); loadDelivery();
+});
+$("dl-refresh").addEventListener("click", loadDelivery);
+document.querySelector('.tab[data-tab="delivery"]').addEventListener("click", loadDelivery);
+setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
 </script>
 </body>
 </html>
