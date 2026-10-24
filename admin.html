@@ -1019,7 +1019,7 @@ $("req-login").addEventListener("change", async (e) => {
 loadLoginSetting();
 
 /* ===== PAID ORDERS + TRACKING STAGE ===== */
-const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "រួចរាល់"], ["done", "ប្រគល់ហើយ"]];
+const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "ហាងបានរៀបចំ"], ["done", "បានយកអីវ៉ាន់"]];
 async function loadOrders() {
   const box = $("ord-list");
   const r = await admin({ action: "list_orders" });
@@ -1048,7 +1048,7 @@ if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកត
 
 /* ===== DELIVERY: drivers + dispatching ===== */
 let DL = { orders: [], requests: [], drivers: [] };
-const DSTAT = { not_yet: "មិនទាន់ដឹក", pickup: "កំពុងទៅយកអីវ៉ាន់", delivering: "កំពុងដឹក", delivered: "ដឹកដល់ហើយ" };
+const DSTAT = { not_yet: "មិនទាន់ដឹក", pickup: "ចាប់ផ្តើមដឹក", delivering: "កំពុងដឹក", arrived: "ដល់មកទីតាំង", delivered: "បានយកអីវ៉ាន់" };
 const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
 
 async function loadDelivery() {
@@ -1084,6 +1084,8 @@ function renderDelivery() {
     if (o.dispatch === "approved") {
       state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b> · ${DSTAT[o.delivery_status] || ""}`;
       if (o.delivery_status === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
+      actions += `<div class="muted" style="width:100%;margin-top:6px">ជំហាន (ជាធម្មតាអ្នកដឹកចុចខ្លួនឯង):</div>` +
+        Object.entries(DSTAT).map(([k, l]) => `<button class="btn ${o.delivery_status === k ? "btn-p" : "btn-g"} btn-s" data-a="dstat" data-id="${esc(o.tran_id)}" data-v="${k}">${l}</button>`).join("");
     } else {
       state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
       actions = (o.dispatch === "open"
@@ -1115,6 +1117,7 @@ $("dl-list").addEventListener("click", async (e) => {
   else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
   else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
   else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
+  else if (act === "dstat") dlAct({ action: "set_delivery_status", tran_id: id, status: b.dataset.v });
   else if (act === "approve") {
     const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
     if (!drv) { toast("សូមជ្រើសអ្នកដឹកជាមុន", "bad"); return; }
