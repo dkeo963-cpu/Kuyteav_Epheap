@@ -239,6 +239,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <button class="btn btn-g btn-s" id="logo-up">📷 ប្តូរ</button>
       </div>
     </div>
+    <!-- Category pictures (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🍜 រូបប្រភេទម្ហូប (Category pictures)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញក្នុងប៊ូតុងប្រភេទនៅទំព័រអតិថិជន</div>
+      <div id="cat-img-list"></div>
+    </div>
     <!-- Top Promotion Banner Control -->
     <div class="card">
       <div class="ctl" style="margin-bottom: 12px;">
@@ -972,7 +978,7 @@ async function refresh() {
   // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
   localStorage.removeItem('davin_app_session');
   
-  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners()]);
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs()]);
   ic.classList.remove("spin");
 }
 $("btn-refresh").onclick = refresh;
@@ -1029,6 +1035,32 @@ $("bn-list").addEventListener("click", async e => {
   if (b.dataset.bn === "del") { if (!confirm("លុបបដានេះ?")) return; BN.splice(i, 1); }
   else BN.splice(i - 1, 0, BN.splice(i, 1)[0]);
   await saveBanners();
+});
+
+// ---- category pictures (stored in Telegram, saved as setting "category_images") ----
+const CAT_LIST = [["kuy_teav", "គុយទាវ", "🍜"], ["rice", "បាយ", "🍚"], ["other", "នំបាញ់ចុក", "🥢"], ["drinks", "ភេសជ្ជៈ", "🧋"]];
+let CATIMG = {};
+function renderCatImgs() {
+  $("cat-img-list").innerHTML = CAT_LIST.map(([k, name, ico]) => `<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    ${CATIMG[k] ? `<img src="${esc(imgSrc(CATIMG[k]))}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;background:#e8eeec">` : `<div style="width:48px;height:48px;border-radius:50%;background:#e8eeec;display:flex;align-items:center;justify-content:center;font-size:24px">${ico}</div>`}
+    <div style="flex:1" class="lbl">${esc(name)}</div>
+    <button class="btn btn-g btn-s" data-cat="up" data-k="${k}">📷 ប្តូរ</button>
+    ${CATIMG[k] ? `<button class="btn btn-d btn-s" data-cat="del" data-k="${k}">🗑</button>` : ""}</div>`).join("");
+}
+async function saveCatImgs() {
+  const r = await admin({ action: "update_setting", key: "category_images", value: JSON.stringify(CATIMG) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderCatImgs();
+}
+async function loadCatImgs() {
+  const { data: rows } = await supa.from("app_settings").select("key, value").eq("key", "category_images");
+  let v = rows && rows[0] && rows[0].value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = {}; }
+  CATIMG = v && typeof v === "object" && !Array.isArray(v) ? v : {}; renderCatImgs();
+}
+$("cat-img-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-cat]"); if (!b) return; const k = b.dataset.k;
+  if (b.dataset.cat === "del") { delete CATIMG[k]; }
+  else { const id = await uploadImage(); if (!id) return; CATIMG[k] = "tg:" + id; }
+  await saveCatImgs();
 });
 $("logo-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const r = await admin({ action: "update_setting", key: "shop_logo", value: "tg:" + id }); if (r.error) toast(r.error, "err"); else { $("logo-prev").src = imgSrc("tg:" + id); toast("បានប្តូរឡូហ្គោ", "ok"); } };
 // menu photo: the new picture becomes the cover and replaces old ./images/ (GitHub) pictures
