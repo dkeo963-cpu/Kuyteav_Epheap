@@ -435,9 +435,50 @@
     .tl li.done { color:var(--ink); font-weight:700; } .tl li.done .d { background:var(--brand); }
     .tl li.now .d { box-shadow:0 0 0 4px rgba(15,118,110,.2); }
     .trow { display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
+
+    /* ===== Welcome intro (shows before the main page) ===== */
+    #welcome { position:fixed; inset:0; z-index:99999; background:var(--brand-d); color:#fff;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+      padding:24px calc(24px) calc(24px + var(--safe-b)); cursor:pointer;
+      transition:opacity .45s ease, transform .45s ease; }
+    #welcome.hide { opacity:0; transform:scale(1.04); pointer-events:none; }
+    body.welcome-lock { overflow:hidden; }
+    .w-logo { position:relative; width:132px; height:132px; border-radius:50%; background:#fff; padding:6px;
+      box-shadow:0 0 0 6px rgba(255,255,255,.18), 0 18px 40px rgba(0,0,0,.28); animation:wPop .7s cubic-bezier(.2,.9,.3,1.2) both; }
+    .w-logo img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+    .w-steam { position:absolute; left:50%; top:-46px; width:70px; height:50px; transform:translateX(-50%); display:flex; justify-content:space-between; }
+    .w-steam i { width:6px; height:34px; border-radius:6px; background:rgba(255,255,255,.55); filter:blur(2px); opacity:0; animation:wSteam 2.4s ease-in-out infinite; }
+    .w-steam i:nth-child(2) { animation-delay:.5s; height:42px; }
+    .w-steam i:nth-child(3) { animation-delay:1s; }
+    .w-hello { margin-top:30px; font-size:15px; font-weight:600; opacity:.85; animation:wUp .6s .35s both; }
+    .w-name { margin:4px 0 0; font-size:30px; font-weight:800; line-height:1.35; animation:wUp .6s .5s both; }
+    .w-sub { margin:8px 0 0; font-size:14px; opacity:.8; max-width:300px; animation:wUp .6s .65s both; }
+    .w-btn { margin-top:34px; background:#fff; color:var(--brand-d); border:0; border-radius:99px; padding:14px 34px;
+      font-weight:800; font-size:16px; cursor:pointer; box-shadow:0 8px 22px rgba(0,0,0,.22); animation:wUp .6s .85s both; }
+    .w-btn:active { transform:scale(.97); }
+    .w-bar { position:absolute; left:0; bottom:0; height:4px; width:100%; background:rgba(255,255,255,.18); }
+    .w-bar b { display:block; height:100%; width:0; background:#fff; animation:wBar 3.2s linear forwards; }
+    @keyframes wPop { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:scale(1); } }
+    @keyframes wUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @keyframes wSteam { 0% { opacity:0; transform:translateY(10px); } 40% { opacity:.8; } 100% { opacity:0; transform:translateY(-22px); } }
+    @keyframes wBar { to { width:100%; } }
+    @media (prefers-reduced-motion: reduce) { #welcome *, #welcome { animation-duration:.01s !important; animation-delay:0s !important; transition:none !important; } }
 </style>
 </head>
 <body>
+
+  <!-- Welcome intro -->
+  <div id="welcome" role="dialog" aria-label="Welcome">
+    <div class="w-logo">
+      <div class="w-steam"><i></i><i></i><i></i></div>
+      <img src="./images/Logo.JPG" alt="" onerror="this.outerHTML='<div style=&quot;font-size:64px;line-height:120px&quot;>🍜</div>'">
+    </div>
+    <div class="w-hello">សូមស្វាគមន៍មកកាន់</div>
+    <h1 class="w-name">តូបគុយទាវ អ៊ីភាព</h1>
+    <p class="w-sub">គុយទាវ និងភេសជ្ជៈ ក្តៅៗ ដឹកដល់ផ្ទះអ្នក</p>
+    <button class="w-btn" id="welcome-go" type="button">ចាប់ផ្ដើមកម្មង់</button>
+    <div class="w-bar"><b></b></div>
+  </div>
 
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
     <div class="top-promo-track">
@@ -1918,6 +1959,24 @@
         window.location.href = window.location.pathname + '?v=' + Date.now();
       })
       .subscribe();
+  </script>
+
+  <script>
+  // Welcome intro: closes by tapping, or automatically after ~3.2s
+  (function () {
+    var w = document.getElementById('welcome');
+    if (!w) return;
+    document.body.classList.add('welcome-lock');
+    var closed = false;
+    function closeWelcome() {
+      if (closed) return; closed = true;
+      w.classList.add('hide');
+      document.body.classList.remove('welcome-lock');
+      setTimeout(function () { w.remove(); }, 500);
+    }
+    w.addEventListener('click', closeWelcome);
+    setTimeout(closeWelcome, 3200);
+  })();
   </script>
 </body>
 </html>
