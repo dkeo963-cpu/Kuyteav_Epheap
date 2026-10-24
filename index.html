@@ -1025,9 +1025,12 @@
       const slider = document.getElementById('banner-slider');
       let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
       try {
-        const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'banners').maybeSingle();
-        let v = data && data.value; if (typeof v === 'string') v = JSON.parse(v);
+        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo']);
+        const row = k => (data || []).find(r => r.key === k);
+        let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
+        const lg = row('shop_logo') && row('shop_logo').value;
+        if (typeof lg === 'string' && lg.startsWith('tg:')) document.getElementById('shop-logo').src = imgUrl(lg);
       } catch (e) {}
       slider.innerHTML = list.map(path => `
         <div class="banner-slide">
