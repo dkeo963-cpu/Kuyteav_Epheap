@@ -227,6 +227,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <main class="wrap">
   <!-- ========== HOME ========== -->
   <section id="page-home" class="page on">
+    <!-- Shop banners (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🖼 បដាស្លាយ (Banners)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញនៅទំព័រអតិថិជន</div>
+      <div id="bn-list"></div>
+      <button class="btn btn-p btn-s" id="bn-add">➕ បន្ថែមបដា</button>
+    </div>
     <!-- Top Promotion Banner Control -->
     <div class="card">
       <div class="ctl" style="margin-bottom: 12px;">
@@ -400,6 +407,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <div>
         <label for="f-img">រូបភាព (URL មួយបន្ទាត់ម្តង)</label>
         <textarea id="f-img" placeholder="./images/kuy_teav.png"></textarea>
+        <button type="button" class="btn btn-g btn-s" id="f-img-up" style="margin-top:6px">📷 ផ្ទុករូបឡើង (Telegram)</button>
         <div class="hint">ទុកទទេ ប្រសិនបើគ្មានរូប — ប្រព័ន្ធនឹងប្រើ ./images/កូដ.png</div>
       </div>
       <div class="switch-row">
@@ -716,7 +724,7 @@ function renderMenu() {
     return `
     <article class="item ${on ? "" : "off"}" data-key="${esc(i.item_key)}">
       <div class="item-h">
-        <div class="thumb"><img src="${esc(img)}" alt="" data-fb="${esc(i.icon || "🍜")}" loading="lazy"></div>
+        <div class="thumb"><img src="${esc(imgSrc(img))}" alt="" data-fb="${esc(i.icon || "🍜")}" loading="lazy"></div>
         <div class="t">
           <b>${esc(i.name_kh)}</b>
           <small>${esc(i.name_en)}</small>
@@ -959,11 +967,63 @@ async function refresh() {
   // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
   localStorage.removeItem('davin_app_session');
   
-  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu()]);
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners()]);
   ic.classList.remove("spin");
 }
 $("btn-refresh").onclick = refresh;
 document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+/* ---------- Images stored in Telegram ---------- */
+const imgSrc = u => String(u || "").startsWith("tg:") ? SUPABASE_URL + "/functions/v1/tg-image?f=" + encodeURIComponent(String(u).slice(3)) : u;
+function pickImage() {   // choose a photo, shrink it to max 1280px, return base64 JPEG
+  return new Promise(res => {
+    const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
+    i.onchange = () => {
+      const f = i.files[0]; if (!f) return res(null);
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(im.src); res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      im.onerror = () => res(null); im.src = URL.createObjectURL(f);
+    };
+    i.click();
+  });
+}
+async function uploadImage() {
+  const b64 = await pickImage(); if (!b64) return null;
+  toast("កំពុងផ្ទុកឡើង…");
+  const r = await admin({ action: "upload_image", data: b64 });
+  if (r.error) { toast(r.error, "err"); return null; }
+  return r.data.file_id;
+}
+let BN = [];
+async function loadBanners() {
+  const { data } = await supa.from("app_settings").select("value").eq("key", "banners").maybeSingle();
+  let v = data && data.value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = []; }
+  BN = Array.isArray(v) ? v : []; renderBanners();
+}
+function renderBanners() {
+  $("bn-list").innerHTML = BN.length ? BN.map((u, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+    <img src="${esc(imgSrc(u))}" style="width:96px;height:48px;object-fit:cover;border-radius:8px;background:#e8eeec">
+    <div style="flex:1" class="muted">បដា ${i + 1}</div>
+    ${i ? `<button class="btn btn-g btn-s" data-bn="up" data-i="${i}">↑</button>` : ""}<button class="btn btn-d btn-s" data-bn="del" data-i="${i}">🗑</button></div>`).join("")
+    : '<div class="muted" style="margin-bottom:8px">មិនទាន់មានបដា — កំពុងប្រើរូបលំនាំដើម</div>';
+}
+async function saveBanners() {
+  const r = await admin({ action: "update_setting", key: "banners", value: JSON.stringify(BN) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderBanners();
+}
+$("bn-add").onclick = async () => { const id = await uploadImage(); if (id) { BN.push("tg:" + id); await saveBanners(); } };
+$("bn-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-bn]"); if (!b) return; const i = Number(b.dataset.i);
+  if (b.dataset.bn === "del") { if (!confirm("លុបបដានេះ?")) return; BN.splice(i, 1); }
+  else BN.splice(i - 1, 0, BN.splice(i, 1)[0]);
+  await saveBanners();
+});
+$("f-img-up").onclick = async () => { const id = await uploadImage(); if (id) { const t = $("f-img"); t.value = (t.value.trim() ? t.value.trim() + "\n" : "") + "tg:" + id; toast("បានបន្ថែមរូប — សូមចុចរក្សាទុកម្ហូប", "ok"); } };
 
 const u = tg?.initDataUnsafe?.user;
 $("who").textContent = u ? `${[u.first_name, u.last_name].filter(Boolean).join(" ")}${u.username ? "  @" + u.username : ""}  (ID ${u.id})` : "មិនទាន់ភ្ជាប់ Telegram";
