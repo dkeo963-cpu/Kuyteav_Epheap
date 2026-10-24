@@ -1075,6 +1075,15 @@ function renderDrivers() {
         <button class="btn btn-d btn-s" data-d="del" data-id="${d.id}">លុប</button>
       </div></div>`).join("");
 }
+function trackBox(o) {
+  const id = esc(o.tran_id);
+  if (!o.track_code) return `<div style="margin:6px 0">🔢 លេខតាមដាន: <span class="muted">មិនទាន់មាន</span> <button class="btn btn-p btn-s" data-a="tcnew" data-id="${id}">➕ បង្កើតលេខ</button> <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="">✏️ វាយលេខខ្លួនឯង</button></div>`;
+  return `<div style="margin:6px 0">🔢 លេខតាមដាន: <b style="font-size:15px;letter-spacing:1px">${esc(o.track_code)}</b>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-p btn-s" data-a="tccopy" data-c="${esc(o.track_code)}" data-n="${esc(o.customer_name)}">📋 ចម្លងសារផ្ញើអតិថិជន</button>
+      <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="${esc(o.track_code)}">✏️ កែលេខ</button>
+      <button class="btn btn-d btn-s" data-a="tcdel" data-id="${id}">🗑 លុបលេខ</button></div></div>`;
+}
 function renderDelivery() {
   const box = $("dl-list");
   if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ"; return; }
@@ -1112,6 +1121,7 @@ function renderDelivery() {
       <div class="muted">${tg} · 📞 ${esc(o.phone)} <button class="btn btn-g btn-s" style="padding:2px 8px" data-a="phone" data-id="${esc(o.tran_id)}" data-p="${esc(o.phone)}">✏️ កែលេខ</button></div>
       <div style="font-size:12.5px;margin:4px 0">${items}</div>
       <div class="muted">📍 ${esc(o.address || "—")} ${map ? `· <a href="${esc(map)}" target="_blank" rel="noopener">🗺️ មើលផែនទី (Pin)</a>` : ""}</div>
+      ${trackBox(o)}
       <div style="margin:6px 0">${state}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div>${reqHtml}</div>`;
   }).join("");
@@ -1127,6 +1137,13 @@ $("dl-list").addEventListener("click", async (e) => {
   else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
   else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
   else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
+  else if (act === "tcnew") dlAct({ action: "set_track_code", tran_id: id }, "បានបង្កើតលេខតាមដាន");
+  else if (act === "tcedit") { const v = prompt("លេខតាមដាន (៤-១២ តួ អក្សរ ឬលេខ):", b.dataset.c || ""); if (v) dlAct({ action: "set_track_code", tran_id: id, code: v }, "បានរក្សាទុកលេខ"); }
+  else if (act === "tcdel") { if (confirm("លុបលេខតាមដាននេះ? អតិថិជននឹងមិនអាចមើលតាមលេខនេះបានទៀតទេ")) dlAct({ action: "set_track_code", tran_id: id, clear: true }, "បានលុបលេខ"); }
+  else if (act === "tccopy") {
+    const msg = `សួស្តី ${b.dataset.n || ""}! លេខតាមដានការកម្មង់របស់អ្នកក្នុង Epheap app គឺ ${b.dataset.c}\nសូមបញ្ចូលវាក្នុង «🔎 តាមដានអីវ៉ាន់» ដើម្បីមើលស្ថានភាព។ អរគុណ!`;
+    (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(() => toast("បានចម្លងសារ", "ok")).catch(() => prompt("ចម្លងសារនេះ:", msg));
+  }
   else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
   else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
   else if (act === "approve") {
