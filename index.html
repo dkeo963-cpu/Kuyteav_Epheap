@@ -1017,12 +1017,19 @@
 
     // Auto-sliding multi-banner logic
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner1.png"];
+    const imgUrl = u => String(u).startsWith('tg:') ? SUPABASE_URL + '/functions/v1/tg-image?f=' + encodeURIComponent(String(u).slice(3)) : u;
     let currentBannerIndex = 0;
     let bannerInterval = null;
 
-    function initBanners() {
+    async function initBanners() {
       const slider = document.getElementById('banner-slider');
-      slider.innerHTML = bannerImages.map(path => `
+      let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
+      try {
+        const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'banners').maybeSingle();
+        let v = data && data.value; if (typeof v === 'string') v = JSON.parse(v);
+        if (Array.isArray(v) && v.length) list = v.map(imgUrl);
+      } catch (e) {}
+      slider.innerHTML = list.map(path => `
         <div class="banner-slide">
           <img src="${path}" alt="Banner" onerror="this.src='https://placehold.co/600x250/0f766e/fff?text=Kuyteav+Epheap'">
         </div>
@@ -1031,7 +1038,7 @@
       // Start automatic slide timer (every 3.5 seconds)
       if (bannerInterval) clearInterval(bannerInterval);
       bannerInterval = setInterval(() => {
-        currentBannerIndex = (currentBannerIndex + 1) % bannerImages.length;
+        currentBannerIndex = (currentBannerIndex + 1) % list.length;
         slider.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
       }, 3500);
     }
@@ -1059,8 +1066,8 @@
     function selectCategory(cat) { currentCategory = cat; renderCategories(); renderMenu(); }
 
     function getItemImages(item) {
-      if (Array.isArray(item.images) && item.images.length > 0) return item.images;
-      if (item.image_url) return [item.image_url];
+      if (Array.isArray(item.images) && item.images.length > 0) return item.images.map(imgUrl);
+      if (item.image_url) return [imgUrl(item.image_url)];
       return [`./images/${item.item_key}.png`];
     }
 
