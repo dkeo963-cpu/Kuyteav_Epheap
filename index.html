@@ -609,6 +609,11 @@
     .food-side.in-cart { flex-direction: column; align-items: flex-end; gap: 6px; }
     .food-side .food-price { font-size: 16px; }
     .add-btn { width: 30px; height: 30px; border-radius: 9px; font-size: 18px; }
+
+    /* ===== Category cards: big square picture, whole image visible ===== */
+    .category-card { flex: 1 0 96px; padding: 8px 8px 10px; gap: 7px; border-radius: 18px; }
+    .category-icon { width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 14px; font-size: 42px; }
+    .category-icon img { width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
 </style>
 </head>
 <body>
@@ -1225,6 +1230,7 @@
     // Auto-sliding multi-banner logic
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner1.png"];
     const imgUrl = u => String(u).startsWith('tg:') ? SUPABASE_URL + '/functions/v1/tg-image?f=' + encodeURIComponent(String(u).slice(3)) : u;
+    let catImages = {};   // category pictures set from the admin page (stored in Telegram)
     let currentBannerIndex = 0;
     let bannerInterval = null;
 
@@ -1232,8 +1238,10 @@
       const slider = document.getElementById('banner-slider');
       let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
       try {
-        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo']);
+        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images']);
         const row = k => (data || []).find(r => r.key === k);
+        let ci = row('category_images') && row('category_images').value; if (typeof ci === 'string') ci = JSON.parse(ci);
+        if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
         let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
         const lg = row('shop_logo') && row('shop_logo').value;
@@ -1267,8 +1275,9 @@
         { key: 'drinks', name: 'ភេសជ្ជៈ', icon: '🧋' }
       ];
       container.innerHTML = categories.map(cat => {
-        let pic = '';
+        let pic = catImages[cat.key] ? imgUrl(catImages[cat.key]) : '';
         try {
+          if (pic) throw 0;
           const it = menuItems.find(m => m.category === cat.key && getItemImages(m)[0]);
           if (it) pic = getItemImages(it)[0];
         } catch (e) {}
