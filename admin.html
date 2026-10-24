@@ -245,6 +245,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញក្នុងប៊ូតុងប្រភេទនៅទំព័រអតិថិជន</div>
       <div id="cat-img-list"></div>
     </div>
+    <!-- Greeting question on the customer page -->
+    <div class="card">
+      <div class="lbl">💬 អត្ថបទស្វាគមន៍ (Greeting question)</div>
+      <div class="muted" style="margin-bottom:8px">បង្ហាញក្រោម «សួស្ដី …» នៅទំព័រអតិថិជន</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="greet-input" maxlength="80" placeholder="ថ្ងៃនេះចង់ញ៉ាំអ្វី?" style="flex:1;height:38px;border:1px solid var(--line);border-radius:var(--r-s);padding:0 10px;background:#fafcfb;">
+        <button class="btn btn-p btn-s" id="greet-save">រក្សាទុក</button>
+      </div>
+    </div>
     <!-- Top Promotion Banner Control -->
     <div class="card">
       <div class="ctl" style="margin-bottom: 12px;">
@@ -263,6 +272,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
           <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">មុខម្ហូបប្រូម៉ូសិន (ប៊ូតុង «កម្មង់ឥឡូវ» នឹងទៅកាន់មុខម្ហូបនេះ):</label>
+          <select id="promo-item-select" style="height: 38px; width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 10px; background: #fafcfb;"><option value="">— មិនជ្រើស (ទៅកាន់ម៉ឺនុយ) —</option></select>
         </div>
         <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
       </div>
@@ -581,11 +594,36 @@ $("promo-toggle").addEventListener("change", async e => {
   loadPromoBanner();
 });
 
+
+// ---- promo food + greeting text ----
+let PROMO_ITEM = "";
+function fillPromoItems() {
+  const sel = $("promo-item-select"); if (!sel) return;
+  sel.innerHTML = '<option value="">— មិនជ្រើស (ទៅកាន់ម៉ឺនុយ) —</option>' +
+    (items || []).map(i => `<option value="${esc(i.item_key)}">${esc(i.name_kh)}</option>`).join("");
+  sel.value = PROMO_ITEM;
+}
+async function loadPromoItem() {
+  const { data } = await supa.from("app_settings").select("key, value").in("key", ["promo_item"]);
+  let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
+  PROMO_ITEM = typeof v === "string" ? v : ""; fillPromoItems();
+}
+async function loadGreet() {
+  const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text"]);
+  let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
+  $("greet-input").value = typeof v === "string" ? v : "";
+}
+$("greet-save").addEventListener("click", async () => {
+  const r = await admin({ action: "update_setting", key: "greet_text", value: $("greet-input").value.trim() });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok");
+});
 $("promo-save-btn").addEventListener("click", async () => {
   const badge = $("promo-badge-input").value.trim();
   const text = $("promo-msg-input").value.trim();
   
   await admin({ action: "update_setting", key: "promo_badge", value: badge });
+  PROMO_ITEM = $("promo-item-select").value;
+  await admin({ action: "update_setting", key: "promo_item", value: PROMO_ITEM });
   const { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
   
   if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
@@ -659,6 +697,7 @@ async function loadMenu() {
     CATEGORIES.findIndex(c => c.key === a.category) - CATEGORIES.findIndex(c => c.key === b.category)
     || String(a.name_kh).localeCompare(String(b.name_kh)));
   renderAll();
+  fillPromoItems();
 }
 
 const stockOf = i => Number.isFinite(+i.stock_quantity) ? +i.stock_quantity : 0;
@@ -978,7 +1017,7 @@ async function refresh() {
   // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
   localStorage.removeItem('davin_app_session');
   
-  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs()]);
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs(), loadPromoItem(), loadGreet()]);
   ic.classList.remove("spin");
 }
 $("btn-refresh").onclick = refresh;
