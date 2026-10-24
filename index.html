@@ -189,33 +189,25 @@
     }
     .search-input:focus { border-color: var(--brand); }
 
-    /* Category buttons (playful kid style) */
+    /* Category buttons (clean, simple) */
     .category-grid {
-      display: flex; gap: 12px; overflow-x: auto; margin: 0 -14px 14px; padding: 14px 14px 18px;
-      background: linear-gradient(180deg, #fff7e0 0%, #ffffff 100%); border-bottom: 2px dashed #ffd27a;
+      display: flex; gap: 10px; overflow-x: auto; margin: 0 -14px 14px; padding: 12px 14px;
+      background: var(--surface); border-bottom: 1px solid var(--line);
       scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
     .category-grid::-webkit-scrollbar { display: none; }
     .category-card {
-      --c:#0f766e; --cd:#0b5c56; --cl:#e3f3f1;
-      flex: 0 0 auto; min-width: 92px; display: flex; flex-direction: column; align-items: center; gap: 2px;
-      background: var(--cl); border: 3px solid var(--c); border-radius: 22px; padding: 8px 14px 9px;
-      cursor: pointer; box-shadow: 0 5px 0 var(--cd);
-      transition: transform .12s ease, box-shadow .12s ease, background .15s;
+      flex: 0 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+      padding: 9px 22px; cursor: pointer; box-shadow: 0 2px 6px rgba(20,32,31,.08);
+      transition: transform .15s ease, box-shadow .15s ease, background .2s, border-color .2s;
     }
-    .category-card.c1 { --c:#ef4444; --cd:#b91c1c; --cl:#ffe4e4; }
-    .category-card.c2 { --c:#f59e0b; --cd:#b45309; --cl:#fff1cc; }
-    .category-card.c3 { --c:#8b5cf6; --cd:#6d28d9; --cl:#ede4ff; }
-    .category-card.c4 { --c:#0ea5e9; --cd:#0369a1; --cl:#dff3ff; }
-    .category-emoji { font-size: 30px; line-height: 1.1; display: block; transition: transform .2s; }
-    .category-card:active { transform: translateY(5px) scale(.95); box-shadow: 0 0 0 var(--cd); }
-    .category-name { font-size: 14px; font-weight: 800; color: var(--cd); white-space: nowrap; }
-    .category-card.active { background: var(--c); animation: catPop .5s cubic-bezier(.2,.9,.3,1.5); }
-    .category-card.active .category-name { color: #fff; }
-    .category-card.active .category-emoji { animation: catWiggle 1.6s ease-in-out .5s infinite; }
-    @keyframes catPop { 0% { transform: scale(.8) rotate(-6deg); } 55% { transform: scale(1.14) rotate(3deg); } 100% { transform: scale(1) rotate(0); } }
-    @keyframes catWiggle { 0%,60%,100% { transform: rotate(0) scale(1); } 70% { transform: rotate(-14deg) scale(1.15); } 80% { transform: rotate(12deg) scale(1.15); } 90% { transform: rotate(-6deg); } }
-    @media (prefers-reduced-motion: reduce) { .category-card.active, .category-card.active .category-emoji { animation: none; } }
+    .category-card:active { transform: scale(.97); box-shadow: 0 1px 2px rgba(20,32,31,.1); }
+    .category-card.active {
+      background: var(--brand); border-color: var(--brand); box-shadow: 0 4px 12px rgba(15,118,110,.32);
+      transform: translateY(-1px);
+    }
+    .category-name { font-size: 15px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+    .category-card.active .category-name { color: #fff; font-weight: 700; }
 
     /* ===== Food Card Layout & Sizing ===== */
     #food-list { display: grid; grid-template-columns: 1fr; gap: 14px; }
@@ -1108,14 +1100,13 @@
     function renderCategories() {
       const container = document.getElementById('category-cards-container');
       const categories = [
-        { key: 'kuy_teav', name: 'គុយទាវ', emoji: '🍜', c: 'c1' },
-        { key: 'rice', name: 'បាយ', emoji: '🍚', c: 'c2' },
-        { key: 'other', name: 'នំបាញ់ចុក', emoji: '🥢', c: 'c3' },
-        { key: 'drinks', name: 'ភេសជ្ជៈ', emoji: '🧋', c: 'c4' }
+        { key: 'kuy_teav', name: 'គុយទាវ' },
+        { key: 'rice', name: 'បាយ' },
+        { key: 'other', name: 'នំបាញ់ចុក' },
+        { key: 'drinks', name: 'ភេសជ្ជៈ' }
       ];
       container.innerHTML = categories.map(cat => `
-        <div class="category-card ${cat.c} ${currentCategory === cat.key ? 'active' : ''}" onclick="selectCategory('${cat.key}')">
-          <span class="category-emoji">${cat.emoji}</span>
+        <div class="category-card ${currentCategory === cat.key ? 'active' : ''}" onclick="selectCategory('${cat.key}')">
           <div class="category-name">${cat.name}</div>
         </div>
       `).join('');
