@@ -419,7 +419,21 @@
     .leaflet-container .leaflet-control-attribution { font-size:9px; background:rgba(255,255,255,.7); }
     #map-modal .lifted { translate: 0 -10px; transition: translate .15s ease; }
     #picker-map .gm-style-cc, #picker-map .gmnoprint a { font-size: 10px; }
-  </style>
+      .track-entry { display:block; width:calc(100% - 32px); margin:10px 16px; padding:12px 14px; border:1.5px solid var(--brand); border-radius:12px; background:var(--brand-l); color:var(--brand); font:inherit; font-weight:800; font-size:14px; text-align:left; cursor:pointer; }
+    .tcard { border:1px solid var(--line); border-radius:12px; padding:12px; margin-top:10px; text-align:left; }
+    .tcard ul { margin:6px 0; padding-left:18px; font-size:13px; line-height:1.6; }
+    .tbtns { display:flex; gap:8px; margin-top:8px; }
+    .tbtn { flex:1; padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--sub); font:inherit; font-weight:700; font-size:13px; }
+    .tbtn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+    .tbtn.go { cursor:pointer; } .tbtn:disabled { opacity:.55; }
+    #live-map { height:240px; border-radius:12px; margin-top:10px; }
+    .tl { margin:10px 0 2px; padding:0; list-style:none; }
+    .tl li { display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px; color:var(--sub); }
+    .tl .d { width:22px; height:22px; border-radius:50%; background:#dde1e6; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .tl li.done { color:var(--ink); font-weight:700; } .tl li.done .d { background:var(--brand); }
+    .tl li.now .d { box-shadow:0 0 0 4px rgba(15,118,110,.2); }
+    .trow { display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
+</style>
 </head>
 <body>
 
@@ -477,7 +491,7 @@
 
   <!-- Auto-sliding multi-banner container -->
   <div class="banner-container">
-    <div class="banner-slider" id="banner-slider"></div>
+<div class="banner-slider" id="banner-slider"></div>
   </div>
 
   <input type="text" id="search-input" class="search-input" placeholder="ស្វែងរកមុខម្ហូប..." oninput="renderMenu()">
@@ -528,6 +542,7 @@
     </div>
 
     <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
+      <button type="button" class="track-entry" style="margin:0;width:100%" onclick="closeInfoModal(); openTrackModal();">🔎 តាមដានអីវ៉ាន់ (Tracking your order)</button>
       <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
       <div>
         <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⏰ ម៉ោងដំណើរការហាង</div>
@@ -668,6 +683,21 @@
       <button id="send-order-btn" class="submit-order-btn" onclick="sendOrder()">
         ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>
       </button>
+    </div>
+  </div>
+
+  <!-- Order tracking -->
+  <div id="track-modal" class="pay-overlay">
+    <div class="pay-card">
+      <div class="row-h" style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">🔎 តាមដានអីវ៉ាន់</b><button type="button" class="pay-btn ghost" style="width:auto;margin:0;height:36px;padding:0 14px" onclick="closeTrackModal()">✕</button></div>
+      <div class="pay-sub" style="margin:8px 0;text-align:left">បញ្ចូលលេខទូរស័ព្ទដែលអ្នកបានប្រើពេលកម្មង់</div>
+      <input id="track-phone" class="custom-input" inputmode="tel" placeholder="012 345 678" maxlength="16">
+      <button type="button" class="pay-btn" onclick="lookupOrders()">ស្វែងរក</button>
+      <div id="track-results"></div>
+      <div id="live-box" style="display:none">
+        <div id="live-info" class="pay-sub" style="margin-top:12px;font-weight:700"></div>
+        <div id="live-map"></div>
+      </div>
     </div>
   </div>
 
@@ -1692,6 +1722,103 @@
       else if (requireLogin) showLoginWidget();
     }
 
+    /* ===== Tracking your order: look up by phone, then watch the driver live ===== */
+    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null;
+    const FULFIL = { new: 'បានទទួលការកម្មង់', preparing: 'កំពុងរៀបចំ', ready: 'រួចរាល់', done: 'ប្រគល់ហើយ' };
+    function openTrackModal() {
+      const el = document.getElementById('track-phone');
+      let saved = ''; try { saved = localStorage.getItem('track_phone') || ''; } catch (e) {}
+      if (!el.value) el.value = (document.getElementById('input-phone') || {}).value || saved;
+      document.getElementById('track-modal').style.display = 'flex';
+      if (el.value) lookupOrders();
+    }
+    function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; stopLive(); }
+    function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; document.getElementById('live-box').style.display = 'none'; }
+    async function lookupOrders() {
+      const box = document.getElementById('track-results');
+      const phone = normalizeKhPhone(document.getElementById('track-phone').value);
+      if (!phone) { alert('លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678'); return; }
+      try { localStorage.setItem('track_phone', phone); } catch (e) {}
+      box.textContent = 'កំពុងស្វែងរក…';
+      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'lookup_phone', phone } });
+      box.innerHTML = '';
+      if (error || !data || data.error) { box.textContent = (data && data.error) || 'មិនអាចភ្ជាប់បានទេ'; return; }
+      if (!data.orders.length) { box.textContent = 'រកមិនឃើញការកម្មង់ក្នុង ៣ ថ្ងៃចុងក្រោយទេ។'; return; }
+      data.orders.forEach(o => box.appendChild(orderCard(o)));
+    }
+    function orderCard(o) {
+      const c = document.createElement('div'); c.className = 'tcard';
+      const el = (tag, txt, st) => { const x = document.createElement(tag); if (txt != null) x.textContent = txt; if (st) x.style.cssText = st; return x; };
+      const row = (l, r, st) => { const d = el('div', null, st); d.className = 'trow'; d.append(el('span', l), el('b', r)); return d; };
+      const isDel = o.order_type === 'delivery';
+      const qty = (o.items || []).reduce((n, i) => n + Number(i.qty || 0), 0);
+
+      c.append(el('div', '🧾 ' + o.tran_id, 'font-size:11.5px;color:var(--sub)'));
+      c.append(row('👤 អតិថិជន', o.name));
+      c.append(row('🛵 ប្រភេទ', isDel ? 'ដឹកជញ្ជូន (Delivery)' : 'ទៅយក (Pick Up)'));
+      c.append(row('💳 ទូទាត់', 'បានបង់តាម ABA ✅'));
+      c.append(el('div', '🛒 បញ្ជីមុខម្ហូប', 'font-weight:700;margin-top:6px'));
+      const ul = el('ul');
+      (o.items || []).forEach(i => {
+        const li = el('li', i.name + (i.size ? ' (' + String(i.size).toUpperCase() + ')' : '') + (i.sugar ? ' [ស្ករ ' + i.sugar + ', ' + i.ice + ']' : '') +
+          ' ×' + i.qty + (i.price != null ? ' = $' + (Number(i.price) * Number(i.qty)).toFixed(2) : ''));
+        ul.appendChild(li);
+      });
+      c.append(ul);
+      c.append(row('🍽️ សរុបមុខម្ហូប', (o.items || []).length + ' មុខ / ' + qty + ' ចាន'));
+      if (isDel && Number(o.delivery_fee) > 0) c.append(row('🛵 ថ្លៃដឹកជញ្ជូន', '$' + Number(o.delivery_fee).toFixed(2)));
+      c.append(row('💰 សរុបបានបង់', '$' + Number(o.total).toFixed(2), 'font-size:15px;margin-top:2px'));
+
+      // ----- steps: the shop and the driver set these -----
+      const rank = { not_yet: 0, pickup: 1, delivering: 2, arrived: 3, delivered: 4 }[o.delivery_status] || 0;
+      const shopReady = o.fulfillment === 'ready' || o.fulfillment === 'done' || (isDel && rank >= 1);
+      const steps = isDel ? [
+        ['ហាងបានរៀបចំ', shopReady], ['ចាប់ផ្តើមដឹក', rank >= 1], ['កំពុងដឹក', rank >= 2], ['ដល់មកទីតាំង', rank >= 3], ['បានយកអីវ៉ាន់', rank >= 4]
+      ] : [
+        ['ហាងបានរៀបចំ', shopReady], ['បានយកអីវ៉ាន់', o.fulfillment === 'done']
+      ];
+      const lastDone = steps.map(x => x[1]).lastIndexOf(true);
+      c.append(el('div', '📍 ស្ថានភាព', 'font-weight:700;margin-top:10px'));
+      const tl = el('ul'); tl.className = 'tl';
+      steps.forEach((st, k) => {
+        const li = el('li'); li.className = (st[1] ? 'done' : '') + (k === lastDone ? ' now' : '');
+        const d = el('span', st[1] ? '✓' : String(k + 1)); d.className = 'd';
+        li.append(d, el('span', st[0])); tl.append(li);
+      });
+      c.append(tl);
+      if (isDel && o.driver && rank >= 1) c.append(el('div', 'អ្នកដឹក: ' + o.driver, 'font-size:12.5px;color:var(--sub);margin-top:4px'));
+      if (isDel && o.delivery_status === 'delivering') {
+        const b = el('button', '🗺️ មើលទីតាំងអ្នកដឹក (Live)'); b.type = 'button'; b.className = 'tbtn go on'; b.style.cssText = 'width:100%;margin-top:8px';
+        b.onclick = () => showLive(o.tran_id); c.append(b);
+      }
+      return c;
+    }
+    function showLive(id) {
+      liveId = id;
+      document.getElementById('live-box').style.display = 'block';
+      if (!liveMap) {
+        liveMap = L.map('live-map', { zoomControl: true, attributionControl: false }).setView([11.55, 104.9], 15);
+        L.tileLayer(MAPTILER_KEY ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}` : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(liveMap);
+        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(liveMap);
+      }
+      setTimeout(() => liveMap.invalidateSize(), 150);
+      pollLive();
+      clearInterval(liveTimer); liveTimer = setInterval(pollLive, 6000);
+    }
+    async function pollLive() {
+      if (!liveId) return;
+      const info = document.getElementById('live-info');
+      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'live', tran_id: liveId } });
+      if (error || !data) { info.textContent = 'មិនអាចភ្ជាប់បានទេ…'; return; }
+      if (data.delivery_status === 'delivered') { info.textContent = '✅ អីវ៉ាន់ដឹកដល់ហើយ។ អរគុណ!'; clearInterval(liveTimer); return; }
+      if (!data.live) { info.textContent = 'រង់ចាំទីតាំងរបស់អ្នកដឹក…'; return; }
+      info.textContent = '🛵 ' + (data.driver || 'អ្នកដឹក') + (data.distance_km != null ? ' · នៅឆ្ងាយ ~' + data.distance_km + ' km' : '') + (data.eta_min != null ? ' · ប្រហែល ' + data.eta_min + ' នាទី' : '');
+      const pos = [data.lat, data.lng];
+      if (!liveMarker) liveMarker = L.marker(pos, { icon: L.divIcon({ className: '', html: '<div style="font-size:30px;line-height:30px">🛵</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(liveMap);
+      else liveMarker.setLatLng(pos);
+      liveMap.panTo(pos, { animate: true });
+    }
+
     async function sendOrder() {
       await checkDeliveryStatus();
       if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
@@ -1750,6 +1877,7 @@
 
         const info = { ...data, started_at: Date.now() };
         localStorage.setItem('pending_payment', JSON.stringify(info));
+        try { localStorage.setItem('track_phone', phoneVal); } catch (e) {}
         showPayModal(info);
       } catch (err) {
         alert("កំហុស: " + (err.message || err));
