@@ -981,7 +981,14 @@ async function pwLogin() {
 $("pw-go").onclick = pwLogin;
 $("pw-in").addEventListener("keydown", e => { if (e.key === "Enter") pwLogin(); });
 $("pw-out").onclick = () => { admToken = ""; try { localStorage.removeItem("adm_token"); } catch (e) {} showPw(); };
-if (hasTG) admin({ action: "ping" });   // pops the password screen when the server needs it
+if (hasTG) {   // locked by default: the dashboard stays covered until the server says yes
+  showPw(); $("pw-in").disabled = true; $("pw-go").disabled = true; $("pw-err").textContent = "កំពុងពិនិត្យ…";
+  admin({ action: "ping" }).then(r => {
+    $("pw-in").disabled = false; $("pw-go").disabled = false;
+    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; }
+    else $("pw-err").textContent = (r.error && !/ពាក្យសម្ងាត់/.test(r.error)) ? r.error : "";
+  });
+}
 
 if (!hasTG) {
   $("gate").classList.add("show");
