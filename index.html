@@ -588,6 +588,27 @@
     .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 10px; }
     .sec-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--ink); }
     .sec-head span { font-size: 13px; color: var(--sub); font-weight: 600; }
+
+    /* ===== Menu rows (like the reference) + categories with photos ===== */
+    .top-promo-banner { display: flex; align-items: center; gap: 10px; padding: 8px 40px 8px 12px; overflow: hidden; position: relative; text-align: left; }
+    .promo-run { flex: 1; min-width: 0; overflow: hidden; }
+    .top-promo-banner .top-promo-content { padding-right: 36px; font-size: 13.5px; font-weight: 600; }
+    .promo-cta { flex-shrink: 0; }
+
+    .category-grid { gap: 10px; padding: 2px 14px 8px; }
+    .category-card { flex: 1 0 78px; width: auto; }
+    .category-icon { overflow: hidden; }
+    .category-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+
+    #food-list { flex-direction: column; gap: 10px; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
+    #food-list > div:not(.food-card) { flex: none; }
+    .food-card { flex: none; width: 100%; max-width: none; flex-direction: row; align-items: center; gap: 12px; padding: 10px 12px 10px 10px; border-radius: 18px; }
+    .food-img { width: 76px; height: 76px; aspect-ratio: auto; flex: 0 0 76px; border-radius: 14px; font-size: 2rem; }
+    .food-body { flex: 1; min-width: 0; padding: 0; }
+    .food-side { flex-direction: row; justify-content: flex-end; align-items: center; gap: 10px; padding: 0; }
+    .food-side.in-cart { flex-direction: column; align-items: flex-end; gap: 6px; }
+    .food-side .food-price { font-size: 16px; }
+    .add-btn { width: 30px; height: 30px; border-radius: 9px; font-size: 18px; }
 </style>
 </head>
 <body>
@@ -606,11 +627,27 @@
   </div>
 
   <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
-    <div class="promo-inner">
-      <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-      <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
-      <button type="button" class="promo-cta" onclick="goMenu()">កម្មង់ឥឡូវ</button>
+    <div class="promo-run">
+      <div class="top-promo-track">
+        <div class="top-promo-content">
+          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
+        </div>
+        <div class="top-promo-content">
+          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
+        </div>
+        <div class="top-promo-content">
+          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
+        </div>
+        <div class="top-promo-content">
+          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
+          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
+        </div>
+      </div>
     </div>
+    <button type="button" class="promo-cta" onclick="goMenu()">កម្មង់ឥឡូវ</button>
     <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
   </div>
 
@@ -625,9 +662,6 @@
           <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
         </div>
         <div class="hdr-actions">
-          <button type="button" class="hdr-ico" aria-label="Track order" onclick="openTrackModal()">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-          </button>
           <button type="button" class="hdr-link" onclick="openInfoModal()">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
             <span class="hdr-link-t">អំពីយើង</span>
@@ -1130,7 +1164,7 @@
 
           const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
           if (isActive && bannerEl) {
-            bannerEl.style.display = 'block';
+            bannerEl.style.display = 'flex';
             const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
             const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
 
@@ -1232,12 +1266,21 @@
         { key: 'other', name: 'នំបាញ់ចុក', icon: '🥢' },
         { key: 'drinks', name: 'ភេសជ្ជៈ', icon: '🧋' }
       ];
-      container.innerHTML = categories.map(cat => `
+      container.innerHTML = categories.map(cat => {
+        let pic = '';
+        try {
+          const it = menuItems.find(m => m.category === cat.key && getItemImages(m)[0]);
+          if (it) pic = getItemImages(it)[0];
+        } catch (e) {}
+        const inner = pic
+          ? `<img src="${pic}" alt="" onerror="this.outerHTML='<span>${cat.icon}</span>'">`
+          : cat.icon;
+        return `
         <div class="category-card ${currentCategory === cat.key ? 'active' : ''}" onclick="selectCategory('${cat.key}')">
-          <div class="category-icon">${cat.icon}</div>
+          <div class="category-icon">${inner}</div>
           <div class="category-name">${cat.name}</div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
     }
 
     function selectCategory(cat) { currentCategory = cat; renderCategories(); renderMenu(); }
@@ -1299,7 +1342,7 @@
               <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
               <div class="food-sub">${item.name_en}</div>
             </div>
-            <div class="food-side">
+            <div class="food-side${totalInCart > 0 ? ' in-cart' : ''}">
               <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
               ${totalInCart === 0
                 ? `<button type="button" class="add-btn" aria-label="Add" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>`
