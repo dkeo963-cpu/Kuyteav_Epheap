@@ -1723,7 +1723,7 @@
     }
 
     /* ===== Tracking your order: look up by phone, then watch the driver live ===== */
-    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null;
+    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null, trackTimer = null;
     const FULFIL = { new: 'បានទទួលការកម្មង់', preparing: 'កំពុងរៀបចំ', ready: 'រួចរាល់', done: 'ប្រគល់ហើយ' };
     function openTrackModal() {
       const el = document.getElementById('track-phone');
@@ -1731,16 +1731,18 @@
       if (!el.value) el.value = (document.getElementById('input-phone') || {}).value || saved;
       document.getElementById('track-modal').style.display = 'flex';
       if (el.value) lookupOrders();
+      clearInterval(trackTimer); trackTimer = setInterval(() => { if (document.getElementById('track-modal').style.display === 'flex') lookupOrders(true); }, 10000);   // status follows the driver's taps
     }
-    function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; stopLive(); }
+    function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; clearInterval(trackTimer); stopLive(); }
     function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; document.getElementById('live-box').style.display = 'none'; }
-    async function lookupOrders() {
+    async function lookupOrders(silent) {
       const box = document.getElementById('track-results');
       const phone = normalizeKhPhone(document.getElementById('track-phone').value);
-      if (!phone) { alert('លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678'); return; }
+      if (!phone) { if (!silent) alert('លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678'); return; }
       try { localStorage.setItem('track_phone', phone); } catch (e) {}
-      box.textContent = 'កំពុងស្វែងរក…';
+      if (!silent) box.textContent = 'កំពុងស្វែងរក…';
       const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'lookup_phone', phone } });
+      if (silent && (error || !data || data.error)) return;   // keep what is on screen if a background refresh fails
       box.innerHTML = '';
       if (error || !data || data.error) { box.textContent = (data && data.error) || 'មិនអាចភ្ជាប់បានទេ'; return; }
       if (!data.orders.length) { box.textContent = 'រកមិនឃើញការកម្មង់ក្នុង ៣ ថ្ងៃចុងក្រោយទេ។'; return; }
@@ -1770,10 +1772,10 @@
       c.append(row('💰 សរុបបានបង់', '$' + Number(o.total).toFixed(2), 'font-size:15px;margin-top:2px'));
 
       // ----- steps: the shop and the driver set these -----
-      const rank = { not_yet: 0, pickup: 1, delivering: 2, arrived: 3, delivered: 4 }[o.delivery_status] || 0;
-      const shopReady = o.fulfillment === 'ready' || o.fulfillment === 'done' || (isDel && rank >= 1);
+      const rank = { not_yet: 0, pickup: 0, delivering: 1, arrived: 1, delivered: 2 }[o.delivery_status] || 0;   // 0 not yet, 1 delivering, 2 received
+      const shopReady = o.fulfillment === 'ready' || o.fulfillment === 'done';
       const steps = isDel ? [
-        ['ហាងបានរៀបចំ', shopReady], ['ចាប់ផ្តើមដឹក', rank >= 1], ['កំពុងដឹក', rank >= 2], ['ដល់មកទីតាំង', rank >= 3], ['បានយកអីវ៉ាន់', rank >= 4]
+        ['មិនទាន់ដឹក', true], ['កំពុងដឹក', rank >= 1], ['បានទទួលអីវ៉ាន់', rank >= 2]
       ] : [
         ['ហាងបានរៀបចំ', shopReady], ['បានយកអីវ៉ាន់', o.fulfillment === 'done']
       ];
@@ -1786,8 +1788,12 @@
         li.append(d, el('span', st[0])); tl.append(li);
       });
       c.append(tl);
-      if (isDel && o.driver && rank >= 1) c.append(el('div', 'អ្នកដឹក: ' + o.driver, 'font-size:12.5px;color:var(--sub);margin-top:4px'));
-      if (isDel && o.delivery_status === 'delivering') {
+      if (isDel && o.driver && rank >= 1 && rank < 2) c.append(el('div', 'អ្នកដឹក: ' + o.driver, 'font-size:12.5px;color:var(--sub);margin-top:4px'));
+      if (isDel && rank >= 2) {
+        c.append(el('div', '✅ ការដឹកបានបញ្ចប់ — អរគុណ!', 'font-size:13px;font-weight:700;color:var(--brand);margin-top:8px'));
+        if (liveId === o.tran_id) stopLive();
+      }
+      if (isDel && rank === 1) {
         const b = el('button', '🗺️ មើលទីតាំងអ្នកដឹក (Live)'); b.type = 'button'; b.className = 'tbtn go on'; b.style.cssText = 'width:100%;margin-top:8px';
         b.onclick = () => showLive(o.tran_id); c.append(b);
       }
@@ -1810,7 +1816,7 @@
       const info = document.getElementById('live-info');
       const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'live', tran_id: liveId } });
       if (error || !data) { info.textContent = 'មិនអាចភ្ជាប់បានទេ…'; return; }
-      if (data.delivery_status === 'delivered') { info.textContent = '✅ អីវ៉ាន់ដឹកដល់ហើយ។ អរគុណ!'; clearInterval(liveTimer); return; }
+      if (data.delivery_status === 'delivered') { stopLive(); lookupOrders(true); return; }
       if (!data.live) { info.textContent = 'រង់ចាំទីតាំងរបស់អ្នកដឹក…'; return; }
       info.textContent = '🛵 ' + (data.driver || 'អ្នកដឹក') + (data.distance_km != null ? ' · នៅឆ្ងាយ ~' + data.distance_km + ' km' : '') + (data.eta_min != null ? ' · ប្រហែល ' + data.eta_min + ' នាទី' : '');
       const pos = [data.lat, data.lng];
