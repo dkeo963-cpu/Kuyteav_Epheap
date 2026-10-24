@@ -477,24 +477,58 @@
     @keyframes wBar { to { width:100%; } }
     @media (prefers-reduced-motion: reduce) { #welcome *, #welcome { animation-duration:.01s !important; animation-delay:0s !important; transition:none !important; } }
 
-    /* ===== Simple mode: flat, quiet, no extra effects ===== */
+    /* ===== Modern menu (category cards + list rows) ===== */
     .hours-badge, .hours-badge * { animation: none !important; }
-    .guide-float-btn { animation: none !important; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
-    /* welcome */
+    .guide-float-btn { animation: none !important; }
     #welcome { background: #fff; color: var(--ink); }
     #welcome .w-steam, #welcome .w-sub, #welcome .w-bar { display: none; }
     #welcome .w-logo { width: 110px; height: 110px; padding: 0; box-shadow: none; border: 1px solid var(--line); animation: none; }
     #welcome .w-hello, #welcome .w-name, #welcome .w-btn { animation: none; }
     #welcome .w-hello { color: var(--sub); opacity: 1; }
-    #welcome .w-btn { background: var(--brand); color: #fff; box-shadow: none; border-radius: 10px; padding: 13px 32px; }
-    /* categories */
-    .category-icon { background: #fff; border: 1px solid var(--line); box-shadow: none; border-radius: 14px; width: 64px; height: 64px; font-size: 28px; transition: background .15s, border-color .15s; }
+    #welcome .w-btn { background: var(--brand); color: #fff; box-shadow: none; border-radius: 14px; padding: 13px 32px; }
+
+    /* category cards: 4 across, swipe if the screen is narrow */
+    .category-grid { gap: 10px; margin: 0 -14px 14px; padding: 2px 14px 6px; scroll-snap-type: none; }
+    .category-card {
+      flex: 1 0 76px; width: auto; gap: 8px; padding: 12px 6px 11px; background: var(--surface);
+      border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 1px 2px rgba(20,32,31,.04);
+      transition: background .2s, border-color .2s, transform .15s;
+    }
+    .category-card:active { transform: scale(.97); }
+    .category-icon {
+      width: 54px; height: 54px; border-radius: 50%; background: #eef3f2; border: 0; box-shadow: none; font-size: 28px;
+      transition: background .2s;
+    }
     .category-card:active .category-icon { transform: none; }
-    .category-card.active .category-icon { background: var(--brand-l); border-color: var(--brand); box-shadow: none; transform: none; }
-    /* food cards */
-    .food-card { border-radius: 12px; box-shadow: none; padding: 8px 8px 12px; }
-    .food-img { border-radius: 8px; }
-    .buy-btn { box-shadow: none; }
+    .category-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .category-card.active { background: var(--brand-l); border-color: var(--brand); }
+    .category-card.active .category-icon { background: #fff; box-shadow: none; transform: none; }
+    .category-card.active .category-name { color: var(--brand-d); font-weight: 800; }
+
+    /* food list: one row per item */
+    #food-list { display: flex; flex-direction: column; gap: 10px; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
+    #food-list > div:not(.food-card) { flex: none; }
+    .food-card {
+      flex: none; max-width: none; width: 100%; flex-direction: row; align-items: center; gap: 12px;
+      padding: 10px 12px 10px 10px; border-radius: 20px; box-shadow: 0 1px 2px rgba(20,32,31,.04);
+    }
+    .food-img { width: 76px; height: 76px; aspect-ratio: auto; flex: 0 0 76px; border-radius: 16px; font-size: 2rem; }
+    .food-img .heart-btn { top: 4px; right: 4px; width: 24px; height: 24px; }
+    .food-img .heart-btn svg { width: 13px; height: 13px; }
+    .photo-count-badge { bottom: 4px; right: 4px; font-size: 9px; padding: 0 5px; }
+    .food-body { flex: 1; min-width: 0; padding: 0; }
+    .food-name { font-size: 15px; line-height: 1.45; }
+    .food-sub { font-size: 12px; }
+    .food-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+    .food-side .food-price { font-size: 16px; }
+    .add-btn {
+      width: 38px; height: 38px; border-radius: 12px; border: 0; background: var(--brand); color: #fff;
+      font-size: 22px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
+    }
+    .add-btn:active { background: var(--brand-d); transform: scale(.94); }
+    .add-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; transform: none; }
+    .food-side .card-stepper { padding: 2px 4px; gap: 6px; background: var(--brand-l); border-color: transparent; }
+    .food-side .card-step-btn { width: 28px; height: 28px; }
 </style>
 </head>
 <body>
@@ -1173,7 +1207,6 @@
         return;
       }
 
-      container.scrollLeft = 0;
       container.innerHTML = filtered.map(item => {
         const firstSize = Object.keys(item.sizes)[0];
         const totalInCart = cart
@@ -1197,15 +1230,16 @@
             <div class="food-body">
               <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
               <div class="food-sub">${item.name_en}</div>
-              <div class="food-row">
-                <div class="card-stepper">
-                  <button type="button" class="card-step-btn" ${totalInCart === 0 ? 'disabled' : ''} onclick="decItem('${item.item_key}')">−</button>
-                  <span class="card-qty">${totalInCart}</span>
-                  <button type="button" class="card-step-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
-                </div>
-                <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
-                <button type="button" class="buy-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">Buy Now</button>
-              </div>
+            </div>
+            <div class="food-side">
+              <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
+              ${totalInCart === 0
+                ? `<button type="button" class="add-btn" aria-label="Add" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>`
+                : `<div class="card-stepper">
+                    <button type="button" class="card-step-btn" onclick="decItem('${item.item_key}')">−</button>
+                    <span class="card-qty">${totalInCart}</span>
+                    <button type="button" class="card-step-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
+                  </div>`}
             </div>
           </div>
         `;
