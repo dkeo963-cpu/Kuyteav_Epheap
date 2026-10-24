@@ -233,6 +233,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញនៅទំព័រអតិថិជន</div>
       <div id="bn-list"></div>
       <button class="btn btn-p btn-s" id="bn-add">➕ បន្ថែមបដា</button>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <img id="logo-prev" src="./images/Logo.JPG" alt="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;background:#e8eeec">
+        <div style="flex:1"><div class="lbl">🏷 ឡូហ្គោហាង (Logo)</div></div>
+        <button class="btn btn-g btn-s" id="logo-up">📷 ប្តូរ</button>
+      </div>
     </div>
     <!-- Top Promotion Banner Control -->
     <div class="card">
@@ -1001,8 +1006,10 @@ async function uploadImage() {
 }
 let BN = [];
 async function loadBanners() {
-  const { data } = await supa.from("app_settings").select("value").eq("key", "banners").maybeSingle();
-  let v = data && data.value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = []; }
+  const { data: rows } = await supa.from("app_settings").select("key, value").in("key", ["banners", "shop_logo"]);
+  const row = k => (rows || []).find(r => r.key === k);
+  const lg = row("shop_logo") && row("shop_logo").value; if (typeof lg === "string" && lg.startsWith("tg:")) $("logo-prev").src = imgSrc(lg);
+  let v = row("banners") && row("banners").value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = []; }
   BN = Array.isArray(v) ? v : []; renderBanners();
 }
 function renderBanners() {
@@ -1023,7 +1030,9 @@ $("bn-list").addEventListener("click", async e => {
   else BN.splice(i - 1, 0, BN.splice(i, 1)[0]);
   await saveBanners();
 });
-$("f-img-up").onclick = async () => { const id = await uploadImage(); if (id) { const t = $("f-img"); t.value = (t.value.trim() ? t.value.trim() + "\n" : "") + "tg:" + id; toast("បានបន្ថែមរូប — សូមចុចរក្សាទុកម្ហូប", "ok"); } };
+$("logo-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const r = await admin({ action: "update_setting", key: "shop_logo", value: "tg:" + id }); if (r.error) toast(r.error, "err"); else { $("logo-prev").src = imgSrc("tg:" + id); toast("បានប្តូរឡូហ្គោ", "ok"); } };
+// menu photo: the new picture becomes the cover and replaces old ./images/ (GitHub) pictures
+$("f-img-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const t = $("f-img"); const keep = t.value.split("\n").map(x => x.trim()).filter(x => x && !x.startsWith("./images/")); t.value = ["tg:" + id, ...keep].join("\n"); toast("បានដាក់រូបថ្មី — សូមចុចរក្សាទុកម្ហូប", "ok"); };
 
 const u = tg?.initDataUnsafe?.user;
 $("who").textContent = u ? `${[u.first_name, u.last_name].filter(Boolean).join(" ")}${u.username ? "  @" + u.username : ""}  (ID ${u.id})` : "មិនទាន់ភ្ជាប់ Telegram";
