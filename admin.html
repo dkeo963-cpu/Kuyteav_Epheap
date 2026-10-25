@@ -78,8 +78,31 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .sw{position:relative;width:50px;height:28px;flex-shrink:0;display:inline-block}
 .pcol{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--sub)}
 .pcol input[type=color]{width:100%;height:38px;padding:2px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb;cursor:pointer}
-@keyframes greetFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-#greet-prev.float{animation:greetFloat 2.6s ease-in-out infinite}
+
+@keyframes gFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes gBounce { 0%,100% { transform: translateY(0); animation-timing-function: cubic-bezier(.3,0,.9,.6); } 45% { transform: translateY(-14px); animation-timing-function: cubic-bezier(.1,.4,.7,1); } 60% { transform: translateY(0); } 72% { transform: translateY(-4px); } 82% { transform: translateY(0); } }
+@keyframes gWobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+@keyframes gPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes gSwing { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+@keyframes gSway { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+@keyframes gJelly { 0%,100% { transform: scale(1,1); } 30% { transform: scale(1.08,.92); } 50% { transform: scale(.94,1.06); } 70% { transform: scale(1.03,.97); } }
+@keyframes gHeart { 0%,40%,100% { transform: scale(1); } 10% { transform: scale(1.08); } 20% { transform: scale(1); } 30% { transform: scale(1.08); } }
+@keyframes gTada { 0%,60%,100% { transform: scale(1) rotate(0); } 10%,20% { transform: scale(.96) rotate(-2.5deg); } 30%,50% { transform: scale(1.06) rotate(2.5deg); } 40% { transform: scale(1.06) rotate(-2.5deg); } }
+#greet-prev.anim-float { animation: gFloat 2.6s ease-in-out infinite; }
+#greet-prev.anim-bounce { animation: gBounce 1.8s infinite; }
+#greet-prev.anim-wobble { animation: gWobble 2.4s ease-in-out infinite; }
+#greet-prev.anim-pulse { animation: gPulse 2s ease-in-out infinite; }
+#greet-prev.anim-swing { animation: gSwing 3s ease-in-out infinite; transform-origin: left top; }
+#greet-prev.anim-sway { animation: gSway 3s ease-in-out infinite; }
+#greet-prev.anim-jelly { animation: gJelly 2.2s ease-in-out infinite; }
+#greet-prev.anim-heartbeat { animation: gHeart 1.8s ease-in-out infinite; }
+#greet-prev.anim-tada { animation: gTada 2.6s ease-in-out infinite; }
+#greet-prev[class*="anim-"] { transform-origin: left center; will-change: transform; }
+#greet-prev.anim-swing { transform-origin: left top; }
+@media (prefers-reduced-motion: reduce) { #greet-prev[class*="anim-"] { animation: none !important; } }
+#greet-styles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#greet-styles label{display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:600;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb;cursor:pointer}
+#greet-styles label.on{border-color:var(--brand);background:#e8f4f1}
 .sw input{opacity:0;width:0;height:0;position:absolute}
 .sw span{position:absolute;inset:0;background:#c3cecb;border-radius:28px;transition:.2s;cursor:pointer}
 .sw span::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
@@ -259,8 +282,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <button class="btn btn-p btn-s" id="greet-save">រក្សាទុក</button>
       </div>
       <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="radio" name="greet-anim" value="none" checked> 1 · ធម្មតា (Normal, no movement)</label>
-        <label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="radio" name="greet-anim" value="float"> 2 · រំកិលឡើងចុះបន្តិច (Soft float up &amp; down)</label>
+        <div id="greet-styles"></div>
         <div id="greet-prev" style="font-weight:800;font-size:18px;padding:6px 2px">ថ្ងៃនេះចង់ញ៉ាំអ្វី?</div>
       </div>
     </div>
@@ -657,11 +679,18 @@ async function loadGreet() {
   const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text", "greet_anim"]);
   const val = k => { let v = (data || []).find(r => r.key === k)?.value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {} return typeof v === "string" ? v : ""; };
   $("greet-input").value = val("greet_text");
-  setGreetAnim(val("greet_anim") === "float" ? "float" : "none");
+  setGreetAnim(val("greet_anim"));
 }
+const GREET_STYLES = [
+  ["none", "1 · ធម្មតា (Normal)"], ["float", "2 · Float ឡើងចុះ"], ["bounce", "3 · Bounce លោត"], ["wobble", "4 · Wobble ញ័រ"], ["pulse", "5 · Pulse ពង្រីក"],
+  ["swing", "6 · Swing យោល"], ["sway", "7 · Sway ទៅឆ្វេងស្ដាំ"], ["jelly", "8 · Jelly ជែលលី"], ["heartbeat", "9 · Heartbeat ដើមទ្រូង"], ["tada", "10 · Tada អបអរ"]
+];
+$("greet-styles").innerHTML = GREET_STYLES.map(([k, t]) => `<label><input type="radio" name="greet-anim" value="${k}"${k === "none" ? " checked" : ""}> ${t}</label>`).join("");
 function setGreetAnim(v) {
-  document.querySelectorAll('input[name="greet-anim"]').forEach(r => { r.checked = r.value === v; });
-  $("greet-prev").classList.toggle("float", v === "float");
+  if (!GREET_STYLES.some(g => g[0] === v)) v = "none";
+  document.querySelectorAll('input[name="greet-anim"]').forEach(r => { r.checked = r.value === v; r.parentElement.classList.toggle("on", r.checked); });
+  const p = $("greet-prev");
+  p.className = v === "none" ? "" : "anim-" + v;
 }
 document.querySelectorAll('input[name="greet-anim"]').forEach(r => r.addEventListener("change", () => setGreetAnim(r.value)));
 $("f-disc").addEventListener("change", () => { $("f-disc-box").style.display = $("f-disc").checked ? "" : "none"; });
