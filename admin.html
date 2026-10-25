@@ -407,10 +407,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       </div>
     </div>
     <div class="card" style="margin-top:12px">
-      <h2 class="h2">🧾 ការកម្មង់ដែលបានបង់ប្រាក់</h2>
-      <p class="muted" style="margin:4px 0 10px">ចុចដំណាក់កាល ដើម្បីឱ្យអតិថិជនឃើញក្នុងទំព័រតាមដាន។</p>
+      <h2 class="h2">🧾 ការកម្មង់ទាំងអស់ <span id="ord-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">⏳ មិនទាន់ទទួល · ✅ បានទទួលរួច។ ពេលចុច ✅ ការកម្មង់នឹងចូលប្រវត្តិ ហើយកែលែងបាន។</p>
       <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
       <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📜 ប្រវត្តិ (បានទទួលរួច) <span id="hist-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">🔒 ចាក់សោ មិនអាចកែបានទេ · Admin អាចលុបបាន។</p>
+      <div id="hist-list" class="muted">…</div>
+      <button class="btn btn-d btn-s" id="hist-clear" style="margin-top:8px;display:none">🗑 លុបប្រវត្តិទាំងអស់</button>
     </div>
     <div class="card" style="margin-top:12px">
       <h2 class="h2">🔐 ការចូលតាម Telegram</h2>
@@ -1291,30 +1297,55 @@ $("req-login").addEventListener("change", async (e) => {
 loadLoginSetting();
 
 /* ===== PAID ORDERS + TRACKING STAGE ===== */
-const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "ហាងបានរៀបចំ"], ["done", "បានយកអីវ៉ាន់"]];
+const ordHead = o => {
+  const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+  const u = String(o.username || "");
+  const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+  return `<div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
+      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>`;
+};
 async function loadOrders() {
-  const box = $("ord-list");
+  const box = $("ord-list"), hbox = $("hist-list");
   const r = await admin({ action: "list_orders" });
   if (r.error) { box.textContent = r.error; return; }
-  const rows = r.data?.orders || [];
-  if (!rows.length) { box.textContent = "មិនទាន់មានការកម្មង់ទេ"; return; }
-  box.innerHTML = rows.map(o => {
-    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
-    const u = String(o.username || "");
-    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
-    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
-      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
-      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
-      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${STAGES.map(([k, l]) =>
-        `<button class="btn ${o.fulfillment === k ? "btn-p" : "btn-g"} btn-s" data-id="${esc(o.tran_id)}" data-f="${k}">${l}</button>`).join("")}</div>
-    </div>`;
-  }).join("");
-  box.querySelectorAll("button[data-f]").forEach(b => b.addEventListener("click", async () => {
-    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: b.dataset.f });
-    if (res.error) toast(res.error, "bad"); else { toast("បានរក្សាទុក", "ok"); loadOrders(); }
+  const rows = r.data?.orders || [], hist = r.data?.history || [];
+  $("ord-count").textContent = rows.length ? `(${rows.length})` : "";
+  $("hist-count").textContent = hist.length ? `(${hist.length})` : "";
+
+  // ---- active orders: two statuses ----
+  box.innerHTML = rows.length ? rows.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      ${ordHead(o)}
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-p btn-s" disabled style="opacity:1">⏳ មិនទាន់ទទួល</button>
+        <button class="btn btn-g btn-s" data-id="${esc(o.tran_id)}" data-recv="1">✅ បានទទួលរួច</button>
+      </div></div>`).join("") : "មិនទាន់មានការកម្មង់ថ្មីទេ";
+  box.querySelectorAll("button[data-recv]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("អតិថិជនបានទទួលរួចមែនទេ? ការកម្មង់នឹងចូលប្រវត្តិ ហើយមិនអាចកែបានទៀតទេ។")) return;
+    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: "done" });
+    if (res.error) toast(res.error, "bad"); else { toast("បានផ្លាស់ទៅប្រវត្តិ", "ok"); loadOrders(); }
+  }));
+
+  // ---- history: locked, delete only ----
+  hbox.innerHTML = hist.length ? hist.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink);background:#f5f8f7">
+      <div style="opacity:.75">${ordHead(o)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-g btn-s" disabled style="opacity:.6">⏳ មិនទាន់ទទួល</button>
+        <button class="btn btn-p btn-s" disabled style="opacity:1">✅ បានទទួលរួច 🔒</button>
+        <button class="btn btn-d btn-s" data-id="${esc(o.tran_id)}" data-del="1" style="margin-left:auto">🗑 លុប</button>
+      </div></div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
+  $("hist-clear").style.display = hist.length ? "" : "none";
+  hbox.querySelectorAll("button[data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("លុបការកម្មង់នេះពីប្រវត្តិជាអចិន្ត្រៃយ៍?")) return;
+    const res = await admin({ action: "delete_order", tran_id: b.dataset.id });
+    if (res.error) toast(res.error, "bad"); else { toast("បានលុប", "ok"); loadOrders(); }
   }));
 }
+$("hist-clear").addEventListener("click", async () => {
+  if (!confirm("លុបប្រវត្តិទាំងអស់ជាអចិន្ត្រៃយ៍? មិនអាចយកមកវិញបានទេ។")) return;
+  const res = await admin({ action: "clear_history" });
+  if (res.error) toast(res.error, "bad"); else { toast("បានលុបប្រវត្តិទាំងអស់", "ok"); loadOrders(); }
+});
 $("ord-refresh").addEventListener("click", loadOrders);
 if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
 
