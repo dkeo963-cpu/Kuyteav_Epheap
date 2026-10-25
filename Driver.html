@@ -104,7 +104,8 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
         <div class="muted" id="map-info" style="margin:0 2px 8px"></div>
         <div id="map-stat" style="margin:0 2px 8px;font-weight:700;color:var(--brand)"></div>
         <div class="card" style="padding:0;overflow:hidden"><div id="map-canvas" style="height:58vh;width:100%"></div></div>
-        <div class="acts">
+        <div class="acts" style="flex-wrap:wrap">
+          <button class="chip" id="map-lyr" style="border:0;cursor:pointer;font:inherit"></button>
           <button class="chip" id="map-me" style="border:0;cursor:pointer;font:inherit">🎯 តាមទីតាំងខ្ញុំ</button>
           <a class="chip" id="map-ext" target="_blank" rel="noopener">🧭 Google Maps</a>
         </div>
@@ -272,7 +273,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
 
   /* in-app LIVE map (Leaflet + OpenStreetMap): the blue dot moves with the phone's GPS, like Google Maps.
      It is part of this page, so the driver never leaves the app and live sharing to the customer keeps running. */
-  var mineData = [], curMap = null, lmap = null, meMarker = null, accCircle = null, destMarker = null, routeLine = null;
+  var mineData = [], curMap = null, lmap = null, meMarker = null, accCircle = null, destMarker = null, routeLine = null, routeCase = null, layerGroup = null, layerIdx = 0;
   var mapWatchId = null, follow = true, mapFitted = false, routeBusy = false, routeFrom = null, routeAt = 0;
   function hav(a1, o1, a2, o2) { var R = 6371, r = Math.PI / 180, dA = (a2 - a1) * r, dO = (o2 - o1) * r; var x = Math.sin(dA / 2) * Math.sin(dA / 2) + Math.cos(a1 * r) * Math.cos(a2 * r) * Math.sin(dO / 2) * Math.sin(dO / 2); return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); }
   function mapExt(o) {
@@ -280,11 +281,28 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (o.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address);
     return o.location_link || '#';
   }
+  /* 3 map looks: clear street map (default), light road map, satellite with road names */
+  var LAYERS = [
+    ['ផ្លូវច្បាស់', function () { return [L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Tiles © Esri, OpenStreetMap' })]; }],
+    ['ស្រាល', function () { return [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO' })]; }],
+    ['ផ្កាយរណប', function () { return [
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery © Esri' }),
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© CARTO' })]; }]
+  ];
+  function setBase(i) {
+    layerIdx = i;
+    if (layerGroup) lmap.removeLayer(layerGroup);
+    layerGroup = L.layerGroup(LAYERS[i][1]()).addTo(lmap);
+    $('map-lyr').textContent = '🗺️ ' + LAYERS[i][0];
+    try { localStorage.setItem('drv_map', String(i)); } catch (e) {}
+  }
+  $('map-lyr').onclick = function () { if (lmap) setBase((layerIdx + 1) % LAYERS.length); };
   function initLeaflet() {
     if (lmap) return true;
     if (typeof L === 'undefined') { $('map-stat').textContent = '⚠️ មិនអាចផ្ទុកផែនទីបានទេ — សូមពិនិត្យអ៊ីនធឺណិត'; return false; }
     lmap = L.map('map-canvas', { zoomControl: true }).setView([11.5564, 104.9282], 14);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(lmap);
+    try { layerIdx = (parseInt(localStorage.getItem('drv_map'), 10) || 0) % LAYERS.length; } catch (e) {}
+    setBase(layerIdx);
     lmap.on('dragstart', function () { follow = false; });   // driver moved the map by hand: stop auto-centering
     return true;
   }
@@ -301,11 +319,11 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     fetch(url).then(function (r) { return r.json(); }).then(function (j) {
       var rt = j && j.routes && j.routes[0]; if (!rt) throw 0;
       var pts = rt.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
-      if (routeLine) routeLine.setLatLngs(pts); else routeLine = L.polyline(pts, { color: '#1a73e8', weight: 6, opacity: .85 }).addTo(lmap);
+      if (routeLine) { routeLine.setLatLngs(pts); routeCase.setLatLngs(pts); } else { routeCase = L.polyline(pts, { color: '#fff', weight: 12, opacity: .95 }).addTo(lmap); routeLine = L.polyline(pts, { color: '#1a73e8', weight: 7 }).addTo(lmap); }
       $('map-stat').textContent = '🛣️ ' + (rt.distance / 1000).toFixed(1) + ' គម · ⏱ ~' + Math.max(1, Math.round(rt.duration / 60)) + ' នាទី';
     }).catch(function () {
       var pts = [ll, dest];
-      if (routeLine) routeLine.setLatLngs(pts); else routeLine = L.polyline(pts, { color: '#1a73e8', weight: 4, dashArray: '8 8' }).addTo(lmap);
+      if (routeLine) { routeLine.setLatLngs(pts); routeCase.setLatLngs(pts); } else { routeCase = L.polyline(pts, { color: '#fff', weight: 10, opacity: .95 }).addTo(lmap); routeLine = L.polyline(pts, { color: '#1a73e8', weight: 5, dashArray: '8 8' }).addTo(lmap); }
       $('map-stat').textContent = '📏 ចម្ងាយត្រង់ ' + hav(ll[0], ll[1], dest[0], dest[1]).toFixed(1) + ' គម';
     }).then(function () { routeBusy = false; });
   }
@@ -327,7 +345,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (!initLeaflet()) return;
     setTimeout(function () { lmap.invalidateSize(); }, 60);
     mapFitted = false; follow = true; routeFrom = null; $('map-stat').textContent = '';
-    if (routeLine) { lmap.removeLayer(routeLine); routeLine = null; }
+    if (routeLine) { lmap.removeLayer(routeLine); lmap.removeLayer(routeCase); routeLine = routeCase = null; }
     if (destMarker) { lmap.removeLayer(destMarker); destMarker = null; }
     if (curMap.lat != null && curMap.lng != null) {
       destMarker = L.marker([Number(curMap.lat), Number(curMap.lng)], { icon: L.divIcon({ className: '', html: '<div class="dest-pin">🏠</div>', iconSize: [0, 0] }) }).addTo(lmap);
