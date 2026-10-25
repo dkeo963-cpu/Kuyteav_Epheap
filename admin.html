@@ -76,6 +76,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* ---------- Switch ---------- */
 .sw{position:relative;width:50px;height:28px;flex-shrink:0;display:inline-block}
+.pcol{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--sub)}
+.pcol input[type=color]{width:100%;height:38px;padding:2px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb;cursor:pointer}
+@keyframes greetFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#greet-prev.float{animation:greetFloat 2.6s ease-in-out infinite}
 .sw input{opacity:0;width:0;height:0;position:absolute}
 .sw span{position:absolute;inset:0;background:#c3cecb;border-radius:28px;transition:.2s;cursor:pointer}
 .sw span::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
@@ -254,6 +258,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <input type="text" id="greet-input" maxlength="80" placeholder="ថ្ងៃនេះចង់ញ៉ាំអ្វី?" style="flex:1;height:38px;border:1px solid var(--line);border-radius:var(--r-s);padding:0 10px;background:#fafcfb;">
         <button class="btn btn-p btn-s" id="greet-save">រក្សាទុក</button>
       </div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="radio" name="greet-anim" value="none" checked> 1 · ធម្មតា (Normal, no movement)</label>
+        <label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600"><input type="radio" name="greet-anim" value="float"> 2 · រំកិលឡើងចុះបន្តិច (Soft float up &amp; down)</label>
+        <div id="greet-prev" style="font-weight:800;font-size:18px;padding:6px 2px">ថ្ងៃនេះចង់ញ៉ាំអ្វី?</div>
+      </div>
     </div>
     <!-- Top Promotion Banner Control -->
     <div class="card">
@@ -273,6 +282,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
           <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">ពណ៌ (Colors):</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <label class="pcol">ផ្ទៃបដា (Banner background)<input type="color" id="promo-bg" value="#e4f3ef"></label>
+            <label class="pcol">អក្សរបដា (Banner text)<input type="color" id="promo-color" value="#14201f"></label>
+            <label class="pcol">ផ្ទៃផ្លាកសញ្ញា (Badge background)<input type="color" id="promo-badge-bg" value="#fde68a"></label>
+            <label class="pcol">អក្សរផ្លាកសញ្ញា (Badge text)<input type="color" id="promo-badge-color" value="#92400e"></label>
+          </div>
+          <div id="promo-prev" style="margin-top:8px;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:center;overflow:hidden;white-space:nowrap"><span id="promo-prev-badge" style="padding:2px 10px;border-radius:99px;font-weight:800;font-size:12px">Badge</span><span id="promo-prev-msg">Preview</span></div>
+          <button type="button" class="btn btn-g btn-s" id="promo-color-reset" style="margin-top:8px">↺ ពណ៌ដើម (Reset colors)</button>
         </div>
         <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
       </div>
@@ -570,7 +590,7 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
    PROMOTIONAL BANNER
    ===================================================== */
 async function loadPromoBanner() {
-  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge']);
+  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
   if (data) {
     const activeItem = data.find(i => i.key === 'promo_active');
     const textItem = data.find(i => i.key === 'promo_text');
@@ -593,8 +613,35 @@ async function loadPromoBanner() {
     setText($("promo-status-text"), active ? "កំពុងបើកបង្ហាញ" : "បានបិទ", active ? "ok" : "bad");
     $("promo-badge-input").value = badge;
     $("promo-msg-input").value = text;
+
+    // saved colours (empty = default look on the customer page)
+    promoColorsCustom = false;
+    COLOR_FIELDS.forEach(([key, id]) => {
+      const c = cleanVal(data.find(i => i.key === key)?.value, "");
+      if (/^#[0-9a-fA-F]{6}$/.test(c)) { $(id).value = c; promoColorsCustom = true; }
+    });
+    updatePromoPreview();
   }
 }
+const COLOR_FIELDS = [["promo_bg", "promo-bg"], ["promo_color", "promo-color"], ["promo_badge_bg", "promo-badge-bg"], ["promo_badge_color", "promo-badge-color"]];
+const COLOR_DEFAULTS = { "promo-bg": "#e4f3ef", "promo-color": "#14201f", "promo-badge-bg": "#fde68a", "promo-badge-color": "#92400e" };
+let promoColorsCustom = false;
+function updatePromoPreview() {
+  $("promo-prev").style.background = $("promo-bg").value;
+  $("promo-prev").style.color = $("promo-color").value;
+  $("promo-prev-badge").style.background = $("promo-badge-bg").value;
+  $("promo-prev-badge").style.color = $("promo-badge-color").value;
+  $("promo-prev-badge").textContent = $("promo-badge-input").value || "Badge";
+  $("promo-prev-msg").textContent = $("promo-msg-input").value || "Preview";
+}
+COLOR_FIELDS.forEach(([, id]) => $(id).addEventListener("input", () => { promoColorsCustom = true; updatePromoPreview(); }));
+$("promo-badge-input").addEventListener("input", updatePromoPreview);
+$("promo-msg-input").addEventListener("input", updatePromoPreview);
+$("promo-color-reset").addEventListener("click", () => {
+  COLOR_FIELDS.forEach(([, id]) => { $(id).value = COLOR_DEFAULTS[id]; });
+  promoColorsCustom = false; updatePromoPreview();
+  toast("ចុច «រក្សាទុកប្រូម៉ូសិន» ដើម្បីប្រើពណ៌ដើម", "ok");
+});
 
 $("promo-toggle").addEventListener("change", async e => {
   const want = e.target.checked;
@@ -607,12 +654,20 @@ $("promo-toggle").addEventListener("change", async e => {
 
 // ---- promo food + greeting text ----
 async function loadGreet() {
-  const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text"]);
-  let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
-  $("greet-input").value = typeof v === "string" ? v : "";
+  const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text", "greet_anim"]);
+  const val = k => { let v = (data || []).find(r => r.key === k)?.value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {} return typeof v === "string" ? v : ""; };
+  $("greet-input").value = val("greet_text");
+  setGreetAnim(val("greet_anim") === "float" ? "float" : "none");
 }
+function setGreetAnim(v) {
+  document.querySelectorAll('input[name="greet-anim"]').forEach(r => { r.checked = r.value === v; });
+  $("greet-prev").classList.toggle("float", v === "float");
+}
+document.querySelectorAll('input[name="greet-anim"]').forEach(r => r.addEventListener("change", () => setGreetAnim(r.value)));
 $("f-disc").addEventListener("change", () => { $("f-disc-box").style.display = $("f-disc").checked ? "" : "none"; });
 $("greet-save").addEventListener("click", async () => {
+  const anim = document.querySelector('input[name="greet-anim"]:checked')?.value || "none";
+  await admin({ action: "update_setting", key: "greet_anim", value: anim });
   const r = await admin({ action: "update_setting", key: "greet_text", value: $("greet-input").value.trim() });
   toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok");
 });
@@ -621,7 +676,11 @@ $("promo-save-btn").addEventListener("click", async () => {
   const text = $("promo-msg-input").value.trim();
   
   await admin({ action: "update_setting", key: "promo_badge", value: badge });
-  const { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
+  let { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
+  for (const [key, id] of COLOR_FIELDS) {
+    const r = await admin({ action: "update_setting", key, value: promoColorsCustom ? $(id).value : "" });
+    if (r.error && !error) error = r.error;
+  }
   
   if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
   loadPromoBanner();
