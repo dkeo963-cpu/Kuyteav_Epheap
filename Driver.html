@@ -281,27 +281,28 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (o.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address);
     return o.location_link || '#';
   }
-  /* 3 map looks: clear street map (default), light road map, satellite with road names */
+  /* 2 map looks (all from Esri, no API key): clear street map (default) and satellite with road names */
+  var ESRI_OPT = { maxZoom: 19, maxNativeZoom: 18, attribution: 'Esri' };
   var LAYERS = [
     ['ផ្លូវច្បាស់', function () { return [L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Tiles © Esri, OpenStreetMap' })]; }],
-    ['ស្រាល', function () { return [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO' })]; }],
     ['ផ្កាយរណប', function () { return [
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery © Esri' }),
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© CARTO' })]; }]
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', ESRI_OPT),
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', ESRI_OPT)]; }]
   ];
   function setBase(i) {
     layerIdx = i;
     if (layerGroup) lmap.removeLayer(layerGroup);
     layerGroup = L.layerGroup(LAYERS[i][1]()).addTo(lmap);
     $('map-lyr').textContent = '🗺️ ' + LAYERS[i][0];
-    try { localStorage.setItem('drv_map', String(i)); } catch (e) {}
+    try { localStorage.setItem('drv_map2', String(i)); } catch (e) {}
   }
   $('map-lyr').onclick = function () { if (lmap) setBase((layerIdx + 1) % LAYERS.length); };
   function initLeaflet() {
     if (lmap) return true;
     if (typeof L === 'undefined') { $('map-stat').textContent = '⚠️ មិនអាចផ្ទុកផែនទីបានទេ — សូមពិនិត្យអ៊ីនធឺណិត'; return false; }
     lmap = L.map('map-canvas', { zoomControl: true }).setView([11.5564, 104.9282], 14);
-    try { layerIdx = (parseInt(localStorage.getItem('drv_map'), 10) || 0) % LAYERS.length; } catch (e) {}
+    try { layerIdx = (parseInt(localStorage.getItem('drv_map2'), 10) || 0) % LAYERS.length; } catch (e) {}
     setBase(layerIdx);
     lmap.on('dragstart', function () { follow = false; });   // driver moved the map by hand: stop auto-centering
     return true;
