@@ -283,17 +283,21 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   }
   /* 3 map looks: clear street map (default), light road map, satellite with road names */
   var LAYERS = [
-    ['ផ្លូវច្បាស់', function () { return [L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Tiles © Esri, OpenStreetMap' })]; }],
-    ['ស្រាល', function () { return [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO' })]; }],
+    ['ផ្លូវច្បាស់', function () { return [L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© OpenStreetMap © CARTO' })]; }],
+    ['ផ្លូវ Esri', function () { return [L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Tiles © Esri, OpenStreetMap' })]; }],
     ['ផ្កាយរណប', function () { return [
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, attribution: 'Imagery © Esri' }),
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, attribution: '© CARTO' })]; }]
   ];
   function setBase(i) {
     layerIdx = i;
-    if (layerGroup) lmap.removeLayer(layerGroup);
-    layerGroup = L.layerGroup(LAYERS[i][1]()).addTo(lmap);
-    $('map-lyr').textContent = '🗺️ ' + LAYERS[i][0];
+    try {
+      if (layerGroup) lmap.removeLayer(layerGroup);
+      layerGroup = L.layerGroup(LAYERS[i][1]()).addTo(lmap);
+    } catch (e) {   // never let a map-style problem hide the blue dot: fall back to plain OpenStreetMap
+      layerGroup = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(lmap);
+    }
+    try { $('map-lyr').textContent = '🗺️ ' + LAYERS[i][0]; } catch (e) {}
     try { localStorage.setItem('drv_map', String(i)); } catch (e) {}
   }
   $('map-lyr').onclick = function () { if (lmap) setBase((layerIdx + 1) % LAYERS.length); };
@@ -306,12 +310,16 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     lmap.on('dragstart', function () { follow = false; });   // driver moved the map by hand: stop auto-centering
     return true;
   }
+  function mapGpsErr(err) {
+    var msg = err && err.code === 1 ? '❌ មិនបានអនុញ្ញាត Location — សូមបើក Location ឱ្យ app/browser នេះ (Settings)' : '⚠️ រកទីតាំងមិនឃើញ — សូមបើក GPS នៅលើទូរស័ព្ទ';
+    if (!meMarker) $('map-stat').textContent = msg; else toast(msg);
+  }
   function stopMapWatch() { if (mapWatchId != null && navigator.geolocation) navigator.geolocation.clearWatch(mapWatchId); mapWatchId = null; }
   function ensureMapWatch() {
     if (!token || !curMap || trackingId || watchId != null || mapWatchId != null) return;   // while delivering, the tracking watch already feeds the map
     if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
     mapWatchId = navigator.geolocation.watchPosition(function (p) { lastPos = p.coords; onPos(p.coords); },
-      function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ — សូមបើក GPS'); }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+      mapGpsErr, { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
   }
   function drawRoute(ll, dest) {
     if (routeBusy) return; routeBusy = true; routeFrom = ll; routeAt = Date.now();
@@ -331,7 +339,8 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (!lmap || !c) return;
     var ll = [c.latitude, c.longitude];
     if (meMarker) meMarker.setLatLng(ll); else meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000 }).addTo(lmap);
-    if (accCircle) { accCircle.setLatLng(ll).setRadius(Math.min(c.accuracy || 0, 200)); } else accCircle = L.circle(ll, { radius: Math.min(c.accuracy || 0, 200), color: '#1a73e8', weight: 1, fillOpacity: .1 }).addTo(lmap);
+    if (/^⏳|^❌|^⚠️/.test($('map-stat').textContent)) $('map-stat').textContent = '';
+    try { if (accCircle) { accCircle.setLatLng(ll).setRadius(Math.min(c.accuracy || 0, 200)); } else accCircle = L.circle(ll, { radius: Math.min(c.accuracy || 0, 200), color: '#1a73e8', weight: 1, fillOpacity: .1 }).addTo(lmap); } catch (e) {}
     var dest = curMap && curMap.lat != null && curMap.lng != null ? [Number(curMap.lat), Number(curMap.lng)] : null;
     if (!mapFitted) { mapFitted = true; if (dest) lmap.fitBounds([ll, dest], { padding: [50, 50], maxZoom: 17 }); else lmap.setView(ll, 16); }
     else if (follow) lmap.panTo(ll);
@@ -351,6 +360,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       destMarker = L.marker([Number(curMap.lat), Number(curMap.lng)], { icon: L.divIcon({ className: '', html: '<div class="dest-pin">🏠</div>', iconSize: [0, 0] }) }).addTo(lmap);
       lmap.setView([Number(curMap.lat), Number(curMap.lng)], 15);
     } else { $('map-stat').textContent = 'ℹ️ អតិថិជនមិនបានបិទជាប់ទីតាំងទេ — មើលអាសយដ្ឋានខាងលើ'; }
+    if (!meMarker) $('map-stat').textContent = '⏳ កំពុងរកទីតាំងរបស់អ្នក… (សូមអនុញ្ញាត Location)';
     ensureMapWatch();
     if (lastPos) onPos(lastPos);
   }
@@ -396,7 +406,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       lastPos = p.coords; gpsErr = null; onPos(p.coords);
       if (first) { first = false; postPos(); }   // send the very first fix at once
       showTrk();
-    }, function (err) { gpsErr = err && err.code === 1 ? 'denied' : 'err'; showTrk(); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
+    }, function (err) { gpsErr = err && err.code === 1 ? 'denied' : 'err'; showTrk(); if (tab === 'map') mapGpsErr(err); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
   }
   function startTracking(id) {
     if (trackingId === id) return;
