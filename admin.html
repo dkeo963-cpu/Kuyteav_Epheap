@@ -1,2236 +1,1372 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>តូបគុយទាវ អ៊ីភាព</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Leaflet CSS & JS for Interactive Map Picker -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700;800&family=Battambang:wght@400;700&display=swap">
-  <style>
-    :root {
-      --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
-      --brand:#0f766e; --brand-d:#0b5c56; --brand-l:#e3f3f1;
-      --ok:#15803d; --ok-l:#e5f5ea;
-      --warn:#b45309; --warn-l:#fdf1dc;
-      --bad:#c62828; --bad-l:#fde8e8;
-      --r:14px; --r-s:10px;
-      --aba:#005d7b;
-      --safe-b:env(safe-area-inset-bottom,0px);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ផ្ទាំងគ្រប់គ្រង - តូបគុយទាវ អ៊ីភាព</title>
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { margin: 0; }
-    body {
-      font-family: 'Noto Sans Khmer', 'Battambang', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif;
-      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-      background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.65;
-      padding-bottom: calc(108px + var(--safe-b));
-      user-select: none; -webkit-user-select: none;
-    }
-    input, textarea { user-select: text; -webkit-user-select: text; font: inherit; color: inherit; }
-    button { font: inherit; color: inherit; }
-    h1, h2, h3, h4, p, label, select, input, textarea, button { font-family: inherit; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible, [onclick]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    /* Top Promotion Banner & Scrolling Marquee Styles */
-    .top-promo-banner {
-      background: #fef3c7; color: #92400e; padding: 8px 0; font-size: 13px; font-weight: 700;
-      border-bottom: 1px solid #fde68a; width: 100%; z-index: 100; position: relative;
-      overflow: hidden;
-    }
-    .top-promo-track {
-      display: flex;
-      align-items: center;
-      width: max-content;
-      animation: promoScroll 16s linear infinite;
-    }
-    .top-promo-banner:hover .top-promo-track {
-      animation-play-state: paused;
-    }
-    .top-promo-content {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-right: 40px;
-      white-space: nowrap;
-    }
-    .top-promo-badge {
-      background: #f59e0b; color: #fff; font-size: 14px; font-weight: 800; padding: 2px 8px; border-radius: 99px; text-transform: uppercase;
-      flex-shrink: 0;
-    }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;500;700&display=swap');
 
-    @keyframes promoScroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
+:root{
+  --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
+  --brand:#0f766e; --brand-d:#0b5c56; --brand-l:#e3f3f1;
+  --ok:#15803d; --ok-l:#e5f5ea;
+  --warn:#b45309; --warn-l:#fdf1dc;
+  --bad:#c62828; --bad-l:#fde8e8;
+  --r:14px; --r-s:10px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:'Battambang', 'Noto Sans Khmer', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  background:var(--bg); color:var(--ink); font-size:14px; line-height:1.65;
+  padding-bottom:calc(120px + var(--safe-b));
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+h1,h2,h3,h4,p,label,select,input,textarea,button{font-family:inherit}
+body{font-weight:400;line-height:1.7;letter-spacing:0;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+input,select,textarea{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:960px;margin:0 auto;padding:0 14px}
 
-    .top { 
-      position: sticky; 
-      top: 0; 
-      z-index: 50; 
-      background: var(--surface); 
-      color: var(--ink); 
-      padding: 11px 0; 
-      border-bottom: 1px solid var(--line);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-    .top .wrap { display: flex; flex-direction: column; gap: 6px; }
-    .top-row-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; }
-    .top-l { flex: 1; min-width: 0; }
-    .greeting { font-size: 14px; font-weight: 600; color: var(--sub); }
-    
-    /* Branding Header with Chef Girl Icon & Menu Icon */
-    .shop-title-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .shop-title-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-    .chef-girl-icon {
-      width: 44px;
-      height: 44px;
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--brand-l);
-      border: 1.5px solid var(--brand);
-      border-radius: 50%;
-      padding: 3px;
-      overflow: hidden;
-    }
-    .chef-girl-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 50%;
-    }
-    .shop-title { font-size: 22px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    
-    /* Header Menu Dropdown / Icon Button */
-    .header-menu-btn {
-      background: var(--brand-l);
-      border: 1.5px solid var(--brand);
-      color: var(--brand);
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 18px;
-      flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    .header-menu-btn:active {
-      background: var(--brand);
-      color: #fff;
-    }
+/* ---------- Header ---------- */
+.top{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:12px 0}
+.top .wrap{display:flex;align-items:center;gap:10px}
+.top h1{font-size:16px;font-weight:800;margin:0;flex:1;min-width:0}
+.top small{display:block;font-weight:500;font-size:11px;opacity:.65}
+.icon-btn{height:36px;padding:0 12px;border-radius:var(--r-s);background:rgba(255,255,255,.12);color:#fff;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.icon-btn:active{background:rgba(255,255,255,.22)}
+.spin{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    main.wrap { padding-top: 14px; }
+/* ---------- Bottom tabs ---------- */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+.tab{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--sub);position:relative}
+.tab .ic{font-size:20px;line-height:1}
+.tab.on{color:var(--brand)}
+.tab.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--brand)}
+.tab .dot{position:absolute;top:6px;left:calc(50% + 8px);min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px}
 
-    /* Store Status Badge with Glow Effect */
-    @keyframes borderGlowBackAndForth {
-      0% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
-      50% { border-color: rgba(21, 128, 61, 1); box-shadow: inset 0 0 10px rgba(21, 128, 61, 0.4), 0 0 12px rgba(21, 128, 61, 0.6); background: #dcfce7; }
-      100% { border-color: rgba(21, 128, 61, 0.3); box-shadow: inset 0 0 4px rgba(21, 128, 61, 0.1), 0 0 4px rgba(21, 128, 61, 0.2); background: var(--ok-l); }
-    }
+/* ---------- Common ---------- */
+.page{display:none;padding-top:16px}
+.page.on{display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.h2{font-size:15px;font-weight:800;margin:0 0 2px}
+.muted{color:var(--sub);font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.sec-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:22px 0 10px}
 
-    @keyframes closedBorderGlow {
-      0% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
-      50% { border-color: rgba(198, 40, 40, 1); box-shadow: inset 0 0 10px rgba(198, 40, 40, 0.4), 0 0 12px rgba(198, 40, 40, 0.6); background: #fee2e2; }
-      100% { border-color: rgba(198, 40, 40, 0.3); box-shadow: inset 0 0 4px rgba(198, 40, 40, 0.1), 0 0 4px rgba(198, 40, 40, 0.2); background: var(--bad-l); }
-    }
+.btn{height:40px;padding:0 16px;border-radius:var(--r-s);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:active{background:var(--brand-d)}
+.btn-g{background:#e8eeec;color:var(--ink)}
+.btn-d{background:var(--bad-l);color:var(--bad)}
+.btn-s{height:32px;padding:0 11px;font-size:12px}
 
-    .hours-badge {
-      font-size: 13px; font-weight: 800; padding: 5px 12px; border-radius: 99px;
-      background: var(--bad-l); color: var(--bad); width: fit-content;
-      margin-left: auto; border: 1.5px solid transparent;
-      animation: closedBorderGlow 2.5s ease-in-out infinite;
-    }
-    .hours-badge.open {
-      background: var(--ok-l); color: var(--ok);
-      animation: borderGlowBackAndForth 2.5s ease-in-out infinite;
-    }
+/* ---------- Switch ---------- */
+.sw{position:relative;width:50px;height:28px;flex-shrink:0;display:inline-block}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:#c3cecb;border-radius:28px;transition:.2s;cursor:pointer}
+.sw span::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw input:checked+span{background:var(--ok)}
+.sw input:checked+span::before{transform:translateX(22px)}
+.sw input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
 
-    .closed-banner, .delivery-limit-banner, .username-warning {
-      padding: 11px 14px; border-radius: var(--r); font-weight: 700; text-align: center;
-      margin-bottom: 12px; font-size: 13px;
-    }
-    .closed-banner { background: var(--bad-l); color: var(--bad); border: 1px solid #f1c0c0; }
-    .delivery-limit-banner, .username-warning { background: var(--warn-l); color: var(--warn); border: 1px solid #f0d9a8; display: none; }
+/* ---------- Status cards ---------- */
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ctl .lbl{font-size:12px;color:var(--sub);font-weight:600}
+.ctl .val{font-size:17px;font-weight:800;margin-top:2px}
+.ctl .val.ok{color:var(--ok)} .ctl .val.bad{color:var(--bad)} .ctl .val.warn{color:var(--warn)}
+.wait-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.wait-row label{font-size:12px;font-weight:700;color:var(--sub);flex:1}
+.num{width:76px;height:36px;border:1px solid var(--line);border-radius:var(--r-s);text-align:center;font-weight:800;background:#fafcfb}
 
-    /* Banner Slider */
-    .banner-container {
-      width: 100%; height: 150px; border-radius: var(--r); overflow: hidden;
-      margin-bottom: 12px; position: relative; border: 1px solid var(--line); background: var(--surface);
-    }
-    .banner-slider { display: flex; width: 100%; height: 100%; transition: transform .5s ease-in-out; }
-    .banner-slide { min-width: 100%; height: 100%; }
-    .banner-slide img { width: 100%; height: 100%; object-fit: cover; }
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{border-radius:var(--r);padding:12px 14px;background:var(--surface);border:1px solid var(--line);text-align:left;width:100%}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stat span{font-size:12px;color:var(--sub);font-weight:600}
+.stat.warn b{color:var(--warn)} .stat.bad b{color:var(--bad)} .stat.ok b{color:var(--ok)}
+.stat:active{background:#f6f9f8}
 
-    .search-input {
-      width: 100%; height: 44px; border: 1px solid var(--line); border-radius: var(--r-s);
-      padding: 0 14px 0 40px; font-size: 14px; background: var(--surface) no-repeat 13px center;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235f706d' stroke-width='2' stroke-linecap='round' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
-      outline: none; margin-bottom: 12px;
-    }
-    .search-input:focus { border-color: var(--brand); }
+/* ---------- Low stock list ---------- */
+.low-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.low-row:last-child{border-bottom:0}
+.low-row .nm{flex:1;min-width:0;font-weight:700}
+.low-row .nm small{display:block;font-weight:500;color:var(--sub);font-size:11px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:800}
+.pill.warn{background:var(--warn-l);color:var(--warn)}
+.pill.bad{background:var(--bad-l);color:var(--bad)}
+.pill.ok{background:var(--ok-l);color:var(--ok)}
+.pill.pop{background:#ffe9e0;color:#c2410c}
 
-    /* Category tiles (swipe sideways) */
-    .category-grid {
-      display: flex; gap: 12px; overflow-x: auto; margin: 0 -14px 6px; padding: 4px 14px 10px;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity;
-    }
-    .category-grid::-webkit-scrollbar { display: none; }
-    .category-card {
-      flex: 0 0 auto; width: 72px; display: flex; flex-direction: column; align-items: center; gap: 7px;
-      background: none; border: 0; padding: 0; cursor: pointer; scroll-snap-align: start;
-    }
-    .category-icon {
-      width: 68px; height: 68px; border-radius: 20px; background: #1f2b2a; font-size: 32px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 10px rgba(20,32,31,.18);
-      transition: transform .18s cubic-bezier(.2,.9,.3,1.3), background .2s, box-shadow .2s;
-    }
-    .category-card:active .category-icon { transform: scale(.93); }
-    .category-card.active .category-icon { background: var(--brand); box-shadow: 0 6px 14px rgba(15,118,110,.4); transform: scale(1.05); }
-    .category-name { font-size: 13px; font-weight: 600; color: var(--sub); white-space: nowrap; }
-    .category-card.active .category-name { color: var(--brand); font-weight: 800; }
+/* ---------- Menu toolbar ---------- */
+.toolbar{position:sticky;top:60px;z-index:40;background:var(--bg);padding:10px 0 8px}
+.search{position:relative}
+.search input{width:100%;height:42px;padding:0 14px 0 38px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+.search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-style:normal;opacity:.5}
+.pills{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill-b{flex-shrink:0;height:34px;padding:0 13px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:12px;color:var(--sub)}
+.pill-b.on{background:var(--brand);border-color:var(--brand);color:#fff}
 
-    /* ===== Food Card Layout & Sizing ===== */
-    #food-list {
-      display: flex; gap: 14px; overflow-x: auto; margin: 0 -14px; padding: 4px 14px 16px;
-      scroll-snap-type: x mandatory; scroll-padding-left: 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    #food-list::-webkit-scrollbar { display: none; }
-    #food-list > div:not(.food-card) { flex: 1 0 100%; text-align: center; color: var(--sub); padding: 30px 0; }
+/* ---------- Menu cards ---------- */
+.menu{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+@media(min-width:640px){.menu{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.menu{grid-template-columns:repeat(3,1fr)}}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px}
+.item.off{background:#faf3f3;border-color:#efc9c9}
+.item-h{display:flex;gap:11px;align-items:center}
+.thumb{width:58px;height:58px;border-radius:12px;background:#e8eeec;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.item-h .t{flex:1;min-width:0}
+.item-h .t b{display:block;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-h .t small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{font-size:12px;font-weight:700;color:var(--brand);margin-top:2px}
+.item-m{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.step{display:flex;align-items:center;background:#eef3f1;border-radius:var(--r-s);overflow:hidden}
+.step button{width:38px;height:38px;font-size:20px;font-weight:700;color:var(--ink)}
+.step button:active{background:#dbe5e2}
+.step input{width:50px;height:38px;border:0;background:transparent;text-align:center;font-weight:800;font-size:15px;-moz-appearance:textfield}
+.step input::-webkit-outer-spin-button,.step input::-webkit-inner-spin-button{-webkit-appearance:none}
+.avail{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--sub)}
+.item-f{display:flex;gap:8px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:10px}
+.empty{grid-column:1/-1;text-align:center;padding:44px 10px;color:var(--sub)}
+.empty .big{font-size:34px;margin-bottom:6px}
 
-    .food-card {
-      flex: 0 0 76%; max-width: 290px; scroll-snap-align: start;
-      background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
-      padding: 8px 8px 12px; display: flex; flex-direction: column; gap: 10px;
-      box-shadow: 0 4px 14px rgba(20,32,31,.08);
-    }
-    .food-body { padding: 0 4px; }
-    .food-img {
-      position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden;
-      background: #e8eeec; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 3rem;
-    }
-    .food-img img { width: 100%; height: 100%; object-fit: cover; }
-    .heart-btn {
-      position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%;
-      background: rgba(255,255,255,.92); border: 0; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: #b9c2c0; box-shadow: 0 1px 4px rgba(0,0,0,.2);
-    }
-    .heart-btn svg { width: 18px; height: 18px; fill: currentColor; }
-    .heart-btn.on { color: var(--brand); }
-    .photo-count-badge {
-      position: absolute; bottom: 6px; right: 6px; background: rgba(20,32,31,.78); color: #fff;
-      font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 8px;
-    }
-    .food-body { display: flex; flex-direction: column; gap: 3px; }
-    .food-name { font-weight: 800; font-size: 15px; color: var(--ink); }
-    .food-sub { font-size: 12px; color: var(--sub); }
-    .pop-badge { background: var(--brand-l); color: var(--brand); font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; margin-left: 4px; white-space: nowrap; }
-    
-    .food-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
-    .card-stepper { display: flex; align-items: center; gap: 8px; background: #f6f9f8; padding: 3px 6px; border-radius: 20px; border: 1px solid var(--line); }
-    
-    /* Updated Green Stepper & Buy Buttons */
-    .card-step-btn {
-      width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--brand); background: #fff; color: var(--brand);
-      font-size: 16px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
-    }
-    .card-step-btn:active { background: var(--brand-l); }
-    .card-step-btn:disabled { border-color: #d5dcda; color: #b9c2c0; cursor: not-allowed; }
-    .card-qty { min-width: 14px; text-align: center; font-weight: 800; font-size: 14px; color: var(--ink); }
-    
-    .food-price { font-weight: 800; font-size: 16px; color: var(--brand); white-space: nowrap; }
-    
-    .buy-btn {
-      height: 34px; padding: 0 14px; border-radius: 8px; background: var(--brand); color: #fff;
-      border: 1.5px solid var(--brand); font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
-    }
-    .buy-btn:active { background: var(--brand-d); }
-    .buy-btn:disabled { background: #e3e9e7; border-color: #d5dcda; color: #9aa8a5; cursor: not-allowed; box-shadow: none; }
+/* ---------- FAB ---------- */
+.fab{position:fixed;right:16px;bottom:calc(84px + var(--safe-b));z-index:55;height:50px;padding:0 20px;border-radius:25px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(15,118,110,.4);display:none;align-items:center;gap:8px}
+.fab.show{display:inline-flex}
+.fab:active{background:var(--brand-d)}
 
-    .bottom-icons-bar { display: flex; gap: 8px; margin: 22px 0 10px; }
-    .icon-action-btn {
-      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 6px;
-      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s);
-      font-size: 12px; font-weight: 700; color: var(--ink); text-decoration: none; cursor: pointer;
-    }
-    .icon-action-btn:active { transform: scale(.97); }
-    .icon-action-btn.fb { color: #1877f2; }
-    .icon-action-btn.tg { color: #0088cc; }
-    .icon-action-btn.info { color: var(--brand); }
+/* ---------- Sheet / modal ---------- */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(10,20,19,.55);display:none;align-items:flex-end;justify-content:center}
+.ov.show{display:flex}
+@media(min-width:700px){.ov{align-items:center;padding:20px}}
+.sheet{background:var(--surface);width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;animation:up .2s ease-out}
+@media(min-width:700px){.sheet{border-radius:20px}}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sheet-h h3{margin:0;font-size:16px;font-weight:800}
+.x{width:34px;height:34px;border-radius:50%;background:#e8eeec;font-weight:800}
+.sheet-b{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sheet-f{padding:12px 16px calc(12px + var(--safe-b));border-top:1px solid var(--line);display:flex;gap:8px}
+.sheet-f .btn-p{flex:1}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.f input[type=text],.f input[type=number],.f select,.f textarea{width:100%;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb}
+.f textarea{height:auto;min-height:74px;padding:10px 12px;resize:vertical;font-size:12px}
+.f input:disabled{background:#eef2f1;color:var(--sub)}
+.f .hint{font-size:11px;color:var(--sub);margin-top:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.size-row{display:grid;grid-template-columns:1fr 96px 38px;gap:8px;margin-bottom:8px}
+.size-row button{height:42px;border-radius:var(--r-s);background:var(--bad-l);color:var(--bad);font-weight:800}
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:#f3f7f6;border-radius:var(--r-s);font-weight:700;font-size:13px}
 
-    @keyframes floatBounce {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
-    }
+/* ---------- Toast ---------- */
+.toast{position:fixed;left:50%;bottom:calc(92px + var(--safe-b));transform:translate(-50%,20px);z-index:300;max-width:calc(100% - 28px);padding:11px 16px;border-radius:12px;background:var(--ink);color:#fff;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--bad)}
+.toast.ok{background:var(--ok)}
 
-    .guide-float-btn {
-      position: fixed; right: 14px; bottom: calc(92px + var(--safe-b)); z-index: 150;
-      height: 42px; padding: 0 16px; border-radius: 21px; background: var(--brand); color: #fff;
-      border: 0; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer;
-      box-shadow: 0 8px 20px rgba(15, 118, 110, 0.3);
-      animation: floatBounce 1.8s ease-in-out infinite !important;
-    }
-    .guide-float-btn:active { transform: scale(.96); background: var(--brand-d); }
-
-    .btn { height: 46px; padding: 0 16px; border: 0; border-radius: var(--r-s); font-weight: 800; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: transform .08s; }
-    .btn:active { transform: scale(.98); }
-    .btn-p { background: var(--brand); color: #fff; }
-    .btn-g { background: #e8eeec; color: var(--ink); }
-    .btn-block { width: 100%; }
-    .x { width: 34px; height: 34px; border: 0; border-radius: 50%; background: #e8eeec; font-weight: 800; cursor: pointer; }
-
-    .modal-overlay, .cart-drawer-overlay, .map-modal-overlay {
-      position: fixed; inset: 0; background: rgba(10,20,19,.55); display: none; align-items: flex-end; justify-content: center;
-    }
-    .modal-overlay { z-index: 500; }
-    .cart-drawer-overlay { z-index: 600; }
-    .map-modal-overlay { z-index: 800; }
-
-    .modal-card, .cart-drawer-card {
-      background: var(--surface); width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto;
-      border-radius: 20px 20px 0 0; padding: 18px 16px calc(16px + var(--safe-b)); animation: up .2s ease-out;
-    }
-    @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-    @media (min-width: 700px) {
-      .modal-overlay, .cart-drawer-overlay, .map-modal-overlay { align-items: center; padding: 20px; }
-      .modal-card, .cart-drawer-card { border-radius: 20px; }
-    }
-
-    .size-tile {
-      background: #f6f9f8; border: 1px solid var(--line); border-radius: var(--r-s); padding: 13px 14px;
-      margin: 8px 0; display: flex; justify-content: space-between; font-weight: 700; cursor: pointer;
-    }
-    .size-tile.selected { border-color: var(--brand); background: var(--brand-l); box-shadow: 0 0 0 1px var(--brand); }
-
-    .option-group { margin: 14px 0; }
-    .option-title { font-size: 12px; font-weight: 700; color: var(--sub); margin-bottom: 6px; }
-    .option-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pill { height: 34px; padding: 0 14px; display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 99px; font-size: 12px; font-weight: 700; color: var(--sub); cursor: pointer; }
-    .pill.active { background: var(--brand); border-color: var(--brand); color: #fff; }
-
-    .cart-trigger-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--surface);
-      border-top: 1px solid var(--line); padding: 10px 14px calc(10px + var(--safe-b));
-    }
-    .trigger-btn {
-      display: flex; width: 100%; max-width: 692px; margin: 0 auto; height: 52px; padding: 0 18px;
-      background: var(--brand); color: #fff; border: 0; border-radius: var(--r-s);
-      font-size: 15px; font-weight: 800; justify-content: space-between; align-items: center; cursor: pointer;
-    }
-    .trigger-btn:active { background: var(--brand-d); }
-    .trigger-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-    .modal-top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
-    .back-btn { background: #e8eeec; border: 0; color: var(--ink); font-weight: 700; padding: 0 14px; height: 36px; border-radius: var(--r-s); font-size: 13px; cursor: pointer; }
-    .drawer-title { font-size: 16px; font-weight: 800; margin: 0; }
-
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
-    .qty-stepper { display: flex; align-items: center; gap: 6px; background: #eef3f1; padding: 3px 6px; border-radius: var(--r-s); }
-    .stepper-btn { width: 30px; height: 30px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-weight: 800; cursor: pointer; }
-
-    .section-label { font-size: 12px; color: var(--sub); margin: 18px 0 8px; font-weight: 700; }
-    .toggle-grid { display: flex; gap: 8px; }
-    .toggle-item { flex: 1; padding: 12px 8px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); border-radius: var(--r-s); font-weight: 700; font-size: 13px; text-align: center; cursor: pointer; }
-    .toggle-item.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-
-    .aba-pay-card { background: var(--aba) !important; color: #fff !important; border-color: var(--aba) !important; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-    .custom-input { width: 100%; background: #fafcfb; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 13px; height: 44px; font-size: 14px; outline: none; margin-top: 6px; }
-    textarea.custom-input { height: auto; padding: 10px 13px; resize: vertical; }
-    .custom-input:focus { border-color: var(--brand); background: #fff; }
-    .custom-input[readonly] { background: #eef2f1; color: var(--sub); cursor: not-allowed; }
-
-    .gps-btn { background: var(--brand); color: #fff; border: 0; height: 44px; border-radius: var(--r-s); font-size: 13px; font-weight: 800; margin-top: 8px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
-    .gps-btn:active { background: var(--brand-d); }
-    .gps-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; }
-
-    .submit-order-btn { width: 100%; height: 52px; background: var(--brand); color: #fff; border: 0; border-radius: var(--r-s); font-size: 15px; font-weight: 800; margin-top: 18px; cursor: pointer; }
-    .submit-order-btn:active { background: var(--brand-d); }
-    .submit-order-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    .image-modal-overlay { position: fixed; inset: 0; background: rgba(10,20,19,.93); display: none; flex-direction: column; justify-content: space-between; z-index: 1000; padding: 18px 14px; }
-    .image-modal-header { display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 700; z-index: 1001; }
-    .close-img-btn { background: rgba(255,255,255,.18); color: #fff; border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
-    .slider-viewport { width: 100%; flex: 1; display: flex; align-items: center; overflow: hidden; position: relative; margin: 14px 0; }
-    .slider-track { display: flex; width: 100%; height: 100%; transition: transform .3s ease-in-out; }
-    .slider-slide { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-    .slider-slide img { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--r-s); }
-    .slider-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.22); color: #fff; border: 0; width: 42px; height: 42px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; z-index: 1002; display: flex; align-items: center; justify-content: center; }
-    .slider-prev { left: 8px; } .slider-next { right: 8px; }
-    .slider-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); transition: all .2s; }
-    .dot.active { background: #fff; transform: scale(1.3); }
-
-    /* Interactive Map Modal Styles */
-    .map-card {
-      background: var(--surface); width: 100%; max-width: 600px; height: 85vh; border-radius: 20px 20px 0 0;
-      display: flex; flex-direction: column; overflow: hidden; position: relative; animation: up .2s ease-out;
-    }
-    @media (min-width: 700px) { .map-card { border-radius: 20px; height: 80vh; } }
-    .map-header {
-      padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
-      display: flex; justify-content: space-between; align-items: center; z-index: 10;
-    }
-    .map-container-wrapper { flex: 1; position: relative; width: 100%; background: #e5e3df; }
-    #picker-map { width: 100%; height: 100%; }
-    .center-pin-marker {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%);
-      z-index: 500; pointer-events: none; transition: transform 0.15s ease;
-    }
-    .center-pin-shadow {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 14px; height: 6px; background: rgba(0,0,0,0.25); border-radius: 50%;
-      z-index: 499; pointer-events: none;
-    }
-    .map-recenter-btn {
-      position: absolute; bottom: 20px; right: 16px; z-index: 500;
-      width: 44px; height: 44px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
-      font-size: 18px; cursor: pointer; color: var(--brand);
-    }
-    .map-recenter-btn:active { background: #f0f0f0; }
-    .map-footer { padding: 14px 16px calc(14px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); z-index: 10; }
-    .map-addr-preview { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  
-    /* ABA Pay modal */
-    .pay-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 900; display: none; align-items: flex-end; justify-content: center; }
-    .pay-card { background: var(--surface); width: 100%; max-width: 440px; border-radius: 18px 18px 0 0; padding: 20px 18px calc(20px + var(--safe-b)); text-align: center; max-height: 92vh; overflow-y: auto; }
-    @media (min-width: 600px) { .pay-overlay { align-items: center; padding: 20px; } .pay-card { border-radius: 18px; } }
-    .pay-amount { font-size: 28px; font-weight: 800; color: var(--aba); margin: 4px 0 2px; }
-    .pay-sub { color: var(--sub); font-size: 12.5px; }
-    .pay-btn { width: 100%; height: 52px; background: var(--aba); color: #fff; border: 0; border-radius: var(--r-s); font-size: 15px; font-weight: 800; margin-top: 14px; cursor: pointer; }
-    .pay-btn.ghost { background: var(--surface); color: var(--aba); border: 1.5px solid var(--aba); height: 44px; font-size: 13px; }
-    .pay-qr { width: 210px; height: 210px; margin: 12px auto 0; border: 1px solid var(--line); border-radius: 12px; padding: 6px; display: block; object-fit: contain; background: #fff; }
-    .pay-state { margin-top: 12px; font-size: 13px; font-weight: 700; }
-    .pay-state.ok { color: var(--ok); } .pay-state.bad { color: var(--bad); } .pay-state.wait { color: var(--warn); }
-    .pay-resume { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 850; display: none; background: var(--aba); color: #fff; border-radius: var(--r-s); padding: 10px 12px; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
-    .pay-resume button { border: 0; border-radius: 8px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
-    .pay-resume .go { background: #fff; color: var(--aba); } .pay-resume .x { background: transparent; color: #fff; }
-    .leaflet-tooltip.store-tip { background:#fff; color:#005d7b; font-weight:800; font-size:12px; border:0; border-radius:8px; padding:3px 8px; box-shadow:0 2px 8px rgba(0,0,0,.25); }
-    .leaflet-tooltip.store-tip::before { display:none; }
-    .leaflet-container .leaflet-control-attribution { font-size:9px; background:rgba(255,255,255,.7); }
-    #map-modal .lifted { translate: 0 -10px; transition: translate .15s ease; }
-    #picker-map .gm-style-cc, #picker-map .gmnoprint a { font-size: 10px; }
-      .track-entry { display:block; width:calc(100% - 32px); margin:10px 16px; padding:12px 14px; border:1.5px solid var(--brand); border-radius:12px; background:var(--brand-l); color:var(--brand); font:inherit; font-weight:800; font-size:14px; text-align:left; cursor:pointer; }
-    .tcard { border:1px solid var(--line); border-radius:12px; padding:12px; margin-top:10px; text-align:left; }
-    .tcard ul { margin:6px 0; padding-left:18px; font-size:13px; line-height:1.6; }
-    .tbtns { display:flex; gap:8px; margin-top:8px; }
-    .tbtn { flex:1; padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--sub); font:inherit; font-weight:700; font-size:13px; }
-    .tbtn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
-    .tbtn.go { cursor:pointer; } .tbtn:disabled { opacity:.55; }
-    #live-map { height:240px; border-radius:12px; margin-top:10px; }
-    .tl { margin:10px 0 2px; padding:0; list-style:none; }
-    .tl li { display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px; color:var(--sub); }
-    .tl .d { width:22px; height:22px; border-radius:50%; background:#dde1e6; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .tl li.done { color:var(--ink); font-weight:700; } .tl li.done .d { background:var(--brand); }
-    .tl li.now .d { box-shadow:0 0 0 4px rgba(15,118,110,.2); }
-    .trow { display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
-
-    /* ===== Welcome intro (shows before the main page) ===== */
-    #welcome { position:fixed; inset:0; z-index:99999; background:var(--brand-d); color:#fff;
-      display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
-      padding:24px calc(24px) calc(24px + var(--safe-b)); cursor:pointer;
-      transition:opacity .45s ease, transform .45s ease; }
-    #welcome.hide { opacity:0; transform:scale(1.04); pointer-events:none; }
-    body.welcome-lock { overflow:hidden; }
-    .w-logo { position:relative; width:132px; height:132px; border-radius:50%; background:#fff; padding:6px;
-      box-shadow:0 0 0 6px rgba(255,255,255,.18), 0 18px 40px rgba(0,0,0,.28); animation:wPop .7s cubic-bezier(.2,.9,.3,1.2) both; }
-    .w-logo img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
-    .w-steam { position:absolute; left:50%; top:-46px; width:70px; height:50px; transform:translateX(-50%); display:flex; justify-content:space-between; }
-    .w-steam i { width:6px; height:34px; border-radius:6px; background:rgba(255,255,255,.55); filter:blur(2px); opacity:0; animation:wSteam 2.4s ease-in-out infinite; }
-    .w-steam i:nth-child(2) { animation-delay:.5s; height:42px; }
-    .w-steam i:nth-child(3) { animation-delay:1s; }
-    .w-hello { margin-top:30px; font-size:15px; font-weight:600; opacity:.85; animation:wUp .6s .35s both; }
-    .w-name { margin:4px 0 0; font-size:30px; font-weight:800; line-height:1.35; animation:wUp .6s .5s both; }
-    .w-sub { margin:8px 0 0; font-size:14px; opacity:.8; max-width:300px; animation:wUp .6s .65s both; }
-    .w-btn { margin-top:34px; background:#fff; color:var(--brand-d); border:0; border-radius:99px; padding:14px 34px;
-      font-weight:800; font-size:16px; cursor:pointer; box-shadow:0 8px 22px rgba(0,0,0,.22); animation:wUp .6s .85s both; }
-    .w-btn:active { transform:scale(.97); }
-    .w-bar { position:absolute; left:0; bottom:0; height:4px; width:100%; background:rgba(255,255,255,.18); }
-    .w-bar b { display:block; height:100%; width:0; background:#fff; animation:wBar 3.2s linear forwards; }
-    @keyframes wPop { from { opacity:0; transform:scale(.6); } to { opacity:1; transform:scale(1); } }
-    @keyframes wUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
-    @keyframes wSteam { 0% { opacity:0; transform:translateY(10px); } 40% { opacity:.8; } 100% { opacity:0; transform:translateY(-22px); } }
-    @keyframes wBar { to { width:100%; } }
-    @media (prefers-reduced-motion: reduce) { #welcome *, #welcome { animation-duration:.01s !important; animation-delay:0s !important; transition:none !important; } }
-
-    /* ===== Modern menu (category cards + list rows) ===== */
-
-    /* category cards: 4 across, swipe if the screen is narrow */
-    .category-grid { gap: 10px; margin: 0 -14px 12px; padding: 2px 14px 8px; scroll-snap-type: x proximity; }
-    .category-card { scroll-snap-align: start; }
-    .category-card {
-      flex: 0 0 88px; width: 88px; gap: 8px; padding: 12px 6px 11px; background: var(--surface);
-      border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 1px 2px rgba(20,32,31,.04);
-      transition: background .2s, border-color .2s, transform .15s;
-    }
-    .category-card:active { transform: scale(.97); }
-    .category-icon {
-      width: 54px; height: 54px; border-radius: 50%; background: #eef3f2; border: 0; box-shadow: none; font-size: 28px;
-      transition: background .2s;
-    }
-    .category-card:active .category-icon { transform: none; }
-    .category-name { font-size: 13px; font-weight: 700; color: var(--ink); }
-    .category-card.active { background: var(--brand-l); border-color: var(--brand); }
-    .category-card.active .category-icon { background: #fff; box-shadow: none; transform: none; }
-    .category-card.active .category-name { color: var(--brand-d); font-weight: 800; }
-
-    /* food list: cards slide sideways */
-    #food-list {
-      display: flex; flex-direction: row; gap: 12px; overflow-x: auto; margin: 0 -14px; padding: 2px 14px 14px;
-      scroll-snap-type: x mandatory; scroll-padding-left: 14px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    #food-list::-webkit-scrollbar { display: none; }
-    #food-list > div:not(.food-card) { flex: 1 0 100%; }
-    .food-card {
-      flex: 0 0 74%; max-width: 280px; scroll-snap-align: start; flex-direction: column; align-items: stretch; gap: 10px;
-      padding: 8px 8px 12px; border-radius: 22px; box-shadow: 0 1px 2px rgba(20,32,31,.04);
-    }
-    .food-img { width: 100%; height: auto; aspect-ratio: 4 / 3; flex: none; border-radius: 16px; font-size: 3rem; }
-    .photo-count-badge { bottom: 6px; right: 6px; font-size: 10px; padding: 1px 6px; }
-    .food-body { flex: none; min-width: 0; padding: 0 6px; }
-    .food-name { font-size: 15px; line-height: 1.45; }
-    .food-sub { font-size: 12px; }
-    .food-side { display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; padding: 0 6px; }
-    .food-side .food-price { font-size: 17px; }
-    .add-btn {
-      width: 38px; height: 38px; border-radius: 12px; border: 0; background: var(--brand); color: #fff;
-      font-size: 22px; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
-    }
-    .add-btn:active { background: var(--brand-d); transform: scale(.94); }
-    .add-btn:disabled { background: #e3e9e7; color: #9aa8a5; cursor: not-allowed; transform: none; }
-    .food-side .card-stepper { padding: 2px 4px; gap: 6px; background: var(--brand-l); border-color: transparent; }
-    .food-side .card-step-btn { width: 28px; height: 28px; }
-
-    /* ===== Mixed colors (gradients instead of one flat color) ===== */
-    :root {
-      --grad: linear-gradient(135deg, #0f766e 0%, #0f766e 100%);
-      --grad-soft: linear-gradient(135deg, #e3f3f1 0%, #e6f4ea 100%);
-    }
-    .buy-btn, .guide-float-btn, .btn-p, .trigger-btn, .gps-btn, .submit-order-btn, .add-btn,
-    .pill.active, .toggle-item.active, .tbtn.on {
-      background: var(--grad); border-color: transparent;
-    }
-    .buy-btn:active, .guide-float-btn:active, .trigger-btn:active, .gps-btn:active,
-    .submit-order-btn:active, .add-btn:active { background: var(--grad); filter: brightness(.9); }
-    .tl li.done .d { background: var(--grad); }
-    .header-menu-btn { background: var(--grad-soft); }
-    .pop-badge { background: linear-gradient(135deg, #fde68a, #fcd34d); color: #7c2d12; }
-    .food-price { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
-    .size-tile.selected { background: var(--grad-soft); }
-    /* category icons: each category gets its own mix */
-    .category-card:nth-child(1) .category-icon { background: linear-gradient(135deg, #fee2e2, #fed7aa); }
-    .category-card:nth-child(2) .category-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-    .category-card:nth-child(3) .category-icon { background: linear-gradient(135deg, #ede9fe, #fbcfe8); }
-    .category-card:nth-child(4) .category-icon { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-    .category-card.active { background: var(--grad-soft); }
-    .category-card.active .category-icon { box-shadow: 0 4px 10px rgba(15,118,110,.25); }
-
-    /* ===== Davin-style top: promo banner, header, tabs, hero ===== */
-    .top-promo-banner { background: linear-gradient(90deg, #e3f3f1, #e6f4ea); color: var(--ink); border-bottom: 1px solid var(--line); padding: 10px 40px 10px 12px; overflow: visible; text-align: center; }
-    .promo-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; font-size: 13.5px; font-weight: 600; line-height: 1.5; }
-    .top-promo-banner .top-promo-badge { background: #fde68a; color: #92400e; font-size: 12px; font-weight: 800; text-transform: none; padding: 3px 12px; }
-    .promo-cta { background: #14201f; color: #fff; border: 0; border-radius: 99px; padding: 6px 16px; font-weight: 800; font-size: 13px; cursor: pointer; }
-    .promo-x { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 26px; height: 26px; border: 0; background: none; color: var(--sub); font-size: 15px; cursor: pointer; }
-
-    .top { padding: 10px 0 0; }
-    .top .wrap { gap: 8px; }
-    .hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .hdr-brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .hdr-brand .shop-title { font-size: 19px; }
-    .hdr-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
-    .hdr-link { display: flex; align-items: center; gap: 5px; background: none; border: 0; padding: 4px; font-weight: 700; font-size: 14px; color: var(--ink); cursor: pointer; }
-    .hdr-ico { position: relative; background: none; border: 0; padding: 4px; color: var(--ink); cursor: pointer; display: flex; }
-    .hdr-ico b { position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 99px; background: var(--brand); color: #fff; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; }
-    .hdr-tabs { background: #e6f4ea; margin-top: 4px; }
-    .hdr-tabs .wrap { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; flex-direction: row; }
-    .hdr-tabs .wrap::-webkit-scrollbar { display: none; }
-    .hdr-tab { flex: 0 0 auto; background: none; border: 0; border-bottom: 3px solid transparent; padding: 11px 2px 8px; font-weight: 800; font-size: 14.5px; color: #1d3b2b; cursor: pointer; }
-    .hdr-tab.active { color: var(--brand); border-bottom-color: var(--brand); }
-
-    .hero { background: #eef5f3; border-radius: 24px; padding: 26px 18px 24px; margin-bottom: 14px; text-align: center; }
-    .hero-eyebrow { color: var(--brand); font-weight: 800; font-size: 13.5px; line-height: 1.6; }
-    .hero-title { margin: 10px 0 8px; font-size: 27px; line-height: 1.5; font-weight: 800; color: var(--ink); }
-    .hero-sub { margin: 0 auto; max-width: 320px; font-size: 14px; color: var(--sub); }
-    .hero-btns { display: flex; justify-content: center; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
-    .hero-btn { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 12px; padding: 12px 20px; font-weight: 800; font-size: 14.5px; cursor: pointer; }
-    .hero-btn.primary { background: var(--grad); border-color: transparent; color: #fff; }
-    #category-cards-container { scroll-margin-top: 150px; }
-
-    /* ===== Final layout: greeting -> photo -> search -> categories -> menu ===== */
-    .hdr-actions { gap: 10px; }
-    .greet { padding: 2px 2px 12px; }
-    .greet-hi { font-size: 14px; font-weight: 600; color: var(--sub); }
-    .greet-q { font-size: 24px; font-weight: 800; line-height: 1.5; color: var(--ink); }
-    .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 10px; }
-    .sec-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--ink); }
-    .sec-head span { font-size: 13px; color: var(--sub); font-weight: 600; }
-
-    /* ===== Menu rows (like the reference) + categories with photos ===== */
-    .top-promo-banner { display: flex; align-items: center; gap: 10px; padding: 8px 40px 8px 12px; overflow: hidden; position: relative; text-align: left; }
-    .promo-run { flex: 1; min-width: 0; overflow: hidden; }
-    .top-promo-banner .top-promo-content { padding-right: 36px; font-size: 13.5px; font-weight: 600; }
-    .promo-cta { flex-shrink: 0; }
-
-    .category-grid { gap: 10px; padding: 2px 14px 8px; }
-    .category-card { flex: 1 0 78px; width: auto; }
-    .category-icon { overflow: hidden; }
-    .category-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
-
-    #food-list { flex-direction: column; gap: 10px; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
-    #food-list > div:not(.food-card) { flex: none; }
-    .food-card { flex: none; width: 100%; max-width: none; flex-direction: row; align-items: center; gap: 12px; padding: 10px 12px 10px 10px; border-radius: 18px; }
-    .food-img { width: 76px; height: 76px; aspect-ratio: auto; flex: 0 0 76px; border-radius: 14px; font-size: 2rem; }
-    .food-body { flex: 1; min-width: 0; padding: 0; }
-    .food-side { flex-direction: row; justify-content: flex-end; align-items: center; gap: 10px; padding: 0; }
-    .food-side.in-cart { flex-direction: column; align-items: flex-end; gap: 6px; }
-    .food-side .food-price { font-size: 16px; }
-    .add-btn { width: 30px; height: 30px; border-radius: 9px; font-size: 18px; }
-
-    /* ===== Category cards: big square picture, whole image visible ===== */
-    .category-card { flex: 1 0 96px; padding: 8px 8px 10px; gap: 7px; border-radius: 18px; }
-    .category-icon { width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 14px; font-size: 42px; }
-    .category-icon img { width: 100%; height: 100%; object-fit: contain; border-radius: 14px; }
-
-    /* ===== Header: spacing close to the earlier look ===== */
-    .top { padding: 10px 0 6px; }
-
-    .food-card.flash { animation: cardFlash 2.2s ease; }
-    @keyframes cardFlash { 0%,100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); } 20%,70% { box-shadow: 0 0 0 4px rgba(15,118,110,.55); border-color: var(--brand); } }
-
-    .food-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-    .tag-disc, .tag-free { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
-    .tag-disc { background: #fee2e2; color: #b91c1c; }
-    .tag-free { background: #dcfce7; color: #166534; }
-    .food-price s { white-space: nowrap; }
-
-    /* Footer */
-    .site-footer { text-align: center; padding: 26px 10px 90px; margin-top: 8px; border-top: 1px solid var(--line); }
-    .foot-title { font-size: 15px; font-weight: 800; letter-spacing: .5px; color: var(--ink); }
-    .foot-social { display: flex; justify-content: center; gap: 14px; margin: 16px 0 18px; }
-    .foot-ico { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; transition: transform .15s; }
-    .foot-ico:active { transform: scale(.93); }
-    .foot-ico.fb { background: #3b5998; }
-    .foot-ico.tg { background: #0088cc; }
-    .foot-copy { font-size: 13px; color: var(--sub); line-height: 1.7; }
-    .foot-copy b { color: var(--ink); }
+/* ---------- Gate ---------- */
+.gate{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;text-align:center}
+.gate.show{display:flex}
+.gate .box{max-width:340px}
+.gate .big{font-size:48px;margin-bottom:8px}
+.gate h2{margin:0 0 8px;font-size:18px}
+.skeleton{background:linear-gradient(90deg,#e6ecea 25%,#f2f6f5 50%,#e6ecea 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:var(--r);height:118px}
+@keyframes sk{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-  <!-- Welcome intro -->
-  <div id="welcome" role="dialog" aria-label="Welcome">
-    <div class="w-logo">
-      <div class="w-steam"><i></i><i></i><i></i></div>
-      <img src="./images/Logo.JPG" alt="" onerror="this.outerHTML='<div style=&quot;font-size:64px;line-height:120px&quot;>🍜</div>'">
-    </div>
-    <div class="w-hello">សូមស្វាគមន៍មកកាន់</div>
-    <h1 class="w-name">តូបគុយទាវ អ៊ីភាព</h1>
-    <p class="w-sub">គុយទាវ និងភេសជ្ជៈ ក្តៅៗ ដឹកដល់ផ្ទះអ្នក</p>
-    <button class="w-btn" id="welcome-go" type="button">ចាប់ផ្ដើមកម្មង់</button>
-    <div class="w-bar"><b></b></div>
-  </div>
 
-  <div id="top-promo-banner" class="top-promo-banner" style="display: none;">
-    <div class="promo-run">
-      <div class="top-promo-track">
-        <div class="top-promo-content">
-          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
-        </div>
-        <div class="top-promo-content">
-          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
-        </div>
-        <div class="top-promo-content">
-          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
-        </div>
-        <div class="top-promo-content">
-          <span class="top-promo-badge promo-badge-text">Free Delivery</span>
-          <span class="promo-msg-text">we will free delivery for more than 10 items for you</span>
-        </div>
+<!-- Access gate (shown when not opened inside Telegram) -->
+<div id="gate" class="gate">
+  <div class="box">
+    <div class="big">🔒</div>
+    <h2>សូមបើកតាម Telegram</h2>
+    <p class="muted" style="font-size:13px">ទំព័រនេះអាចកែប្រែទិន្នន័យបានតែនៅពេលបើកតាមរយៈ Telegram Bot របស់ហាងប៉ុណ្ណោះ។</p>
+    <button class="btn btn-g" id="gate-view" style="margin-top:12px">មើលតែប៉ុណ្ណោះ (View only)</button>
+  </div>
+</div>
+<!-- Admin password -->
+<div id="pw-gate" class="gate">
+  <div class="box" style="width:100%">
+    <div class="big">🔑</div>
+    <h2>ពាក្យសម្ងាត់ Admin</h2>
+    <input id="pw-in" type="password" autocomplete="current-password" placeholder="បញ្ចូលពាក្យសម្ងាត់" style="width:100%;height:50px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;margin-top:6px">
+    <button class="btn btn-p" id="pw-go" style="width:100%;margin-top:10px;height:48px">ចូល</button>
+    <div id="pw-err" style="color:var(--bad);margin-top:8px;font-size:13px"></div>
+  </div>
+</div>
+<header class="top">
+  <div class="wrap">
+    <h1>ផ្ទាំងគ្រប់គ្រងហាង<small>តូបគុយទាវ អ៊ីភាព</small></h1>
+    <button class="icon-btn" id="btn-refresh" aria-label="ធ្វើបច្ចុប្បន្នភាព"><span id="refresh-ic">🔄</span> Refresh</button>
+    <a class="icon-btn" href="index.html" target="_blank" rel="noopener">👁️ ហាង</a>
+  </div>
+</header>
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន (ចុច Reload page អតិថន)</h2>
+  <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
+  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+</div>
+<main class="wrap">
+  <!-- ========== HOME ========== -->
+  <section id="page-home" class="page on">
+    <!-- Shop banners (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🖼 បដាស្លាយ (Banners)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញនៅទំព័រអតិថិជន</div>
+      <div id="bn-list"></div>
+      <button class="btn btn-p btn-s" id="bn-add">➕ បន្ថែមបដា</button>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <img id="logo-prev" src="./images/Logo.JPG" alt="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;background:#e8eeec">
+        <div style="flex:1"><div class="lbl">🏷 ឡូហ្គោហាង (Logo)</div></div>
+        <button class="btn btn-g btn-s" id="logo-up">📷 ប្តូរ</button>
       </div>
     </div>
-    <button type="button" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
-    <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
-  </div>
+    <!-- Category pictures (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🍜 រូបប្រភេទម្ហូប (Category pictures)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញក្នុងប៊ូតុងប្រភេទនៅទំព័រអតិថិជន</div>
+      <div id="cat-img-list"></div>
+    </div>
+    <!-- Greeting question on the customer page -->
+    <div class="card">
+      <div class="lbl">💬 អត្ថបទស្វាគមន៍ (Greeting question)</div>
+      <div class="muted" style="margin-bottom:8px">បង្ហាញក្រោម «សួស្ដី …» នៅទំព័រអតិថិជន</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="greet-input" maxlength="80" placeholder="ថ្ងៃនេះចង់ញ៉ាំអ្វី?" style="flex:1;height:38px;border:1px solid var(--line);border-radius:var(--r-s);padding:0 10px;background:#fafcfb;">
+        <button class="btn btn-p btn-s" id="greet-save">រក្សាទុក</button>
+      </div>
+    </div>
+    <!-- Top Promotion Banner Control -->
+    <div class="card">
+      <div class="ctl" style="margin-bottom: 12px;">
+        <div>
+          <div class="lbl">ប្រូម៉ូសិនបដាខាងលើ (Top Promotion Banner)</div>
+          <div id="promo-status-text" class="val">…</div>
+          <div class="muted">បង្ហាញ ឬបិទប្រូម៉ូសិននៅផ្នែកខាងលើរបស់អតិថិជន</div>
+        </div>
+        <label class="sw"><input type="checkbox" id="promo-toggle"><span></span></label>
+      </div>
+      <div class="wait-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">អត្ថបទផ្លាកសញ្ញា (Badge Text):</label>
+          <input type="text" id="promo-badge-input" placeholder="Free Delivery" style="height: 38px; width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 10px; background: #fafcfb;">
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
+          <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
+        </div>
+        <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
+      </div>
+    </div>
 
-  <header class="top">
-    <div class="wrap">
-      <div id="status-badge" class="hours-badge">កំពុងពិនិត្យម៉ោង...</div>
-      <div class="hdr-row">
-        <div class="hdr-brand">
-          <div class="chef-girl-icon" title="Food &amp; Drink Delivery">
-            <img id="shop-logo" alt="Shop logo" src="./images/Logo.JPG">
+    <div class="grid2">
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">ស្ថានភាពហាង</div>
+            <div id="store-text" class="val">…</div>
+            <div class="muted">បើក/បិទ ការទទួលការកម្មង់</div>
           </div>
-          <div class="shop-title">តូបគុយទាវ អ៊ីភាព</div>
+          <label class="sw"><input type="checkbox" id="store-toggle"><span></span></label>
         </div>
-        <div class="hdr-actions">
-          <button type="button" class="hdr-link" onclick="openInfoModal()">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-            <span class="hdr-link-t">អំពីយើង</span>
-          </button>
-          <button type="button" class="hdr-ico" aria-label="Cart" onclick="openCartDrawer()">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L19 8H6.2"/><circle cx="9" cy="19.5" r="1.2"/><circle cx="17" cy="19.5" r="1.2"/></svg>
-            <b id="hdr-cart-count" style="display:none">0</b>
-          </button>
+      </div>
+
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">សេវាដឹកជញ្ជូន</div>
+            <div id="delivery-text" class="val">…</div>
+          </div>
+          <label class="sw"><input type="checkbox" id="delivery-toggle"><span></span></label>
+        </div>
+        <div class="wait-row">
+          <label for="wait-input">រយៈពេលរង់ចាំ (នាទី)</label>
+          <input class="num" type="number" id="wait-input" min="1" max="180" inputmode="numeric" placeholder="15">
+          <button class="btn btn-p btn-s" id="wait-save">រក្សាទុក</button>
         </div>
       </div>
     </div>
-  </header>
 
-  <main class="wrap">
+    <div class="stats" id="stats"></div>
 
-  <div id="store-closed-banner" class="closed-banner" style="display: none;">
-    🔒 ហាងត្រូវបានបិទជាបណ្ដោះអាសន្ន! មិនអាចធ្វើការកម្មង់បានទេនៅពេលនេះ។
-  </div>
-
-  <div id="delivery-limit-banner" class="delivery-limit-banner" style="display: none;">
-    🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល <span id="banner-wait-time">១៥</span> នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។
-  </div>
-
-  <div id="tg-login-box" style="display:none; margin:10px 16px; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface); text-align:center; font-size:13px;"></div>
-
-  <div id="no-username-banner" class="username-warning">
-    ⚠️ គណនី Telegram របស់អ្នកមិនមាន Username ទេ។ សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន ទើបអាចកម្មង់បាន។
-  </div>
-
-  <section class="greet">
-    <div class="greet-hi">សួស្ដី <span id="user-name">អតិថិជន</span> 👋</div>
-    <div class="greet-q">ថ្ងៃនេះចង់ញ៉ាំអ្វី?</div>
+    <div class="sec-title">
+      <div>
+        <h2 class="h2">⚠️ ស្តុកជិតអស់</h2>
+        <div class="muted">មុខម្ហូបដែលនៅសល់ ≤ <span id="low-n"></span> ឬអស់ស្តុក</div>
+      </div>
+    </div>
+    <div class="card" id="low-list" style="padding:4px 14px"></div>
   </section>
 
-  <!-- Auto-sliding multi-banner container -->
-  <div class="banner-container">
-<div class="banner-slider" id="banner-slider"></div>
+  <!-- ========== MENU ========== -->
+  <section id="page-menu" class="page">
+    <div class="toolbar">
+      <div class="search">
+        <i>🔍</i>
+        <input type="search" id="search" placeholder="ស្វែងរកឈ្មោះម្ហូប…" autocomplete="off">
+      </div>
+      <div class="pills" id="cat-pills"></div>
+    </div>
+    <div class="menu" id="menu"></div>
+  </section>
+
+  <!-- ========== DELIVERY ========== -->
+  <section id="page-delivery" class="page">
+    <div class="card">
+      <h2 class="h2">🛵 អ្នកដឹក (Drivers)</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <input id="drv-name" placeholder="ឈ្មោះ" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <input id="drv-id" placeholder="ID ចូលកម្មវិធី" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px" autocapitalize="off">
+        <input id="drv-pw" placeholder="ពាក្យសម្ងាត់ (≥6)" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <button class="btn btn-p btn-s" id="drv-add">➕ បន្ថែម</button>
+      </div>
+      <div id="drv-list" class="muted">កំពុងផ្ទុក…</div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📦 ការដឹកជញ្ជូនដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">១) «ផ្ញើទៅ Delivery app» ឱ្យអ្នកដឹកស្នើ ឬ ២) ជ្រើសអ្នកដឹកផ្ទាល់ រួចចុច «អនុម័ត»។ ក្រោយអនុម័ត ព័ត៌មាន និងផែនទីទើបបង្ហាញក្នុងកម្មវិធីអ្នកដឹក។</p>
+      <div id="dl-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="dl-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+  </section>
+
+  <!-- ========== SETTINGS / ABOUT ========== -->
+  <section id="page-more" class="page">
+    <div class="card">
+      <h2 class="h2">👤 អ្នកគ្រប់គ្រង</h2>
+      <div id="who" class="muted" style="margin-top:6px"></div>
+      <button class="btn btn-g btn-s" id="pw-out" style="margin-top:8px">🔒 ចាកចេញ (Admin)</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧰 អាប់ដេត រហ័ស</h2>
+      <p class="muted" style="margin:4px 0 12px">សកម្មភាពលើមុខម្ហូបទាំងអស់ក្នុងពេលតែមួយ</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-g" id="bulk-enable">✅ បើកលក់មុខម្ហូបទាំងអស់ដែលមានស្តុក</button>
+        <button class="btn btn-g" id="bulk-disable-zero">⛔ បិទមុខម្ហូបដែលអស់ស្តុក (0)</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧾 ការកម្មង់ដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">ចុចដំណាក់កាល ដើម្បីឱ្យអតិថិជនឃើញក្នុងទំព័រតាមដាន។</p>
+      <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🔐 ការចូលតាម Telegram</h2>
+      <p class="muted" style="margin:4px 0 10px">បើក: អតិថិជនត្រូវចូលតាម Telegram (ក្នុង browser) ហើយត្រូវមាន Username ។ បិទ: កម្មង់បានដោយសេរី។</p>
+      <div class="switch-row"><span>តម្រូវឱ្យចូលតាម Telegram និងមាន Username</span>
+        <label class="sw"><input type="checkbox" id="req-login"><span></span></label></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
+      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)។</p>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab" id="fab-add"><span style="font-size:20px;line-height:1">＋</span> បន្ថែមម្ហូប</button>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
+    <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
+    <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន</button>
+    <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
   </div>
+</nav>
 
-  <input type="text" id="search-input" class="search-input" placeholder="ស្វែងរកមុខម្ហូប..." oninput="renderMenu()">
-
-  <div id="category-cards-container" class="category-grid"></div>
-
-  <div class="sec-head"><h2 id="sec-title">មុខម្ហូបទាំងអស់</h2><span id="sec-count"></span></div>
-
-  <div id="food-list">កំពុងទាញយកទិន្នន័យ...</div>
-
-  <footer class="site-footer">
-    <div class="foot-title">Follow us</div>
-    <div class="foot-social">
-      <a href="https://www.facebook.com/share/1JmSamWQLg/" target="_blank" rel="noopener noreferrer" class="foot-ico fb" aria-label="Facebook">
-        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-      </a>
-      <a href="https://t.me/Kuyteav_Epheap" target="_blank" rel="noopener noreferrer" class="foot-ico tg" aria-label="Telegram">
-        <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.16l-2.02 9.53c-.15.68-.56.84-1.13.52l-3.1-2.28-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.77-5.21c.25-.22-.05-.34-.39-.12l-7.14 4.5-3.07-.96c-.67-.21-.68-.67.14-.99l12.01-4.63c.56-.2 1.05.14.84.96z"/></svg>
-      </a>
+<!-- Item modal -->
+<div class="ov" id="item-ov">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-h">
+      <h3 id="sheet-title">បន្ថែមមុខម្ហូបថ្មី</h3>
+      <button class="x" id="sheet-x" aria-label="បិទ">✕</button>
     </div>
-    <div class="foot-copy">© 2026 <b>Copyright Epheapstore</b>. All right reserved</div>
-  </footer>
-
-  </main>
-
-  <button class="guide-float-btn" onclick="openVideoModal()">
-    <span>▶️</span> វិធីបញ្ជាទិញ
-  </button>
-
-  <div id="video-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">🎥 វីដេអូបង្រៀនពីរបៀបកម្មង់</h3>
-        <button onclick="closeVideoModal()" class="x">✕</button>
-      </div>
-      <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: var(--r-s); overflow: hidden; margin-bottom: 14px;">
-        <iframe id="guide-video-frame" width="100%" height="100%" src="https://www.youtube-nocookie.com/embed/3j4WpJIhXk8?rel=0&playsinline=1" title="How to order guide" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="width:100%;height:100%;border:0"></iframe>
-      </div>
-      <button type="button" class="btn btn-g btn-block" style="margin-bottom:10px" onclick="openGuideOnYouTube()">▶ បើកក្នុង YouTube (បើមើលមិនបាន)</button>
-      <button onclick="closeVideoModal()" class="btn btn-p btn-block">យល់ព្រម</button>
-    </div>
-  </div>
-
-<div id="info-modal" class="modal-overlay">
-  <div class="modal-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px;">
-      <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800;">ℹ️ ព័ត៌មាន និងគោលការណ៍ហាង</h3>
-      <button onclick="closeInfoModal()" class="x">✕</button>
-    </div>
-
-    <div style="max-height: 60vh; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 14px;">
-      <button type="button" class="track-entry" style="margin:0;width:100%" onclick="closeInfoModal(); openTrackModal();">🔎 តាមដានអីវ៉ាន់ (Tracking your order)</button>
-      <hr style="border: 0; border-top: 1px solid var(--line); margin: 2px 0;">
+    <div class="sheet-b f">
+      <input type="hidden" id="f-edit">
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⏰ ម៉ោងដំណើរការហាង</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • បើកលក់រាល់ថ្ងៃចាប់ពីម៉ោង <b>៧:០០ ព្រឹក</b> ដល់ <b>៥:០០ ល្ងាច</b>។<br>
-          • ក្រៅពីម៉ោងនេះ អតិថិជនអាចផ្ញើសារកម្មង់ទុកមុនបាន តាមរយៈ Telegram។
+        <label for="f-key">កូដមុខម្ហូប (Item key) *</label>
+        <input type="text" id="f-key" placeholder="kuy_teav_special" autocapitalize="off" autocomplete="off">
+        <div class="hint">អក្សរអង់គ្លេសតូច លេខ និង _ ប៉ុណ្ណោះ។ មិនអាចប្តូរបានក្រោយបង្កើត។</div>
+      </div>
+      <div class="row2">
+        <div><label for="f-kh">ឈ្មោះខ្មែរ *</label><input type="text" id="f-kh" placeholder="គុយទាវពិសេស"></div>
+        <div><label for="f-en">ឈ្មោះអង់គ្លេស *</label><input type="text" id="f-en" placeholder="Special Noodle"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="f-cat">ប្រភេទ *</label>
+          <select id="f-cat"></select>
         </div>
+        <div><label for="f-stock">ស្តុក *</label><input type="number" id="f-stock" min="0" inputmode="numeric" value="50"></div>
       </div>
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">🛵 គោលការណ៍សេវាដឹកជញ្ជូន</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • ចម្ងាយក្រោម ២០០ម៖ <b>ឥតគិតថ្លៃ (Free)</b><br>
-          • ចម្ងាយពី ២០០ម ដល់ ២.០ គីឡូម៉ែត្រ៖ <b>$0.25</b><br>
-          • ចម្ងាយចាប់ពី ២.០ ដល់ ៥.០ គីឡូម៉ែត្រ៖ <b>$0.50</b><br>
-          • ហាងកំណត់សេវាដឹកជញ្ជូនក្នុងរង្វង់អតិបរមា <b>៥ គីឡូម៉ែត្រ</b> ប៉ុណ្ណោះ។
-        </div>
+        <label>ទំហំ និងតម្លៃ ($) *</label>
+        <div id="size-list"></div>
+        <button class="btn btn-g btn-s" id="size-add" type="button">＋ បន្ថែមទំហំ</button>
       </div>
       <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">⚠️ គោលការណ៍ការកម្មង់</div>
-        <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
-          • រាល់ការកម្មង់ហើយ មិនអាចលុបចោលវិញបានទេ បន្ទាប់ពីហាងបានចាប់ផ្តើមរៀបចំធ្វើរួចរាល់។<br>
-          • សូមពិនិត្យទីតាំង GPS និងលេខទូរស័ព្ទឱ្យបានត្រឹមត្រូវមុនពេលបញ្ជូនការកម្មង់ ឬ បង់ប្រាក់តាមរយៈ ABA ។
-        </div>
+        <label for="f-img">រូបភាព (URL មួយបន្ទាត់ម្តង)</label>
+        <textarea id="f-img" placeholder="./images/kuy_teav.png"></textarea>
+        <button type="button" class="btn btn-g btn-s" id="f-img-up" style="margin-top:6px">📷 ផ្ទុករូបឡើង (Telegram)</button>
+        <div class="hint">ទុកទទេ ប្រសិនបើគ្មានរូប — ប្រព័ន្ធនឹងប្រើ ./images/កូដ.png</div>
       </div>
-      <div>
-        <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 8px;"> Contact Me</div>
-        <a href="https://t.me/dddda11999" target="_blank" rel="noopener noreferrer" class="btn btn-p btn-block" style="text-decoration: none; justify-content: flex-start; padding: 0 16px; font-size: 13px; background: #0088cc; color: #fff;">
-          Click Here for Support
-        </a>
+      <div class="switch-row">
+        <span>ស្លាក "ពេញនិយម" 🔥</span>
+        <label class="sw"><input type="checkbox" id="f-pop"><span></span></label>
+      </div>
+      <div class="switch-row">
+        <span>🏷 បញ្ចុះតម្លៃ (Discount)</span>
+        <label class="sw"><input type="checkbox" id="f-disc"><span></span></label>
+      </div>
+      <div id="f-disc-box">
+        <label for="f-disc-pct">បញ្ចុះតម្លៃ (%)</label>
+        <input type="number" id="f-disc-pct" min="1" max="99" inputmode="numeric" placeholder="ឧ. 20">
+        <div class="hint">តម្លៃថ្មីគណនាពីតម្លៃទំហំនីមួយៗ — ប៊ូតុង «កម្មង់ឥឡូវ» នៅទំព័រអតិថិជន នឹងបង្ហាញមុខម្ហូបដែលបើកបញ្ចុះតម្លៃ</div>
+      </div>
+      <div class="switch-row">
+        <span>🛵 ដឹកជញ្ជូនឥតគិតថ្លៃសម្រាប់មុខម្ហូបនេះ</span>
+        <label class="sw"><input type="checkbox" id="f-free"><span></span></label>
       </div>
     </div>
-    <div style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px;">
-      <button onclick="closeInfoModal()" class="btn btn-p btn-block">យល់ព្រម / បិទ</button>
+    <div class="sheet-f">
+      <button class="btn btn-p" id="sheet-save">រក្សាទុក</button>
+      <button class="btn btn-g" id="sheet-cancel">បោះបង់</button>
     </div>
   </div>
 </div>
 
-  <div id="image-viewer-modal" class="image-modal-overlay">
-    <div class="image-modal-header">
-      <span id="img-modal-title">រូបភាពមុខម្ហូប</span>
-      <button class="close-img-btn" onclick="closeImageModal()">✕</button>
+<!-- Confirm modal -->
+<div class="ov" id="cf-ov" style="z-index:200;align-items:center;padding:20px">
+  <div class="sheet" style="border-radius:20px;max-width:360px">
+    <div class="sheet-b" style="text-align:center;padding:24px 20px 14px">
+      <div style="font-size:34px">🗑️</div>
+      <div id="cf-msg" style="font-weight:700"></div>
     </div>
-    <div class="slider-viewport" id="slider-viewport">
-      <button class="slider-nav-btn slider-prev" onclick="prevSlide()">❮</button>
-      <div class="slider-track" id="slider-track"></div>
-      <button class="slider-nav-btn slider-next" onclick="nextSlide()">❯</button>
-    </div>
-    <div class="slider-dots" id="slider-dots"></div>
-  </div>
-
-  <div id="size-modal" class="modal-overlay">
-    <div class="modal-card">
-      <h3 id="modal-title" style="margin: 0 0 16px 0; font-size: 1.1rem;">ជ្រើសរើសទំហំ</h3>
-      <div class="option-title">ជ្រើសរើសទំហំ</div>
-      <div id="size-options-container"></div>
-      <div id="drink-customization-section" style="display: none; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px;">
-        <div class="option-group">
-          <div class="option-title">កម្រិតស្ករ (Sugar Level)</div>
-          <div class="option-pills" id="sugar-pills">
-            <div class="pill" onclick="setDrinkOption('sugar', '10%', this)">10%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '30%', this)">30%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '50%', this)">50%</div>
-            <div class="pill" onclick="setDrinkOption('sugar', '70%', this)">70%</div>
-            <div class="pill active" onclick="setDrinkOption('sugar', '100%', this)">100%</div>
-          </div>
-        </div>
-        <div class="option-group">
-          <div class="option-title">កម្រិតទឹកកក (Ice Level)</div>
-          <div class="option-pills" id="ice-pills">
-            <div class="pill" onclick="setDrinkOption('ice', 'គ្មានទឹកកក (No Ice)', this)">គ្មានទឹកកក</div>
-            <div class="pill" onclick="setDrinkOption('ice', 'ទឹកកកតិច (Little Ice)', this)">ទឹកកកតិច</div>
-            <div class="pill active" onclick="setDrinkOption('ice', 'ធម្មតា (Normal Ice)', this)">ធម្មតា</div>
-            <div class="pill" onclick="setDrinkOption('ice', 'ដាក់ទឹកកកក្រៅ (Ice Outside)', this)">ដាក់ទឹកកកក្រៅ</div>
-          </div>
-        </div>
-      </div>
-      <button id="confirm-add-btn" onclick="confirmAddToCart()" class="btn btn-p btn-block" style="margin-top: 16px;">បន្ថែមទៅក្នុងកន្ត្រក</button>
-      <button onclick="closeSizeModal()" class="btn btn-g btn-block" style="margin-top: 8px;">បោះបង់</button>
+    <div class="sheet-f">
+      <button class="btn btn-g" id="cf-no" style="flex:1">បោះបង់</button>
+      <button class="btn btn-d" id="cf-yes" style="flex:1">បាទ/ចាស លុប</button>
     </div>
   </div>
-
-  <div class="cart-trigger-bar">
-    <button id="trigger-btn" class="trigger-btn" onclick="openCartDrawer()" disabled>
-      <span>🛒 មើលការកម្មង់</span>
-      <span id="trigger-total">$0.00</span>
-    </button>
-  </div>
-
-  <div id="cart-drawer" class="cart-drawer-overlay">
-    <div class="cart-drawer-card">
-      <div class="modal-top-nav">
-        <button class="back-btn" onclick="closeCartDrawer()">← ត្រឡប់ក្រោយ</button>
-        <div class="drawer-title">🛒 មើលការកម្មង់</div>
-        <div style="width: 60px;"></div>
-      </div>
-      <div id="drawer-cart-items"></div>
-      <div class="section-label">ព័ត៌មានអតិថិជន</div>
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub);">Telegram username</label>
-      <input type="text" id="input-username" class="custom-input" readonly placeholder="មិនមាន Username">
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub); margin-top: 8px; display: block;">ឈ្មោះអតិថិជន *</label>
-      <input type="text" id="input-customer-name" class="custom-input" placeholder="បញ្ចូលឈ្មោះរបស់អ្នក">
-      <label style="font-size: 0.8rem; font-weight: 700; color: var(--sub); margin-top: 8px; display: block;">លេខទូរស័ព្ទ *</label>
-      <input type="tel" id="input-phone" class="custom-input" placeholder="012 345 678" inputmode="tel" maxlength="16" autocomplete="tel">
-      <div class="section-label">ប្រភេទការកម្មង់</div>
-      <div class="toggle-grid">
-        <div class="toggle-item active" onclick="setOrderType('takeaway', this)">ទៅយក (Pick Up)</div>
-        <div class="toggle-item" id="delivery-toggle-btn" onclick="setOrderType('delivery', this)">ដឹកជញ្ជូន (Delivery)</div>
-      </div>
-      <div id="gps-section">
-        <div class="section-label">ទីតាំង GPS *</div>
-        <input type="text" id="input-address" class="custom-input" readonly placeholder="បិទការប្រើប្រាស់ពេលទៅយកផ្ទាល់...">
-        <button type="button" id="gps-btn" class="gps-btn" onclick="openMapModal()" disabled>
-          🗺️ ជ្រើសរើសទីតាំងលើផែនទី (Pick Location)
-        </button>
-        <div id="gps-status" style="font-size: 0.8rem; color: var(--ok); margin-top: 6px;"></div>
-      </div>
-      <div class="section-label">វិធីសាស្ត្រទូទាត់ប្រាក់</div>
-      <div class="toggle-grid">
-        <div class="toggle-item aba-pay-card"><span>💳</span> ABA Pay</div>
-      </div>
-      <div style="background: #f8fafc; padding: 12px; border-radius: var(--r-s); margin-top: 16px; border: 1px solid var(--line);">
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub);">
-          <span>តម្លៃសរុបមុខម្ហូប:</span>
-          <span id="summary-subtotal">$0.00</span>
-        </div>
-        <div id="delivery-fee-row" style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--sub); margin-top: 4px; display: none;">
-          <span id="delivery-fee-label">ថ្លៃដឹកជញ្ជូន:</span>
-          <span id="summary-delivery">$0.00</span>
-        </div>
-        <hr style="border: 0; border-top: 1px solid var(--line); margin: 8px 0;">
-        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1rem; color: var(--brand);">
-          <span>សរុបចុងក្រោយ:</span>
-          <span id="summary-grandtotal">$0.00</span>
-        </div>
-      </div>
-      <div class="section-label">កំណត់ចំណាំ</div>
-      <textarea id="input-remark" class="custom-input" rows="2" placeholder="ចំណាំបន្ថែម..."></textarea>
-      <button id="send-order-btn" class="submit-order-btn" onclick="sendOrder()">
-        ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Order tracking -->
-  <div id="track-modal" class="pay-overlay">
-    <div class="pay-card">
-      <div class="row-h" style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">🔎 តាមដានអីវ៉ាន់</b><button type="button" class="pay-btn ghost" style="width:auto;margin:0;height:36px;padding:0 14px" onclick="closeTrackModal()">✕</button></div>
-      <div class="pay-sub" style="margin:8px 0;text-align:left">បញ្ចូលលេខតាមដាន (Tracking number) ដែលហាងបានផ្ញើជូនតាម Telegram</div>
-      <input id="track-code" class="custom-input" autocomplete="off" autocapitalize="characters" placeholder="12345678" maxlength="16">
-      <button type="button" class="pay-btn" onclick="lookupOrders()">ស្វែងរក</button>
-      <div id="track-results"></div>
-      <div id="live-box" style="display:none">
-        <div id="live-info" class="pay-sub" style="margin-top:12px;font-weight:700"></div>
-        <div id="live-map"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="pay-resume" class="pay-resume">
-    <span style="flex:1">⏳ មានការបង់ប្រាក់មួយមិនទាន់បញ្ចប់</span>
-    <button type="button" class="go" onclick="reopenPayment()">បន្ត</button>
-    <button type="button" class="x" onclick="dismissResume()">✕</button>
-  </div>
-
-  <div id="pay-modal" class="pay-overlay">
-    <div class="pay-card">
-      <div class="pay-sub">ទូទាត់តាម ABA Mobile</div>
-      <div class="pay-amount" id="pay-amount">$0.00</div>
-      <div class="pay-sub" id="pay-orderid"></div>
-      <button type="button" class="pay-btn" id="pay-open-btn" onclick="openAbaApp()">💳 បើក ABA Mobile ដើម្បីបង់ប្រាក់</button>
-      <img id="pay-qr" class="pay-qr" alt="ABA KHQR" style="display:none">
-      <div class="pay-sub" style="margin-top:6px">ឬ Screenshot QR នេះ រួចស្កេនក្នុង ABA Mobile</div>
-      <div id="pay-state" class="pay-state wait">⏳ កំពុងរង់ចាំការបង់ប្រាក់...</div>
-      <button type="button" class="pay-btn ghost" id="pay-check-btn" onclick="checkPaymentNow()">🔄 ខ្ញុំបានបង់ហើយ (ពិនិត្យ)</button>
-      <button type="button" class="pay-btn" id="pay-track-btn" style="display:none" onclick="openTrack()">🔎 តាមដានការកម្មង់ (បើកក្នុង browser)</button>
-      <button type="button" class="pay-btn ghost" style="border-color:var(--line);color:var(--sub)" onclick="cancelPaymentUi()">បិទ</button>
-    </div>
-  </div>
-
-  <div id="map-modal" class="map-modal-overlay">
-    <div class="map-card">
-      <div class="map-header">
-        <div style="font-weight: 800; font-size: 1rem; color: var(--ink);">🗺️ ជ្រើសរើសទីតាំងដឹកជញ្ជូន</div>
-        <button type="button" class="x" onclick="closeMapModal()">✕</button>
-      </div>
-      <div class="map-container-wrapper">
-        <div id="picker-map"></div>
-        <div class="center-pin-shadow"></div>
-        <div class="center-pin-marker">
-          <svg width="38" height="48" viewBox="0 0 38 48" fill="none">
-            <path d="M19 0C8.5 0 0 8.5 0 19C0 31.5 19 48 19 48C19 48 38 31.5 38 19C38 8.5 29.5 0 19 0Z" fill="#0f766e"/>
-            <circle cx="19" cy="18" r="8" fill="#ffffff"/>
-            <circle cx="19" cy="18" r="4" fill="#0f766e"/>
-          </svg>
-        </div>
-        <button type="button" class="map-recenter-btn" onclick="recenterMapToUser()" title="ទីតាំងបច្ចុប្បន្ន">🎯</button>
-      </div>
-      <div class="map-footer">
-        <div class="map-addr-preview">
-          <span>📍</span>
-          <span id="map-coords-display">កំពុងកំណត់ទីតាំង...</span>
-        </div>
-        <button type="button" class="btn btn-p btn-block" onclick="confirmMapLocation()">
-          បញ្ជាក់ទីតាំងនេះ (Confirm Location)
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const STORE_LAT = 11.5300546;
-    const STORE_LNG = 104.8039416;
-    const MAX_DELIVERY_KM = 5.0;
-
-    let clientLat = null;
-    let clientLng = null;
-    let currentDeliveryFee = 0.00;
-
-    let pickerMap = null;
-    let tempLat = STORE_LAT;
-    let tempLng = STORE_LNG;
-    let storeMarker = null;
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * (Math.PI / 180);
-      const dLon = (lon2 - lon1) * (Math.PI / 180);
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-    }
-
-    const GOOGLE_MAPS_KEY = '';
-    const MAPTILER_KEY = '';
-    const MAX_QTY_PER_ITEM = 50;
-    
-    function itemLimit(item) {
-      const n = item ? item.stock_quantity : null;
-      if (n === null || n === undefined || n === '') return MAX_QTY_PER_ITEM;
-      const v = Number(n);
-      return Number.isFinite(v) ? Math.min(Math.max(v, 0), MAX_QTY_PER_ITEM) : MAX_QTY_PER_ITEM;
-    }
-    
-    const tg = window.Telegram?.WebApp;
-    if (tg) tg.expand();
-
-    const telegramUser = tg?.initDataUnsafe?.user;
-    const tgUsername = telegramUser?.username ? `@${telegramUser.username}` : "";
-    
-    document.addEventListener("DOMContentLoaded", () => {
-      const usernameInput = document.getElementById('input-username');
-      const noUsernameBanner = document.getElementById('no-username-banner');
-
-      if (tgUsername) {
-        usernameInput.value = tgUsername;
-        noUsernameBanner.style.display = 'none';
-      } else {
-        usernameInput.value = "";
-        usernameInput.placeholder = "គ្មាន Username";
-        noUsernameBanner.style.display = 'block';
-      }
-
-      if (telegramUser?.first_name) {
-        document.getElementById('user-name').innerText = telegramUser.first_name;
-        document.getElementById('input-customer-name').value = `${telegramUser.first_name} ${telegramUser.last_name || ''}`.trim();
-      }
-      
-      checkStoreStatus();
-      checkLoginRequirement();
-      checkDeliveryStatus();
-      checkPromoBanner();
-      initBanners();
-
-      restoreSessionState();
-      resumePendingPayment();
-    });
-
-    const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let IS_STORE_OPEN = false;
-    let IS_DELIVERY_AVAILABLE = true;
-    let ESTIMATED_WAIT_MINUTES = 15;
-    let menuItems = [];
-    let currentCategory = 'all';
-    let activeModalItem = null;
-    let selectedSize = '';
-    let selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
-    let cart = [];
-    let selectedOrderType = 'takeaway';
-    let gpsLink = "";
-    let isLocationPinned = false;
-    let activeImagesList = [];
-    let currentSlideIndex = 0;
-
-    function currentTgKey() {
-      try {
-        const id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || (typeof getStoredLogin === 'function' && getStoredLogin()?.id);
-        return id ? String(id) : 'guest';
-      } catch (e) { return 'guest'; }
-    }
-
-    function saveSessionState() {
-      if (isForceReloading) return;
-      const state = {
-        cart: cart,
-        customerName: document.getElementById('input-customer-name')?.value || '',
-        phone: document.getElementById('input-phone')?.value || '',
-        remark: document.getElementById('input-remark')?.value || '',
-        orderType: selectedOrderType,
-        clientLat: clientLat,
-        clientLng: clientLng,
-        gpsLink: gpsLink,
-        isLocationPinned: isLocationPinned,
-        currentDeliveryFee: currentDeliveryFee,
-        address: document.getElementById('input-address')?.value || '',
-        scrollPosition: window.scrollY
-      };
-      state.tgId = currentTgKey();
-      localStorage.setItem('davin_app_session', JSON.stringify(state));
-    }
-
-    function restoreSessionState() {
-      const savedState = localStorage.getItem('davin_app_session');
-      if (!savedState) return;
-      try {
-        const state = JSON.parse(savedState);
-        if (String(state.tgId ?? '') !== currentTgKey()) { localStorage.removeItem('davin_app_session'); return; }
-        if (Array.isArray(state.cart)) cart = state.cart;
-        if (state.customerName) document.getElementById('input-customer-name').value = state.customerName;
-        if (state.phone) document.getElementById('input-phone').value = state.phone;
-        if (state.remark) document.getElementById('input-remark').value = state.remark;
-        if (state.address) document.getElementById('input-address').value = state.address;
-
-        if (state.orderType) {
-          selectedOrderType = state.orderType;
-          const toggles = document.querySelectorAll('.toggle-grid .toggle-item');
-          toggles.forEach(el => {
-            if ((state.orderType === 'takeaway' && el.innerText.includes('Pick Up')) ||
-                (state.orderType === 'delivery' && el.innerText.includes('Delivery'))) {
-              el.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
-              el.classList.add('active');
-            }
-          });
-          document.getElementById('delivery-fee-row').style.display = state.orderType === 'delivery' ? 'flex' : 'none';
-          document.getElementById('gps-btn').disabled = state.orderType !== 'delivery';
-        }
-
-        clientLat = state.clientLat;
-        clientLng = state.clientLng;
-        gpsLink = state.gpsLink;
-        isLocationPinned = state.isLocationPinned;
-        currentDeliveryFee = state.currentDeliveryFee || 0.00;
-
-        if (isLocationPinned) {
-          document.getElementById('gps-status').style.color = "var(--ok)";
-          document.getElementById('gps-status').innerText = `✓ រក្សាទុកទីតាំង GPS រួចរាល់`;
-        }
-
-        updateCartState();
-        setTimeout(() => { window.scrollTo(0, state.scrollPosition || 0); }, 200);
-      } catch (e) {
-        console.error("Failed to restore session state", e);
-      }
-      localStorage.removeItem('davin_app_session');
-    }
-
-    const RELOAD_INTERVAL_MS = 30 * 60 * 1000;
-    setTimeout(() => {
-      saveSessionState();
-      window.location.reload();
-    }, RELOAD_INTERVAL_MS);
-
-    window.addEventListener('beforeunload', () => { saveSessionState(); });
-
-    function openInfoModal() { document.getElementById('info-modal').style.display = 'flex'; }
-    function closeInfoModal() { document.getElementById('info-modal').style.display = 'none'; }
-    function openGuideOnYouTube() {
-      const u = 'https://www.youtube.com/watch?v=3j4WpJIhXk8';
-      if (tg && typeof tg.openLink === 'function') tg.openLink(u); else window.open(u, '_blank');
-    }
-    function openVideoModal() { document.getElementById('video-modal').style.display = 'flex'; }
-    function closeVideoModal() {
-      document.getElementById('video-modal').style.display = 'none';
-      const iframe = document.getElementById('guide-video-frame');
-      iframe.src = iframe.src;
-    }
-
-    async function checkPromoBanner() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('app_settings')
-          .select('key, value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge']);
-        
-        if (!error && data) {
-          const activeItem = data.find(i => i.key === 'promo_active');
-          const textItem = data.find(i => i.key === 'promo_text');
-          const badgeItem = data.find(i => i.key === 'promo_badge');
-
-          const bannerEl = document.getElementById('top-promo-banner');
-          const cleanVal = (val, fallback) => {
-            if (val === undefined || val === null) return fallback;
-            let str = typeof val === 'string' ? val : JSON.stringify(val);
-            if (str.startsWith('"') && str.endsWith('"')) {
-              try { str = JSON.parse(str); } catch(e) {}
-            }
-            return str || fallback;
-          };
-
-          const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
-          if (isActive && bannerEl) {
-            bannerEl.style.display = 'flex';
-            const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
-            const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
-
-            document.querySelectorAll('.promo-msg-text').forEach(el => el.innerText = msgText);
-            document.querySelectorAll('.promo-badge-text').forEach(el => el.innerText = badgeText);
-          } else if (bannerEl) {
-            bannerEl.style.display = 'none';
-          }
-        }
-      } catch (e) {
-        console.error("Promo banner check failed", e);
-      }
-    }
-
-    async function checkStoreStatus() {
-      try {
-        const { data, error } = await supabaseClient.from('app_settings').select('value').eq('key', 'is_store_open').single();
-        IS_STORE_OPEN = (error || !data) ? true : data.value;
-      } catch (e) { IS_STORE_OPEN = true; }
-
-      const badge = document.getElementById('status-badge');
-      const closedBanner = document.getElementById('store-closed-banner');
-      if (IS_STORE_OPEN) {
-        badge.innerText = "បើក • ម៉ោង ៧:០០ ព្រឹក–៥:០០ ល្ងាច";
-        badge.classList.add('open');
-        closedBanner.style.display = 'none';
-      } else {
-        badge.innerText = "បិទ • ៥:០០ ល្ងាច–៧:០០ ព្រឹក";
-        badge.classList.remove('open');
-        closedBanner.style.display = 'block';
-      }
-      loadMenu();
-    }
-
-    async function checkDeliveryStatus() {
-      try {
-        const { data, error } = await supabaseClient.from('delivery_status').select('is_delivery_available, estimated_wait_minutes').eq('id', 1).single();
-        if (!error && data) {
-          IS_DELIVERY_AVAILABLE = data.is_delivery_available;
-          ESTIMATED_WAIT_MINUTES = data.estimated_wait_minutes || 15;
-        }
-      } catch (e) { IS_DELIVERY_AVAILABLE = true; }
-
-      const deliveryLimitBanner = document.getElementById('delivery-limit-banner');
-      const waitTimeSpan = document.getElementById('banner-wait-time');
-      const deliveryToggleBtn = document.getElementById('delivery-toggle-btn');
-
-      if (!IS_DELIVERY_AVAILABLE) {
-        deliveryLimitBanner.style.display = 'block';
-        waitTimeSpan.innerText = ESTIMATED_WAIT_MINUTES;
-        deliveryToggleBtn.style.opacity = '0.4';
-      } else {
-        deliveryLimitBanner.style.display = 'none';
-        deliveryToggleBtn.style.opacity = '1';
-      }
-    }
-
-    // Auto-sliding multi-banner logic
-    const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner1.png"];
-    const imgUrl = u => String(u).startsWith('tg:') ? SUPABASE_URL + '/functions/v1/tg-image?f=' + encodeURIComponent(String(u).slice(3)) : u;
-    // --- discount + free delivery helpers (values come from the admin dashboard) ---
-    function discPct(it) { return (it && it.discount_active === true && Number(it.discount_percent) > 0) ? Math.min(Number(it.discount_percent), 99) : 0; }
-    function itemPrice(it, size) { const b = parseFloat(it && it.sizes ? it.sizes[size] : 0) || 0; const p = discPct(it); return p ? Math.round(b * (1 - p / 100) * 100) / 100 : b; }
-    function hasFreeDel() { return cart.some(c => { const m = menuItems.find(x => x.item_key === c.id); return m && m.free_delivery === true; }); }
-    function effFee() { return hasFreeDel() ? 0 : currentDeliveryFee; }
-    function priceHtml(it, size) {
-      const p = discPct(it), now = '$' + itemPrice(it, size).toFixed(2);
-      return p ? `<s style="color:var(--sub);font-weight:500;font-size:.8em">$${parseFloat(it.sizes[size]).toFixed(2)}</s> ${now}` : now;
-    }
-    let catImages = {};   // category pictures set from the admin page (stored in Telegram)
-    let currentBannerIndex = 0;
-    let bannerInterval = null;
-
-    async function initBanners() {
-      const slider = document.getElementById('banner-slider');
-      let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
-      try {
-        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'greet_text']);
-        const row = k => (data || []).find(r => r.key === k);
-        let ci = row('category_images') && row('category_images').value; if (typeof ci === 'string') ci = JSON.parse(ci);
-        if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
-        const sv = k => { let x = row(k) && row(k).value; try { if (typeof x === 'string' && x.startsWith('"')) x = JSON.parse(x); } catch (e) {} return typeof x === 'string' ? x : ''; };
-        const gt = sv('greet_text'); if (gt) { const g = document.querySelector('.greet-q'); if (g) g.textContent = gt; }
-        let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
-        if (Array.isArray(v) && v.length) list = v.map(imgUrl);
-        const lg = row('shop_logo') && row('shop_logo').value;
-        if (typeof lg === 'string' && lg.startsWith('tg:')) document.getElementById('shop-logo').src = imgUrl(lg);
-      } catch (e) {}
-      slider.innerHTML = list.map(path => `
-        <div class="banner-slide">
-          <img src="${path}" alt="Banner" onerror="this.src='https://placehold.co/600x250/0f766e/fff?text=Kuyteav+Epheap'">
-        </div>
-      `).join('');
-
-      // Start automatic slide timer (every 3.5 seconds)
-      if (bannerInterval) clearInterval(bannerInterval);
-      bannerInterval = setInterval(() => {
-        currentBannerIndex = (currentBannerIndex + 1) % list.length;
-        slider.style.transform = `translateX(-${currentBannerIndex * 100}%)`;
-      }, 3500);
-    }
-
-    async function loadMenu() {
-      const { data } = await supabaseClient.from('menu_items').select('*');
-      if (data) { menuItems = data; renderCategories(); renderMenu(); }
-    }
-
-    function renderCategories() {
-      const container = document.getElementById('category-cards-container');
-      const categories = [
-        ...(menuItems.some(m => discPct(m)) ? [{ key: 'discount', name: 'បញ្ចុះតម្លៃ', icon: '🏷️' }] : []),
-        { key: 'kuy_teav', name: 'គុយទាវ', icon: '🍜' },
-        { key: 'rice', name: 'បាយ', icon: '🍚' },
-        { key: 'other', name: 'នំបាញ់ចុក', icon: '🥢' },
-        { key: 'drinks', name: 'ភេសជ្ជៈ', icon: '🧋' }
-      ];
-      container.innerHTML = categories.map(cat => {
-        let pic = catImages[cat.key] ? imgUrl(catImages[cat.key]) : '';
-        try {
-          if (pic) throw 0;
-          const it = menuItems.find(m => (cat.key === 'discount' ? discPct(m) : m.category === cat.key) && getItemImages(m)[0]);
-          if (it) pic = getItemImages(it)[0];
-        } catch (e) {}
-        const inner = pic
-          ? `<img src="${pic}" alt="" onerror="this.outerHTML='<span>${cat.icon}</span>'">`
-          : cat.icon;
-        return `
-        <div class="category-card ${currentCategory === cat.key ? 'active' : ''}" onclick="selectCategory('${cat.key}')">
-          <div class="category-icon">${inner}</div>
-          <div class="category-name">${cat.name}</div>
-        </div>`;
-      }).join('');
-    }
-
-    function selectCategory(cat) { currentCategory = cat; renderCategories(); renderMenu(); }
-
-    function getItemImages(item) {
-      if (Array.isArray(item.images) && item.images.length > 0) return item.images.map(imgUrl);
-      if (item.image_url) return [imgUrl(item.image_url)];
-      return [`./images/${item.item_key}.png`];
-    }
-
-    const favItems = new Set();
-    function toggleFav(key) {
-      favItems.has(key) ? favItems.delete(key) : favItems.add(key);
-      renderMenu();
-    }
-    function decItem(key) {
-      for (let i = cart.length - 1; i >= 0; i--) {
-        if (cart[i].id === key) { changeQty(i, -1); return; }
-      }
-    }
-
-    function renderMenu() {
-      const container = document.getElementById('food-list');
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const filtered = menuItems.filter(item => {
-        const matchesCat = currentCategory === 'all' || (currentCategory === 'discount' ? discPct(item) > 0 : item.category === currentCategory);
-        const matchesSearch = item.name_kh.toLowerCase().includes(search) || item.name_en.toLowerCase().includes(search);
-        return matchesCat && matchesSearch;
-      });
-
-      const catNames = { discount: 'បញ្ចុះតម្លៃ', kuy_teav: 'គុយទាវ', rice: 'បាយ', other: 'នំបាញ់ចុក', drinks: 'ភេសជ្ជៈ' };
-      const secT = document.getElementById('sec-title'), secC = document.getElementById('sec-count');
-      if (secT) secT.textContent = catNames[currentCategory] || 'មុខម្ហូបទាំងអស់';
-      if (secC) secC.textContent = filtered.length + ' មុខ';
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="text-align: center; color: var(--sub); padding: 30px 0;">គ្មានមុខម្ហូបត្រូវបានរកឃើញទេ</div>`;
-        return;
-      }
-
-      container.scrollLeft = 0;
-      container.innerHTML = filtered.map(item => {
-        const firstSize = Object.keys(item.sizes)[0];
-        const totalInCart = cart
-          .filter(c => c.id === item.item_key)
-          .reduce((sum, c) => sum + c.quantity, 0);
-
-        const limitN = itemLimit(item);
-        const isAvailable = item.is_available !== false && limitN > 0 && totalInCart < limitN;
-        const itemImgs = getItemImages(item);
-        const isFav = favItems.has(item.item_key);
-
-        return `
-          <div class="food-card" data-key="${item.item_key}">
-            <div class="food-img" onclick="openImageModal('${item.item_key}')">
-              <img src="${itemImgs[0]}" alt="${item.name_kh}" onerror="this.outerHTML='<span>${item.icon || '🍜'}</span>'">
-              ${itemImgs.length > 1 ? `<span class="photo-count-badge">📷 ${itemImgs.length}</span>` : ''}
-            </div>
-            <div class="food-body">
-              <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
-              <div class="food-sub">${item.name_en}</div>
-              ${(discPct(item) || item.free_delivery === true) ? `<div class="food-tags">${discPct(item) ? `<span class="tag-disc">🏷 -${discPct(item)}%</span>` : ''}${item.free_delivery === true ? '<span class="tag-free">🛵 ដឹកឥតគិតថ្លៃ</span>' : ''}</div>` : ''}
-            </div>
-            <div class="food-side${totalInCart > 0 ? ' in-cart' : ''}">
-              <span class="food-price">${priceHtml(item, firstSize)}</span>
-              ${totalInCart === 0
-                ? `<button type="button" class="add-btn" aria-label="Add" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>`
-                : `<div class="card-stepper">
-                    <button type="button" class="card-step-btn" onclick="decItem('${item.item_key}')">−</button>
-                    <span class="card-qty">${totalInCart}</span>
-                    <button type="button" class="card-step-btn" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>
-                  </div>`}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function openImageModal(itemKey) {
-      const item = menuItems.find(i => i.item_key === itemKey);
-      if (!item) return;
-      activeImagesList = getItemImages(item);
-      currentSlideIndex = 0;
-      document.getElementById('img-modal-title').innerText = item.name_kh;
-      document.getElementById('slider-track').innerHTML = activeImagesList.map(url => `<div class="slider-slide"><img src="${url}" alt=""></div>`).join('');
-      document.getElementById('slider-dots').innerHTML = activeImagesList.map((_, idx) => `<div class="dot ${idx === 0 ? 'active' : ''}" onclick="goToSlide(${idx})"></div>`).join('');
-      updateSliderPosition();
-      document.getElementById('image-viewer-modal').style.display = 'flex';
-    }
-
-    function updateSliderPosition() {
-      document.getElementById('slider-track').style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-      document.querySelectorAll('.slider-dots .dot').forEach((dot, idx) => dot.classList.toggle('active', idx === currentSlideIndex));
-    }
-    function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % activeImagesList.length; updateSliderPosition(); }
-    function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + activeImagesList.length) % activeImagesList.length; updateSliderPosition(); }
-    function goToSlide(idx) { currentSlideIndex = idx; updateSliderPosition(); }
-    function closeImageModal() { document.getElementById('image-viewer-modal').style.display = 'none'; }
-
-    function setDrinkOption(type, value, element) {
-      selectedOptions[type] = value;
-      element.parentElement.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      element.classList.add('active');
-    }
-
-    function openSizeModal(itemKey) {
-      activeModalItem = menuItems.find(i => i.item_key === itemKey);
-      if (!activeModalItem || activeModalItem.is_available === false) { alert("មុខម្ហូបនេះអស់ពីស្តុកហើយ!"); return; }
-      
-      document.getElementById('modal-title').innerText = activeModalItem.name_kh;
-      
-      const drinkSection = document.getElementById('drink-customization-section');
-      if (activeModalItem.category === 'drinks') {
-        drinkSection.style.display = 'block';
-        selectedOptions = { sugar: '100%', ice: 'ធម្មតា (Normal Ice)' };
-        document.querySelectorAll('#sugar-pills .pill').forEach(p => {
-          p.classList.toggle('active', p.innerText.trim() === '100%');
-        });
-        document.querySelectorAll('#ice-pills .pill').forEach(p => {
-          p.classList.toggle('active', p.innerText.trim() === 'ធម្មតា');
-        });
-      } else {
-        drinkSection.style.display = 'none';
-      }
-
-      const sizeKeys = Object.keys(activeModalItem.sizes);
-      selectedSize = sizeKeys[0];
-      document.getElementById('size-options-container').innerHTML = sizeKeys.map(sizeKey => `
-        <div class="size-tile ${sizeKey === selectedSize ? 'selected' : ''}" id="size-tile-${sizeKey}" onclick="selectSizeOption('${sizeKey}')">
-          <span>ជ្រើសរើស :  ${sizeKey.toUpperCase()}</span>
-          <span style="color: var(--brand);">${priceHtml(activeModalItem, sizeKey)}</span>
-        </div>
-      `).join('');
-      document.getElementById('size-modal').style.display = 'flex';
-    }
-
-    function selectSizeOption(sizeKey) {
-      selectedSize = sizeKey;
-      document.querySelectorAll('.size-tile').forEach(el => el.classList.remove('selected'));
-      document.getElementById(`size-tile-${sizeKey}`)?.classList.add('selected');
-    }
-
-    function closeSizeModal() { document.getElementById('size-modal').style.display = 'none'; }
-
-    function confirmAddToCart() {
-      if (!activeModalItem || !selectedSize) return;
-
-      const optionsPayload = activeModalItem.category === 'drinks' ? { ...selectedOptions } : null;
-      const existing = cart.find(c => c.id === activeModalItem.item_key && c.size === selectedSize && JSON.stringify(c.options) === JSON.stringify(optionsPayload));
-      const totalInCart = cart.filter(c => c.id === activeModalItem.item_key).reduce((sum, c) => sum + c.quantity, 0);
-
-      if (totalInCart + 1 > itemLimit(activeModalItem)) {
-        alert(`មុខម្ហូប "${activeModalItem.name_kh}" សល់ក្នុងស្តុកត្រឹមតែ ${itemLimit(activeModalItem)} ប៉ុណ្ណោះ!`);
-        return;
-      }
-
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({ 
-          id: activeModalItem.item_key, 
-          size: selectedSize, 
-          quantity: 1,
-          options: optionsPayload
-        });
-      }
-
-      closeSizeModal();
-      updateCartState();
-    }
-
-    function changeQty(index, delta) {
-      const cartItem = cart[index];
-      const product = menuItems.find(m => m.item_key === cartItem.id);
-      const totalInCartExceptThis = cart.filter(c => c.id === cartItem.id).reduce((sum, c) => sum + c.quantity, 0) - cartItem.quantity;
-
-      if (delta > 0 && totalInCartExceptThis + cartItem.quantity + delta > itemLimit(product)) {
-        alert(`មុខម្ហូប "${product?.name_kh || cartItem.id}" សល់ក្នុងស្តុកត្រឹមតែ ${itemLimit(product)} ប៉ុណ្ណោះ!`);
-        return;
-      }
-
-      cartItem.quantity += delta;
-      if (cartItem.quantity <= 0) cart.splice(index, 1);
-      updateCartState();
-      renderCartDrawer();
-    }
-
-    function updateCartState() {
-      const triggerBtn = document.getElementById('trigger-btn');
-      if (cart.length === 0) { 
-        document.getElementById('trigger-total').innerText = '$0.00'; 
-        triggerBtn.disabled = true; 
-        closeCartDrawer(); 
-        renderMenu();
-        return; 
-      }
-      triggerBtn.disabled = false;
-      const subtotal = cart.reduce((sum, c) => sum + itemPrice(menuItems.find(m => m.item_key === c.id), c.size) * c.quantity, 0);
-      const grandTotal = subtotal + (selectedOrderType === 'delivery' ? effFee() : 0);
-      document.getElementById('trigger-total').innerText = `$${grandTotal.toFixed(2)}`;
-      document.getElementById('final-total').innerText = `$${grandTotal.toFixed(2)}`;
-      document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-      document.getElementById('summary-delivery').innerHTML = hasFreeDel()
-        ? (currentDeliveryFee > 0 ? `<s style="color:var(--sub)">$${currentDeliveryFee.toFixed(2)}</s> ` : '') + '<b style="color:var(--ok)">ឥតគិតថ្លៃ</b> · ម្ហូបនេះដឹកឥតគិតថ្លៃថ្ងៃនេះ'
-        : (currentDeliveryFee === 0 ? 'ឥតគិតថ្លៃ (Free)' : `$${currentDeliveryFee.toFixed(2)}`);
-      document.getElementById('summary-grandtotal').innerText = `$${grandTotal.toFixed(2)}`;
-      
-      renderMenu();
-    }
-
-    function openCartDrawer() { 
-      checkDeliveryStatus(); 
-      renderCartDrawer(); 
-      document.getElementById('cart-drawer').style.display = 'flex'; 
-    }
-    function closeCartDrawer() { document.getElementById('cart-drawer').style.display = 'none'; }
-
-    function renderCartDrawer() {
-      document.getElementById('drawer-cart-items').innerHTML = cart.map((c, idx) => {
-        const product = menuItems.find(m => m.item_key === c.id);
-        let optionsHtml = '';
-        if (c.options) {
-          optionsHtml = `<div style="font-size: 0.75rem; color: var(--warn); font-weight: 600;">• ស្ករ: ${c.options.sugar} | ទឹកកក: ${c.options.ice}</div>`;
-        }
-
-        return `
-          <div class="cart-item-row">
-            <div>
-              <div style="font-weight: 700;">${product?.name_kh || c.id} (${c.size.toUpperCase()})</div>
-              ${optionsHtml}
-              <div style="font-size: 0.8rem; color: var(--sub);">$${itemPrice(product, c.size).toFixed(2)} × ${c.quantity}</div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div class="qty-stepper">
-                <button class="stepper-btn" onclick="changeQty(${idx}, -1)">−</button>
-                <span style="font-weight: 800; font-size: 0.9rem;">${c.quantity}</span>
-                <button class="stepper-btn" onclick="changeQty(${idx}, 1)">+</button>
-              </div>
-              <span style="font-weight: 800; color: var(--brand);">$${(itemPrice(product, c.size) * c.quantity).toFixed(2)}</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function setOrderType(type, element) {
-      await checkDeliveryStatus();
-      if (type === 'delivery' && !IS_DELIVERY_AVAILABLE) {
-        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត ឬជ្រើសរើស "ទៅយកផ្ទាល់ (Pick Up)"។`);
-        return;
-      }
-      element.parentElement.querySelectorAll('.toggle-item').forEach(e => e.classList.remove('active'));
-      element.classList.add('active');
-      selectedOrderType = type;
-      document.getElementById('delivery-fee-row').style.display = type === 'delivery' ? 'flex' : 'none';
-      document.getElementById('gps-btn').disabled = type !== 'delivery';
-      updateCartState();
-    }
-
-    let gMap = null, gUserDot = null, gMapsPromise = null;
-    const liftPin = on => document.querySelector('#map-modal .center-pin-marker')?.classList.toggle('lifted', on);
-
-    function loadGoogleMaps() {
-      if (window.google && google.maps) return Promise.resolve();
-      if (gMapsPromise) return gMapsPromise;
-      gMapsPromise = new Promise((resolve, reject) => {
-        window.__gmReady = resolve;
-        window.gm_authFailure = () => { console.warn('Google Maps key rejected'); if (gMap) { gMap = null; document.getElementById('picker-map').innerHTML = ''; openLeafletMap(tempLat, tempLng); } };
-        const sc = document.createElement('script');
-        sc.async = true;
-        sc.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(GOOGLE_MAPS_KEY) + '&callback=__gmReady&language=km&region=KH';
-        sc.onerror = () => { gMapsPromise = null; reject(new Error('Google Maps failed to load')); };
-        document.head.appendChild(sc);
-      });
-      return gMapsPromise;
-    }
-
-    function openGoogleMap(lat, lng) {
-      if (!gMap) {
-        gMap = new google.maps.Map(document.getElementById('picker-map'), {
-          center: { lat, lng }, zoom: 17, maxZoom: 20,
-          disableDefaultUI: true, zoomControl: true,
-          zoomControlOptions: { position: google.maps.ControlPosition.RIGHT_TOP },
-          gestureHandling: 'greedy', clickableIcons: false, keyboardShortcuts: false
-        });
-
-        new google.maps.Circle({
-          map: gMap, center: { lat: STORE_LAT, lng: STORE_LNG }, radius: MAX_DELIVERY_KM * 1000,
-          strokeColor: '#0f766e', strokeOpacity: 0.8, strokeWeight: 1.5,
-          fillColor: '#0f766e', fillOpacity: 0.05, clickable: false
-        });
-
-        const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><circle cx="18" cy="18" r="15" fill="#005d7b" stroke="#fff" stroke-width="2.5"/><text x="18" y="24" font-size="16" text-anchor="middle">🍜</text></svg>';
-        new google.maps.Marker({
-          map: gMap, position: { lat: STORE_LAT, lng: STORE_LNG }, title: 'Kuyteav_Epheap', clickable: false,
-          icon: { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(36, 36), anchor: new google.maps.Point(18, 18), labelOrigin: new google.maps.Point(18, -8) },
-          label: { text: 'Kuyteav_Epheap', color: '#005d7b', fontWeight: '800', fontSize: '12px' }
-        });
-
-        let raf = 0;
-        gMap.addListener('center_changed', () => {
-          if (raf) return;
-          raf = requestAnimationFrame(() => {
-            raf = 0;
-            const c = gMap.getCenter();
-            tempLat = c.lat(); tempLng = c.lng();
-            updateMapDisplayCoords(tempLat, tempLng);
-          });
-        });
-        gMap.addListener('dragstart', () => liftPin(true));
-        gMap.addListener('idle', () => liftPin(false));
-      } else {
-        gMap.setCenter({ lat, lng }); gMap.setZoom(17);
-      }
-      google.maps.event.trigger(gMap, 'resize');
-      gMap.setCenter({ lat, lng });
-      updateMapDisplayCoords(lat, lng);
-    }
-
-    function openMapModal() {
-      document.getElementById('map-modal').style.display = 'flex';
-      const initialLat = clientLat || STORE_LAT;
-      const initialLng = clientLng || STORE_LNG;
-      tempLat = initialLat;
-      tempLng = initialLng;
-
-      const afterOpen = () => {
-        if (!clientLat && navigator.geolocation) recenterMapToUser();
-      };
-
-      if (GOOGLE_MAPS_KEY && !(pickerMap && !gMap)) {
-        loadGoogleMaps()
-          .then(() => { openGoogleMap(initialLat, initialLng); afterOpen(); })
-          .catch(() => { openLeafletMap(initialLat, initialLng); afterOpen(); });
-      } else {
-        openLeafletMap(initialLat, initialLng);
-        afterOpen();
-      }
-    }
-
-    function openLeafletMap(initialLat, initialLng) {
-      if (!pickerMap) {
-        pickerMap = L.map('picker-map', {
-          zoomControl: false, attributionControl: false,
-          zoomSnap: 0.25, zoomDelta: 0.5, wheelPxPerZoomLevel: 90,
-          inertia: true, inertiaDeceleration: 2200, easeLinearity: 0.2,
-          zoomAnimation: true, fadeAnimation: true, markerZoomAnimation: true
-        }).setView([initialLat, initialLng], 17);
-
-        L.tileLayer(MAPTILER_KEY
-          ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
-          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
-        }).addTo(pickerMap);
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(pickerMap);
-
-        L.control.zoom({ position: 'topright' }).addTo(pickerMap);
-
-        L.circle([STORE_LAT, STORE_LNG], {
-          radius: MAX_DELIVERY_KM * 1000, color: '#0f766e', weight: 1.5, dashArray: '6 6',
-          fillColor: '#0f766e', fillOpacity: 0.05, interactive: false
-        }).addTo(pickerMap);
-
-        const shopIcon = L.divIcon({
-          className: 'custom-shop-icon',
-          html: `<div style="background:#005d7b; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:16px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.35);">🍜</div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
-        });
-        storeMarker = L.marker([STORE_LAT, STORE_LNG], { icon: shopIcon, title: 'Kuyteav_Epheap' }).addTo(pickerMap);
-        storeMarker.bindTooltip('Kuyteav_Epheap', { permanent: true, direction: 'top', offset: [0, -18], className: 'store-tip' });
-
-        let moveRaf = 0;
-        const pinEl = () => document.querySelector('#map-modal .center-pin-marker');
-        pickerMap.on('move', () => {
-          if (moveRaf) return;
-          moveRaf = requestAnimationFrame(() => {
-            moveRaf = 0;
-            const center = pickerMap.getCenter();
-            tempLat = center.lat;
-            tempLng = center.lng;
-            updateMapDisplayCoords(tempLat, tempLng);
-          });
-        });
-        pickerMap.on('movestart', () => pinEl()?.classList.add('lifted'));
-        pickerMap.on('moveend', () => pinEl()?.classList.remove('lifted'));
-      } else {
-        pickerMap.setView([initialLat, initialLng], 17);
-      }
-
-      setTimeout(() => {
-        pickerMap.invalidateSize();
-        updateMapDisplayCoords(tempLat, tempLng);
-      }, 250);
-    }
-
-    function updateMapDisplayCoords(lat, lng) {
-      const dist = calculateDistance(STORE_LAT, STORE_LNG, lat, lng);
-      const displayEl = document.getElementById('map-coords-display');
-      if (dist > MAX_DELIVERY_KM) {
-        displayEl.innerHTML = `<span style="color:var(--bad);">⚠️ ឆ្ងាយពេក (${dist.toFixed(2)} km) - ហាងដឹកត្រឹមតែ ${MAX_DELIVERY_KM} km</span>`;
-      } else {
-        displayEl.innerHTML = `<span>${lat.toFixed(5)}, ${lng.toFixed(5)} (${dist.toFixed(2)} km ពីហាង)</span>`;
-      }
-    }
-
-    function recenterMapToUser() {
-      if (!navigator.geolocation) {
-        alert("កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រ GPS ទេ!");
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        pos => {
-          tempLat = pos.coords.latitude;
-          tempLng = pos.coords.longitude;
-          if (gMap) {
-            gMap.panTo({ lat: tempLat, lng: tempLng }); gMap.setZoom(18);
-            if (gUserDot) gUserDot.setMap(null);
-            gUserDot = new google.maps.Marker({
-              map: gMap, position: { lat: tempLat, lng: tempLng }, clickable: false, zIndex: 5,
-              icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: '#2563eb', fillOpacity: 1, strokeColor: '#fff', strokeWeight: 3 }
-            });
-          } else if (pickerMap) {
-            pickerMap.flyTo([tempLat, tempLng], 18, { animate: true, duration: 1.4, easeLinearity: 0.25 });
-            if (window.userDot) pickerMap.removeLayer(window.userDot);
-            window.userDot = L.circleMarker([tempLat, tempLng], { radius: 8, color: '#fff', weight: 3, fillColor: '#2563eb', fillOpacity: 1, interactive: false }).addTo(pickerMap);
-          }
-        },
-        err => {
-          alert("មិនអាចទទួលបានទីតាំង GPS របស់អ្នកទេ! សូមពិនិត្យការអនុញ្ញាត GPS។");
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-
-    function confirmMapLocation() {
-      const distance = calculateDistance(STORE_LAT, STORE_LNG, tempLat, tempLng);
-      if (distance > MAX_DELIVERY_KM) {
-        alert(`📍 ទីតាំងដែលបានជ្រើសរើសនៅឆ្ងាយពេក! (${distance.toFixed(2)} km)\nហាងអាចដឹកជូនត្រឹមតែ ${MAX_DELIVERY_KM.toFixed(1)} km ប៉ុណ្ណោះ។`);
-        return;
-      }
-
-      clientLat = tempLat;
-      clientLng = tempLng;
-
-      currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
-      document.getElementById('input-address').value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
-      gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
-      isLocationPinned = true;
-
-      const gpsStatus = document.getElementById('gps-status');
-      gpsStatus.style.color = "var(--ok)";
-      gpsStatus.innerText = `✓ ចម្ងាយពីហាង: ${distance.toFixed(2)} គីឡូម៉ែត្រ (សេវាដឹក: $${currentDeliveryFee.toFixed(2)})`;
-
-      updateCartState();
-      closeMapModal();
-    }
-
-    function closeMapModal() {
-      document.getElementById('map-modal').style.display = 'none';
-    }
-
-    let payTranId = null, payDeeplink = "", payPollTimer = null, payStartedAt = 0;
-    const PAY_MAX_MS = 12 * 60 * 1000;
-
-    function resetAfterOrder() {
-      cart = [];
-      clientLat = null; clientLng = null; gpsLink = "";
-      isLocationPinned = false; currentDeliveryFee = 0.00;
-      document.getElementById('input-address').value = "";
-      document.getElementById('gps-status').innerText = "";
-      closeCartDrawer();
-      updateCartState();
-    }
-
-    function setPayState(text, cls) {
-      const el = document.getElementById('pay-state');
-      el.innerText = text; el.className = 'pay-state ' + cls;
-    }
-
-    function showPayModal(info) {
-      payTranId = info.tran_id;
-      payDeeplink = info.abapay_deeplink || "";
-      payStartedAt = info.started_at || Date.now();
-      document.getElementById('pay-amount').innerText = '$' + Number(info.grand_total).toFixed(2);
-      document.getElementById('pay-orderid').innerText = 'Order ' + info.tran_id;
-      const qr = document.getElementById('pay-qr');
-      if (info.qr_image) { qr.src = info.qr_image; qr.style.display = 'block'; } else { qr.style.display = 'none'; }
-      setPayState('⏳ កំពុងរង់ចាំការបង់ប្រាក់...', 'wait');
-      document.getElementById('pay-check-btn').style.display = '';
-      document.getElementById('pay-track-btn').style.display = 'none';
-      document.getElementById('pay-modal').style.display = 'flex';
-      startPaymentPolling();
-    }
-
-    let lastTrackId = null;
-    function openTrack() {
-      if (!lastTrackId) return;
-      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-      const url = base + 'track.html?o=' + encodeURIComponent(lastTrackId);
-      try { if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true }); else window.open(url, '_blank'); }
-      catch (e) { window.open(url, '_blank'); }
-    }
-    
-    function openAbaApp() {
-      if (!payDeeplink || !payTranId) return;
-      const base = location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, '');
-      const url = base + 'pay.html?o=' + encodeURIComponent(payTranId);
-      try {
-        if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_browser: true });
-        else window.open(url, '_blank');
-      } catch (e) { window.open(url, '_blank'); }
-      setTimeout(() => {
-        if (document.getElementById('pay-modal').style.display === 'flex') {
-          setPayState('ប្រសិនបើ ABA Mobile មិនបើក សូម Screenshot QR ខាងលើ រួចស្កេនក្នុង ABA Mobile ឬ Bank App ណាមួយ', 'wait');
-        }
-      }, 2500);
-    }
-
-    function startPaymentPolling() {
-      stopPaymentPolling();
-      payPollTimer = setInterval(() => checkPaymentNow(true), 3000);
-    }
-    function stopPaymentPolling() { if (payPollTimer) { clearInterval(payPollTimer); payPollTimer = null; } }
-
-    async function checkPaymentNow(silent) {
-      if (!payTranId) return;
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: payTranId } });
-        if (error) throw error;
-        if (data?.status === 'paid') {
-          stopPaymentPolling();
-          localStorage.removeItem('pending_payment');
-          setPayState('✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង', 'ok');
-          document.getElementById('pay-check-btn').style.display = 'none';
-          resetAfterOrder();
-          lastTrackId = payTranId;
-          document.getElementById('pay-track-btn').style.display = '';
-        } else if (data?.status === 'expired' || Date.now() - payStartedAt > PAY_MAX_MS) {
-          stopPaymentPolling();
-          localStorage.removeItem('pending_payment');
-          setPayState('⌛ QR ផុតកំណត់ សូមកម្មង់ម្ដងទៀត', 'bad');
-        } else if (!silent) {
-          setPayState('⏳ មិនទាន់ទទួលបានការបង់ប្រាក់ទេ...', 'wait');
-        }
-      } catch (e) {
-        if (!silent) setPayState('កំហុសក្នុងការពិនិត្យ: ' + (e.message || e), 'bad');
-      }
-    }
-
-    function cancelPaymentUi() {
-      stopPaymentPolling();
-      localStorage.removeItem('pending_payment');
-      document.getElementById('pay-modal').style.display = 'none';
-      resetSendButton();
-    }
-
-    let resumeInfo = null;
-    async function resumePendingPayment() {
-      try {
-        const raw = localStorage.getItem('pending_payment');
-        if (!raw) return;
-        const info = JSON.parse(raw);
-        if (!info?.tran_id || Date.now() - info.started_at > PAY_MAX_MS) { localStorage.removeItem('pending_payment'); return; }
-        const { data } = await supabaseClient.functions.invoke('payment-status', { body: { tran_id: info.tran_id } });
-        if (data?.status === 'paid') {
-          localStorage.removeItem('pending_payment');
-          resetAfterOrder();
-          alert("✅ បានទទួលការបង់ប្រាក់! ការកម្មង់ត្រូវបានផ្ញើទៅហាង");
-        } else if (data?.status === 'expired') {
-          localStorage.removeItem('pending_payment');
-        } else {
-          resumeInfo = info;
-          document.getElementById('pay-resume').style.display = 'flex';
-        }
-      } catch (e) {}
-    }
-    function reopenPayment() {
-      document.getElementById('pay-resume').style.display = 'none';
-      if (resumeInfo) showPayModal(resumeInfo);
-    }
-    function dismissResume() {
-      document.getElementById('pay-resume').style.display = 'none';
-      localStorage.removeItem('pending_payment');
-      resumeInfo = null;
-    }
-
-    function resetSendButton() {
-      const btn = document.getElementById('send-order-btn');
-      if (!btn) return;
-      btn.disabled = false;
-      btn.innerHTML = 'ធ្វើការកម្មង់ • <span id="final-total">$0.00</span>';
-      updateCartState();
-    }
-
-    const BOT_USERNAME = 'Kuyteav_Epheap_bot';
-    const inTelegram = !!(tg && tg.initData);
-    let requireLogin = true;
-
-    function getStoredLogin() {
-      try {
-        const o = JSON.parse(localStorage.getItem('tg_login') || 'null');
-        if (o && Date.now() / 1000 - Number(o.auth_date) < 23 * 3600) return o;
-      } catch (e) {}
-      try { localStorage.removeItem('tg_login'); } catch (e) {}
-      return null;
-    }
-    function onTelegramAuth(user) {
-      try { localStorage.setItem('tg_login', JSON.stringify(user)); } catch (e) {}
-      applyLogin(user);
-    }
-    function applyLogin(user) {
-      const box = document.getElementById('tg-login-box');
-      const name = [user.first_name, user.last_name].filter(Boolean).join(' ');
-      box.style.display = 'block';
-      box.innerHTML = '';
-      const span = document.createElement('span');
-      span.textContent = '✅ ចូលជា ' + name + (user.username ? ' (@' + user.username + ')' : '') + ' ';
-      const out = document.createElement('button');
-      out.type = 'button'; out.className = 'btn btn-g'; out.style.cssText = 'margin-left:8px;padding:4px 10px';
-      out.textContent = 'ចាកចេញ'; out.onclick = () => { localStorage.removeItem('tg_login'); location.reload(); };
-      box.append(span, out);
-      const nameInput = document.getElementById('input-customer-name');
-      if (nameInput && !nameInput.value) nameInput.value = name;
-      document.getElementById('input-username').value = user.username ? '@' + user.username : '';
-    }
-    function showLoginWidget() {
-      const box = document.getElementById('tg-login-box');
-      box.style.display = 'block';
-      box.innerHTML = '<div style="margin-bottom:8px;font-weight:700">សូមចូលតាម Telegram ដើម្បីកម្មង់</div><div id="tg-widget-slot"></div>';
-      const sc = document.createElement('script');
-      sc.async = true; sc.src = 'https://telegram.org/js/telegram-widget.js?22';
-      sc.setAttribute('data-telegram-login', BOT_USERNAME);
-      sc.setAttribute('data-size', 'large'); sc.setAttribute('data-radius', '10');
-      sc.setAttribute('data-onauth', 'onTelegramAuth(user)');
-      document.getElementById('tg-widget-slot').appendChild(sc);
-    }
-
-    const KH_PREFIX_9 = ['010','011','012','013','015','016','017','060','061','066','067','068','069','070','077','078','079','080','081','083','084','085','086','087','089','090','092','093','095','098','099'];
-    const KH_PREFIX_10 = ['018','031','038','071','076','088','096','097'];
-    function normalizeKhPhone(raw) {
-      let d = String(raw || '').replace(/[\s\-().]/g, '');
-      if (d.startsWith('+855')) d = '0' + d.slice(4);
-      else if (d.startsWith('00855')) d = '0' + d.slice(5);
-      else if (d.startsWith('855')) d = '0' + d.slice(3);
-      if (!/^0\d+$/.test(d)) return null;
-      const p = d.slice(0, 3);
-      if (KH_PREFIX_9.includes(p) && d.length === 9) return d;
-      if (KH_PREFIX_10.includes(p) && d.length === 10) return d;
-      return null;
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      const el = document.getElementById('input-phone');
-      if (!el) return;
-      el.addEventListener('blur', () => {
-        if (!el.value.trim()) { el.style.borderColor = ''; return; }
-        const n = normalizeKhPhone(el.value);
-        if (n) { el.value = n; el.style.borderColor = ''; } else el.style.borderColor = 'var(--bad)';
-      });
-    });
-
-    async function checkLoginRequirement() {
-      try {
-        const { data } = await supabaseClient.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
-        requireLogin = !(data && (data.value === false || data.value === 'false'));
-      } catch (e) {}
-      const banner = document.getElementById('no-username-banner');
-      if (inTelegram) {
-        if (!tgUsername) banner.style.display = 'block';
-        return;
-      }
-      banner.style.display = 'none';
-      const stored = getStoredLogin();
-      if (stored) applyLogin(stored);
-      else if (requireLogin) showLoginWidget();
-    }
-
-    /* ===== Tracking your order: look up by phone, then watch the driver live ===== */
-    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null, trackTimer = null;
-    const FULFIL = { new: 'បានទទួលការកម្មង់', preparing: 'កំពុងរៀបចំ', ready: 'រួចរាល់', done: 'ប្រគល់ហើយ' };
-    function openTrackModal() {
-      const el = document.getElementById('track-code');
-      let saved = ''; try { saved = localStorage.getItem('track_code') || ''; } catch (e) {}
-      if (!el.value) el.value = saved;
-      document.getElementById('track-modal').style.display = 'flex';
-      if (el.value) lookupOrders();
-      clearInterval(trackTimer); trackTimer = setInterval(() => { if (document.getElementById('track-modal').style.display === 'flex') lookupOrders(true); }, 10000);   // status follows the driver's taps
-    }
-    function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; clearInterval(trackTimer); stopLive(); }
-    function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; document.getElementById('live-box').style.display = 'none'; }
-    async function lookupOrders(silent) {
-      const box = document.getElementById('track-results');
-      const code = document.getElementById('track-code').value.replace(/\s/g, '').toUpperCase();
-      if (!/^[A-Z0-9]{4,12}$/.test(code)) { if (!silent) alert('លេខតាមដានមិនត្រឹមត្រូវ! សូមបញ្ចូលលេខដែលហាងបានផ្ញើជូន'); return; }
-      if (!silent) box.textContent = 'កំពុងស្វែងរក…';
-      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'lookup_code', code } });
-      try { if (data && data.orders && data.orders.length) localStorage.setItem('track_code', code); } catch (e) {}
-      if (silent && (error || !data || data.error)) return;   // keep what is on screen if a background refresh fails
-      box.innerHTML = '';
-      if (error || !data || data.error) { box.textContent = (data && data.error) || 'មិនអាចភ្ជាប់បានទេ'; return; }
-      if (!data.orders.length) { box.textContent = 'រកមិនឃើញលេខតាមដាននេះទេ។ សូមពិនិត្យលេខ ឬសួរហាង។'; return; }
-      data.orders.forEach(o => box.appendChild(orderCard(o)));
-    }
-    function orderCard(o) {
-      const c = document.createElement('div'); c.className = 'tcard';
-      const el = (tag, txt, st) => { const x = document.createElement(tag); if (txt != null) x.textContent = txt; if (st) x.style.cssText = st; return x; };
-      const row = (l, r, st) => { const d = el('div', null, st); d.className = 'trow'; d.append(el('span', l), el('b', r)); return d; };
-      const isDel = o.order_type === 'delivery';
-      const qty = (o.items || []).reduce((n, i) => n + Number(i.qty || 0), 0);
-
-      c.append(el('div', '🧾 ' + o.tran_id, 'font-size:11.5px;color:var(--sub)'));
-      if (o.track_code) c.append(row('🔢 លេខតាមដាន', o.track_code));
-      c.append(row('👤 អតិថិជន', o.name));
-      c.append(row('🛵 ប្រភេទ', isDel ? 'ដឹកជញ្ជូន (Delivery)' : 'ទៅយក (Pick Up)'));
-      c.append(row('💳 ទូទាត់', 'បានបង់តាម ABA ✅'));
-      c.append(el('div', '🛒 បញ្ជីមុខម្ហូប', 'font-weight:700;margin-top:6px'));
-      const ul = el('ul');
-      (o.items || []).forEach(i => {
-        const li = el('li', i.name + (i.size ? ' (' + String(i.size).toUpperCase() + ')' : '') + (i.sugar ? ' [ស្ករ ' + i.sugar + ', ' + i.ice + ']' : '') +
-          ' ×' + i.qty + (i.price != null ? ' = $' + (Number(i.price) * Number(i.qty)).toFixed(2) : ''));
-        ul.appendChild(li);
-      });
-      c.append(ul);
-      c.append(row('🍽️ សរុបមុខម្ហូប', (o.items || []).length + ' មុខ / ' + qty + ' ចាន'));
-      if (isDel && Number(o.delivery_fee) > 0) c.append(row('🛵 ថ្លៃដឹកជញ្ជូន', '$' + Number(o.delivery_fee).toFixed(2)));
-      c.append(row('💰 សរុបបានបង់', '$' + Number(o.total).toFixed(2), 'font-size:15px;margin-top:2px'));
-
-      // ----- steps: the shop and the driver set these -----
-      const rank = { not_yet: 0, pickup: 0, delivering: 1, arrived: 1, delivered: 2 }[o.delivery_status] || 0;   // 0 not yet, 1 delivering, 2 received
-      const shopReady = o.fulfillment === 'ready' || o.fulfillment === 'done';
-      const steps = isDel ? [
-        ['មិនទាន់ដឹក', true], ['កំពុងដឹក', rank >= 1], ['បានទទួលអីវ៉ាន់', rank >= 2]
-      ] : [
-        ['ហាងបានរៀបចំ', shopReady], ['បានយកអីវ៉ាន់', o.fulfillment === 'done']
-      ];
-      const lastDone = steps.map(x => x[1]).lastIndexOf(true);
-      c.append(el('div', '📍 ស្ថានភាព', 'font-weight:700;margin-top:10px'));
-      const tl = el('ul'); tl.className = 'tl';
-      steps.forEach((st, k) => {
-        const li = el('li'); li.className = (st[1] ? 'done' : '') + (k === lastDone ? ' now' : '');
-        const d = el('span', st[1] ? '✓' : String(k + 1)); d.className = 'd';
-        li.append(d, el('span', st[0])); tl.append(li);
-      });
-      c.append(tl);
-      if (isDel && o.driver && rank >= 1 && rank < 2) c.append(el('div', 'អ្នកដឹក: ' + o.driver, 'font-size:12.5px;color:var(--sub);margin-top:4px'));
-      if (isDel && rank >= 2) {
-        c.append(el('div', '✅ ការដឹកបានបញ្ចប់ — អរគុណ!', 'font-size:13px;font-weight:700;color:var(--brand);margin-top:8px'));
-        if (liveId === o.tran_id) stopLive();
-      }
-      if (isDel && rank === 1) {
-        const b = el('button', '🗺️ មើលទីតាំងអ្នកដឹក (Live)'); b.type = 'button'; b.className = 'tbtn go on'; b.style.cssText = 'width:100%;margin-top:8px';
-        b.onclick = () => showLive(o.tran_id); c.append(b);
-      }
-      return c;
-    }
-    function showLive(id) {
-      liveId = id;
-      document.getElementById('live-box').style.display = 'block';
-      if (!liveMap) {
-        liveMap = L.map('live-map', { zoomControl: true, attributionControl: false }).setView([11.55, 104.9], 15);
-        L.tileLayer(MAPTILER_KEY ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}` : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(liveMap);
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(liveMap);
-      }
-      setTimeout(() => liveMap.invalidateSize(), 150);
-      pollLive();
-      clearInterval(liveTimer); liveTimer = setInterval(pollLive, 6000);
-    }
-    async function pollLive() {
-      if (!liveId) return;
-      const info = document.getElementById('live-info');
-      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'live', tran_id: liveId } });
-      if (error || !data) { info.textContent = 'មិនអាចភ្ជាប់បានទេ…'; return; }
-      if (data.delivery_status === 'delivered') { stopLive(); lookupOrders(true); return; }
-      if (!data.live) { info.textContent = 'រង់ចាំទីតាំងរបស់អ្នកដឹក…'; return; }
-      info.textContent = '🛵 ' + (data.driver || 'អ្នកដឹក') + (data.distance_km != null ? ' · នៅឆ្ងាយ ~' + data.distance_km + ' km' : '') + (data.eta_min != null ? ' · ប្រហែល ' + data.eta_min + ' នាទី' : '');
-      const pos = [data.lat, data.lng];
-      if (!liveMarker) liveMarker = L.marker(pos, { icon: L.divIcon({ className: '', html: '<div style="font-size:30px;line-height:30px">🛵</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(liveMap);
-      else liveMarker.setLatLng(pos);
-      liveMap.panTo(pos, { animate: true });
-    }
-
-    async function sendOrder() {
-      await checkDeliveryStatus();
-      if (selectedOrderType === 'delivery' && !IS_DELIVERY_AVAILABLE) {
-        alert(`🛵 ⚠️ អស់ជើងដឹកជញ្ជូនជាបណ្ដោះអាសន្ន! សូមរង់ចាំប្រហែល ${ESTIMATED_WAIT_MINUTES} នាទីទៀត។`);
-        return;
-      }
-      if (selectedOrderType === 'delivery' && !isLocationPinned) {
-        alert("សូមចុច '🗺️ ជ្រើសរើសទីតាំងលើផែនទី' ដើម្បីបញ្ជាក់ទីតាំងដឹកជញ្ជូនរបស់អ្នក!");
-        return;
-      }
-
-      const usernameVal = document.getElementById('input-username').value.trim();
-      const customerNameVal = document.getElementById('input-customer-name').value.trim();
-      const phoneRaw = document.getElementById('input-phone').value.trim();
-      const phoneVal = normalizeKhPhone(phoneRaw) || '';
-      if (!customerNameVal || !phoneRaw) { alert("សូមបំពេញឈ្មោះ និងលេខទូរស័ព្ទ!"); return; }
-      if (!phoneVal) { alert("លេខទូរស័ព្ទមិនត្រឹមត្រូវ! សូមប្រើលេខកម្ពុជា ឧទាហរណ៍ 012 345 678 ឬ 096 123 4567"); return; }
-
-      if (requireLogin && !inTelegram && !getStoredLogin()) { alert("សូមចូលតាម Telegram ជាមុនសិន!"); return; }
-      if (!usernameVal) { alert("គណនី Telegram របស់អ្នកមិនមាន Username ទេ! សូមដាក់ Username ក្នុង Telegram (Settings → Username) ជាមុនសិន។"); return; }
-
-      const btn = document.getElementById('send-order-btn');
-      btn.disabled = true; btn.innerHTML = '<span>កំពុងបង្កើត ABA QR...</span>';
-
-      try {
-        const { data, error } = await supabaseClient.functions.invoke('smart-function', {
-          body: {
-            cart,
-            username: usernameVal,
-            customer_name: customerNameVal,
-            phone: phoneVal,
-            order_type: selectedOrderType,
-            address: document.getElementById('input-address').value,
-            location_link: gpsLink,
-            lat: clientLat,
-            lng: clientLng,
-            remark: document.getElementById('input-remark').value,
-            initData: tg?.initData || '',
-            tg_login: getStoredLogin()
-          }
-        });
-
-        if (error) {
-          let errorMsg = error.message, errCode = null;
-          if (error.context && typeof error.context.json === 'function') {
-            try {
-              const errJson = await error.context.json();
-              if (errJson.error) errorMsg = errJson.error;
-              errCode = errJson.code || null;
-            } catch (e) {}
-          }
-          const ex = new Error(errorMsg); ex.code = errCode; throw ex;
-        }
-        if (data && data.error) throw new Error(data.error);
-        if (!data?.abapay_deeplink) throw new Error("មិនទទួលបាន ABA deeplink ពីប្រព័ន្ធ");
-
-        const info = { ...data, started_at: Date.now() };
-        localStorage.setItem('pending_payment', JSON.stringify(info));
-        try { localStorage.setItem('track_phone', phoneVal); } catch (e) {}
-        showPayModal(info);
-      } catch (err) {
-        alert("កំហុស: " + (err.message || err));
-      } finally {
-        resetSendButton();
-      }
-    }
-
-    let isForceReloading = false;
-    const userChannel = supabaseClient.channel('admin-actions');
-
-    userChannel
-      .on('broadcast', { event: 'force_reload' }, payload => {
-        isForceReloading = true;
-        localStorage.removeItem('davin_app_session');
-        cart = [];
-        clientLat = null; clientLng = null; gpsLink = "";
-        isLocationPinned = false; currentDeliveryFee = 0.00;
-        window.location.href = window.location.pathname + '?v=' + Date.now();
-      })
-      .subscribe();
-  </script>
-
-  <script>
-  // Welcome intro: closes by tapping, or automatically after ~3.2s
-  (function () {
-    var w = document.getElementById('welcome');
-    if (!w) return;
-    document.body.classList.add('welcome-lock');
-    var closed = false;
-    function closeWelcome() {
-      if (closed) return; closed = true;
-      w.classList.add('hide');
-      document.body.classList.remove('welcome-lock');
-      setTimeout(function () { w.remove(); }, 500);
-    }
-    w.addEventListener('click', closeWelcome);
-    setTimeout(closeWelcome, 3200);
-  })();
-  </script>
-
-  <script>
-  // header helpers: scroll to menu + cart count badge
-  function goPromo() {
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================
+   CONFIG
+   ===================================================== */
+const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
+const ADMIN_FUNCTION = "update-settings";   // Supabase Edge Function name
+const LOW_STOCK = 10;                        // "low stock" threshold
+
+const CATEGORIES = [
+  { key: "kuy_teav", label: "🍜 គុយទាវ" },
+  { key: "rice",     label: "🍚 បាយ" },
+  { key: "other",    label: "🍛 នំបាញ់ចុក" },
+  { key: "drinks",   label: "🧋 ភេសជ្ជៈ" },
+];
+
+/* =====================================================
+   HELPERS
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "$" + Number(n).toFixed(2);
+const catLabel = k => (CATEGORIES.find(c => c.key === k) || { label: k }).label;
+
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const tg = window.Telegram?.WebApp;
+const hasTG = !!(tg && tg.initData);
+let viewOnly = false;
+let admToken = ""; try { admToken = localStorage.getItem("adm_token") || ""; } catch (e) {}
+function showPw() { $("pw-gate").classList.add("show"); setTimeout(() => $("pw-in").focus(), 50); }
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor("#14201f"); tg.setBackgroundColor("#f1f4f3"); } catch (_) {}
+  try { tg.enableClosingConfirmation(); } catch (_) {}
+}
+const haptic = (t = "light") => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (_) {} };
+const hapticN = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (_) {} };
+
+let toastTimer;
+function toast(msg, type = "") {
+  const el = $("toast");
+  el.textContent = msg;
+  el.className = "toast show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  if (type === "ok") hapticN("success");
+  if (type === "err") hapticN("error");
+}
+
+/** Secured call: Telegram initData is verified server-side by the Edge Function */
+async function admin(body) {
+  if (viewOnly || !hasTG) return { error: "សូមបើកតាម Telegram ដើម្បីកែប្រែទិន្នន័យ" };
+  const { data, error } = await supa.functions.invoke(ADMIN_FUNCTION, {
+    body: { ...body, initData: tg.initData, token: admToken },
+  });
+  if (error) {
+    let msg = error.message, code = "";
     try {
-      if (menuItems.some(function (m) { return discPct(m) > 0; })) {
-        currentCategory = 'discount';
-        var si = document.getElementById('search-input'); if (si) si.value = '';
-        renderCategories(); renderMenu();
+      if (error.context?.json) {
+        const j = await error.context.json();
+        if (j?.error) msg = j.error;
+        if (j?.code) code = j.code;
       }
-    } catch (e) {}
-    goMenu();
+    } catch (_) {}
+    if (code === "LOGIN") showPw();
+    return { error: msg };
   }
-  function goMenu() {
-    var el = document.getElementById('category-cards-container');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (data?.code === "LOGIN") showPw();
+  if (data?.error) return { error: data.error };
+  return { data };
+}
+
+/* =====================================================
+   STATE
+   ===================================================== */
+let items = [];
+let cat = "all";
+let query = "";
+const stockTimers = {};
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+function showTab(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("on", p.id === "page-" + name));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === name));
+  $("fab-add").classList.toggle("show", name === "menu");
+  window.scrollTo({ top: 0 });
+  haptic();
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+/* =====================================================
+   PROMOTIONAL BANNER
+   ===================================================== */
+async function loadPromoBanner() {
+  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge']);
+  if (data) {
+    const activeItem = data.find(i => i.key === 'promo_active');
+    const textItem = data.find(i => i.key === 'promo_text');
+    const badgeItem = data.find(i => i.key === 'promo_badge');
+
+    const cleanVal = (val, fallback) => {
+      if (val === undefined || val === null) return fallback;
+      let str = typeof val === 'string' ? val : JSON.stringify(val);
+      if (str.startsWith('"') && str.endsWith('"')) {
+        try { str = JSON.parse(str); } catch(e) {}
+      }
+      return str || fallback;
+    };
+
+    const active = activeItem ? (activeItem.value === true || activeItem.value === 'true') : false;
+    const text = cleanVal(textItem?.value, "");
+    const badge = cleanVal(badgeItem?.value, "");
+
+    $("promo-toggle").checked = active;
+    setText($("promo-status-text"), active ? "កំពុងបើកបង្ហាញ" : "បានបិទ", active ? "ok" : "bad");
+    $("promo-badge-input").value = badge;
+    $("promo-msg-input").value = text;
   }
-  (function () {
-    var tot = document.getElementById('trigger-total'), badge = document.getElementById('hdr-cart-count');
-    if (!tot || !badge) return;
-    function sync() {
-      var n = 0;
-      try { n = cart.reduce(function (a, c) { return a + c.quantity; }, 0); } catch (e) {}
-      badge.textContent = n; badge.style.display = n > 0 ? 'block' : 'none';
+}
+
+$("promo-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("promo-status-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "promo_active", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកប្រូម៉ូសិនបដា" : "បានបិទប្រូម៉ូសិនបដា", "ok");
+  loadPromoBanner();
+});
+
+
+// ---- promo food + greeting text ----
+async function loadGreet() {
+  const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text"]);
+  let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
+  $("greet-input").value = typeof v === "string" ? v : "";
+}
+$("f-disc").addEventListener("change", () => { $("f-disc-box").style.display = $("f-disc").checked ? "" : "none"; });
+$("greet-save").addEventListener("click", async () => {
+  const r = await admin({ action: "update_setting", key: "greet_text", value: $("greet-input").value.trim() });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok");
+});
+$("promo-save-btn").addEventListener("click", async () => {
+  const badge = $("promo-badge-input").value.trim();
+  const text = $("promo-msg-input").value.trim();
+  
+  await admin({ action: "update_setting", key: "promo_badge", value: badge });
+  const { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
+  
+  if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
+  loadPromoBanner();
+});
+
+/* =====================================================
+   STORE + DELIVERY SETTINGS
+   ===================================================== */
+function setText(el, text, cls) { el.textContent = text; el.className = "val " + cls; }
+
+async function loadStore() {
+  const { data, error } = await supa.from("app_settings").select("value").eq("key", "is_store_open").single();
+  const open = (error || !data) ? true : !!data.value;
+  $("store-toggle").checked = open;
+  setText($("store-text"), open ? "បើកដំណើរការ" : "បិទហាង", open ? "ok" : "bad");
+}
+
+async function loadDelivery() {
+  const { data, error } = await supa.from("delivery_status")
+    .select("is_delivery_available, estimated_wait_minutes").eq("id", 1).single();
+  if (error || !data) return;
+  $("delivery-toggle").checked = !!data.is_delivery_available;
+  setText($("delivery-text"), data.is_delivery_available ? "មានជើងដឹកជញ្ចូន" : "ផ្អាកដឹកបណ្តោះអាសន្ន",
+          data.is_delivery_available ? "ok" : "warn");
+  $("wait-input").value = data.estimated_wait_minutes || 15;
+}
+
+$("store-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("store-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "is_store_open", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកហាង" : "បានបិទហាង", "ok");
+  loadStore();
+});
+
+$("delivery-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  const { error } = await admin({ action: "update_delivery", updates: { is_delivery_available: want } });
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(want ? "បានបើកសេវាដឹកជញ្ជូន" : "បានផ្អាកសេវាដឹកជញ្ជូន", "ok");
+  }
+  loadDelivery();
+});
+
+$("wait-save").addEventListener("click", async () => {
+  let m = parseInt($("wait-input").value, 10);
+  if (!m || m < 1 || m > 180) { toast("សូមបញ្ចូលចន្លោះ 1 – 180 នាទី", "err"); return; }
+  const { error } = await admin({ action: "update_delivery", updates: { estimated_wait_minutes: m } });
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(`បានរក្សាុករយៈពេលរង់ចាំ ${m} នាទី`, "ok");
+  }
+  loadDelivery();
+});
+
+/* =====================================================
+   MENU LOAD + RENDER
+   ===================================================== */
+async function loadMenu() {
+  if (!items.length) $("menu").innerHTML = '<div class="skeleton"></div>'.repeat(3);
+  const { data, error } = await supa.from("menu_items").select("*");
+  if (error) {
+    $("menu").innerHTML = `<div class="empty"><div class="big">⚠️</div>មិនអាចទាញយកទិន្នន័យបាន<br><small>${esc(error.message)}</small></div>`;
+    return;
+  }
+  items = (data || []).sort((a, b) =>
+    CATEGORIES.findIndex(c => c.key === a.category) - CATEGORIES.findIndex(c => c.key === b.category)
+    || String(a.name_kh).localeCompare(String(b.name_kh)));
+  renderAll();
+}
+
+const stockOf = i => Number.isFinite(+i.stock_quantity) ? +i.stock_quantity : 0;
+const isOn = i => i.is_available !== false;
+
+function renderAll() { renderStats(); renderLow(); renderPills(); renderMenu(); }
+
+function renderStats() {
+  const total = items.length;
+  const sold = items.filter(i => isOn(i) && stockOf(i) > 0).length;
+  const low  = items.filter(i => stockOf(i) > 0 && stockOf(i) <= LOW_STOCK).length;
+  const out  = items.filter(i => stockOf(i) <= 0).length;
+  const off  = items.filter(i => !isOn(i)).length;
+  $("stats").innerHTML = `
+    <button class="stat" data-go="all"><b>${total}</b><span>មុខម្ហូបសរុប</span></button>
+    <button class="stat ok" data-go="sell"><b>${sold}</b><span>កំពុងលក់</span></button>
+    <button class="stat warn" data-go="low"><b>${low}</b><span>ស្តុកជិតអស់</span></button>
+    <button class="stat bad" data-go="out"><b>${out}</b><span>អស់ស្តុក${off ? ` • បិទ ${off}` : ""}</span></button>`;
+  const need = low + out;
+  const dot = $("low-dot");
+  dot.style.display = need ? "flex" : "none";
+  dot.textContent = need;
+}
+
+function renderLow() {
+  $("low-n").textContent = LOW_STOCK;
+  const list = items.filter(i => stockOf(i) <= LOW_STOCK).sort((a, b) => stockOf(a) - stockOf(b));
+  if (!list.length) {
+    $("low-list").innerHTML = `<div class="empty" style="padding:26px 0"><div class="big">👍</div>ស្តុកគ្រប់គ្រាន់ទាំងអស់</div>`;
+    return;
+  }
+  $("low-list").innerHTML = list.map(i => `
+    <div class="low-row">
+      <div class="nm">${esc(i.name_kh)}<small>${esc(i.name_en)}</small></div>
+      <span class="pill ${stockOf(i) <= 0 ? "bad" : "warn"}">${stockOf(i) <= 0 ? "អស់" : "នៅសល់ " + stockOf(i)}</span>
+      <button class="btn btn-p btn-s" data-act="plus10" data-key="${esc(i.item_key)}">+10</button>
+    </div>`).join("");
+}
+
+function renderPills() {
+  const all = [{ key: "all", label: "ទាំងអស់" }, ...CATEGORIES];
+  $("cat-pills").innerHTML = all.map(c =>
+    `<button class="pill-b ${cat === c.key ? "on" : ""}" data-cat="${c.key}">${c.label}</button>`).join("");
+}
+
+let special = ""; // 'low' | 'out' | 'sell' quick filter from stat cards
+
+function renderMenu() {
+  const q = query.trim().toLowerCase();
+  const list = items.filter(i => {
+    if (cat !== "all" && i.category !== cat) return false;
+    if (q && !(`${i.name_kh} ${i.name_en} ${i.item_key}`.toLowerCase().includes(q))) return false;
+    if (special === "low"  && !(stockOf(i) > 0 && stockOf(i) <= LOW_STOCK)) return false;
+    if (special === "out"  && stockOf(i) > 0) return false;
+    if (special === "sell" && !(isOn(i) && stockOf(i) > 0)) return false;
+    return true;
+  });
+
+  const chip = special
+    ? `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px"><span class="pill warn">ត្រង៖ ${{low:"ស្តុកជិតអស់",out:"អស់ស្តុក",sell:"កំពុងលក់"}[special]}</span><button class="btn btn-g btn-s" data-act="clear-filter">លុបការត្រង</button></div>`
+    : "";
+
+  if (!list.length) {
+    $("menu").innerHTML = chip + `<div class="empty"><div class="big">🍽️</div>មិនមានមុខម្ហូបត្រូវនឹងការស្វែងរកទេ</div>`;
+    return;
+  }
+
+  $("menu").innerHTML = chip + list.map(i => {
+    const s = stockOf(i), on = isOn(i);
+    const img = coverOf(i);
+    const prices = Object.entries(i.sizes || {}).map(([k, v]) => `${esc(k)} ${money(v)}`).join(" • ");
+    const badge = s <= 0 ? '<span class="pill bad">អស់ស្តុក</span>'
+                : s <= LOW_STOCK ? '<span class="pill warn">ជិតអស់</span>' : "";
+    return `
+    <article class="item ${on ? "" : "off"}" data-key="${esc(i.item_key)}">
+      <div class="item-h">
+        <div class="thumb"><img src="${esc(imgSrc(img))}" alt="" data-fb="${esc(i.icon || "🍜")}" loading="lazy"></div>
+        <div class="t">
+          <b>${esc(i.name_kh)}</b>
+          <small>${esc(i.name_en)}</small>
+          <div class="price">${prices || "—"}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill ok" style="background:var(--brand-l);color:var(--brand)">${esc(catLabel(i.category))}</span>
+        ${i.is_popular ? '<span class="pill pop">ពេញនិយម</span>' : ""}${i.discount_active === true && i.discount_percent > 0 ? `<span class="pill ok">🏷 -${esc(i.discount_percent)}%</span>` : ""}${i.free_delivery === true ? '<span class="pill ok">🛵 ដឹកឥតគិតថ្លៃ</span>' : ""}${badge}
+      </div>
+      <div class="item-m">
+        <div class="step">
+          <button data-act="dec" aria-label="បន្ថយ">−</button>
+          <input type="number" min="0" inputmode="numeric" value="${s}" data-act="stock-input" aria-label="ស្តុក">
+          <button data-act="inc" aria-label="បន្ថែម">+</button>
+        </div>
+        <div class="avail">${on ? "កំពុងលក់" : "បិទលក់"}
+          <label class="sw"><input type="checkbox" data-act="avail" ${on ? "checked" : ""}><span></span></label>
+        </div>
+      </div>
+      <div class="item-f">
+        <button class="btn btn-g btn-s" data-act="edit">✏️ កែប្រែ</button>
+        <button class="btn btn-d btn-s" data-act="del">🗑️ លុប</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function coverOf(i) {
+  if (Array.isArray(i.images) && i.images.length) return i.images[0];
+  if (i.image_url) return i.image_url;
+  return `./images/${i.item_key}.png`;
+}
+
+// Image fallback
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t.tagName === "IMG" && t.dataset.fb) t.replaceWith(document.createTextNode(t.dataset.fb));
+}, true);
+
+/* =====================================================
+   INTERACTIONS
+   ===================================================== */
+$("search").addEventListener("input", e => { query = e.target.value; renderMenu(); });
+
+$("cat-pills").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  cat = b.dataset.cat; renderPills(); renderMenu(); haptic();
+});
+
+$("stats").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  special = ["low", "out", "sell"].includes(b.dataset.go) ? b.dataset.go : "";
+  cat = "all"; query = ""; $("search").value = "";
+  renderPills(); renderMenu(); showTab("menu");
+});
+
+$("low-list").addEventListener("click", e => {
+  const b = e.target.closest('[data-act="plus10"]'); if (!b) return;
+  const it = items.find(x => x.item_key === b.dataset.key);
+  if (it) setStock(it.item_key, stockOf(it) + 10, true);
+});
+
+$("menu").addEventListener("click", e => {
+  const clr = e.target.closest('[data-act="clear-filter"]');
+  if (clr) { special = ""; renderMenu(); return; }
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if (act === "inc") setStock(key, stockOf(it) + 1);
+  else if (act === "dec") setStock(key, Math.max(0, stockOf(it) - 1));
+  else if (act === "edit") openItem(key);
+  else if (act === "del") confirmDelete(it);
+});
+
+$("menu").addEventListener("change", e => {
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  if (e.target.dataset.act === "stock-input") {
+    const v = Math.max(0, parseInt(e.target.value, 10) || 0);
+    setStock(key, v, true);
+  } else if (e.target.dataset.act === "avail") {
+    setAvail(key, e.target.checked);
+  }
+});
+
+function setStock(key, value, immediate = false) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.stock_quantity = value;
+  renderAll();
+  haptic();
+  clearTimeout(stockTimers[key]);
+  const send = async () => {
+    const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { stock_quantity: value } });
+    if (error) { toast(error, "err"); loadMenu(); }
+    else toast("បានរក្សាទុកស្តុក", "ok");
+  };
+  if (immediate) send(); else stockTimers[key] = setTimeout(send, 650);
+}
+
+async function setAvail(key, on) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.is_available = on; renderAll();
+  const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { is_available: on } });
+  if (error) { toast(error, "err"); loadMenu(); }
+  else toast(on ? "បើកលក់ហើយ" : "បិទលក់ហើយ", "ok");
+}
+
+/* =====================================================
+   ADD / EDIT MODAL
+   ===================================================== */
+$("f-cat").innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join("");
+
+function sizeRow(name = "", price = "") {
+  const d = document.createElement("div");
+  d.className = "size-row";
+  d.innerHTML = `
+    <input type="text" placeholder="ឈ្មោះទំហំ (normal)" value="${esc(name)}" aria-label="ឈ្មោះទំហំ">
+    <input type="number" step="0.05" min="0" inputmode="decimal" placeholder="2.50" value="${esc(price)}" aria-label="តម្លៃ">
+    <button type="button" aria-label="លុបទំហំ">✕</button>`;
+  d.querySelector("button").onclick = () => { d.remove(); };
+  $("size-list").appendChild(d);
+}
+$("size-add").onclick = () => sizeRow();
+
+function openItem(key) {
+  const it = key ? items.find(x => x.item_key === key) : null;
+  $("sheet-title").textContent = it ? "កែប្រែមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
+  $("f-edit").value = it ? it.item_key : "";
+  $("f-key").value = it ? it.item_key : "";
+  $("f-key").disabled = !!it;
+  $("f-kh").value = it?.name_kh || "";
+  $("f-en").value = it?.name_en || "";
+  $("f-cat").value = it?.category || (cat !== "all" ? cat : "kuy_teav");
+  $("f-stock").value = it ? stockOf(it) : 50;
+  $("f-pop").checked = !!it?.is_popular;
+  $("f-disc").checked = it?.discount_active === true;
+  $("f-disc-pct").value = it?.discount_percent > 0 ? it.discount_percent : "";
+  $("f-free").checked = it?.free_delivery === true;
+  $("f-disc-box").style.display = $("f-disc").checked ? "" : "none";
+  $("f-img").value = it ? (Array.isArray(it.images) ? it.images : (it.image_url ? [it.image_url] : [])).join("\n") : "";
+  $("size-list").innerHTML = "";
+  const sizes = it?.sizes && Object.keys(it.sizes).length ? it.sizes : { normal: 2.5 };
+  Object.entries(sizes).forEach(([k, v]) => sizeRow(k, v));
+  $("item-ov").classList.add("show");
+  if (tg?.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeItem); }
+}
+
+function closeItem() {
+  $("item-ov").classList.remove("show");
+  if (tg?.BackButton) { tg.BackButton.offClick(closeItem); tg.BackButton.hide(); }
+}
+$("fab-add").onclick = () => openItem(null);
+$("sheet-x").onclick = $("sheet-cancel").onclick = closeItem;
+$("item-ov").addEventListener("click", e => { if (e.target.id === "item-ov") closeItem(); });
+
+$("sheet-save").addEventListener("click", async () => {
+  const editKey = $("f-edit").value;
+  const key = $("f-key").value.trim();
+  const kh = $("f-kh").value.trim();
+  const en = $("f-en").value.trim();
+
+  if (!/^[a-z0-9_]{2,40}$/.test(key)) return toast("កូដមុខម្ហូប៖ a-z, 0-9, _ (2–40 តួអក្សរ)", "err");
+  if (!kh || !en) return toast("សូមបំពេញឈ្មោះខ្មែរ និងអង់គ្លេស", "err");
+  if (!editKey && items.some(i => i.item_key === key)) return toast("កូដនេះមានរួចហើយ", "err");
+
+  const sizes = {};
+  for (const row of $("size-list").children) {
+    const [n, p] = row.querySelectorAll("input");
+    const name = n.value.trim(), price = parseFloat(p.value);
+    if (!name && !p.value) continue;
+    if (!name || !(price >= 0)) return toast("ទំហំ និងតម្លៃមិនត្រឹមត្រូវ", "err");
+    if (name in sizes) return toast(`ឈ្មោះទំហំស្ទួន៖ ${name}`, "err");
+    sizes[name] = Math.round(price * 100) / 100;
+  }
+  if (!Object.keys(sizes).length) return toast("សូមបន្ថែមយ៉ាងហោចណាស់ ១ ទំហំ", "err");
+
+  const images = $("f-img").value.split("\n").map(s => s.trim()).filter(Boolean);
+  const updates = {
+    name_kh: kh, name_en: en, category: $("f-cat").value,
+    stock_quantity: Math.max(0, parseInt($("f-stock").value, 10) || 0),
+    sizes, images: images.length ? images : [`./images/${key}.png`],
+    is_popular: $("f-pop").checked,
+    discount_active: $("f-disc").checked && (parseFloat($("f-disc-pct").value) > 0),
+    discount_percent: Math.min(99, Math.max(0, parseFloat($("f-disc-pct").value) || 0)),
+    free_delivery: $("f-free").checked,
+  };
+  if ($("f-disc").checked && !(parseFloat($("f-disc-pct").value) > 0)) return toast("សូមបញ្ចូលភាគរយបញ្ចុះតម្លៃ", "err");
+
+  const btn = $("sheet-save");
+  btn.disabled = true; btn.textContent = "កំពុងរក្សាទុក…";
+  const body = editKey
+    ? { action: "update_stock", match: { item_key: editKey }, updates }
+    : { action: "add_item", updates: { ...updates, item_key: key, is_available: true } };
+  const { error } = await admin(body);
+  btn.disabled = false; btn.textContent = "រក្សាទុក";
+
+  if (error) return toast(error, "err");
+  toast("បានរក្សាទុកមុខម្ហូប", "ok");
+  closeItem();
+  loadMenu();
+});
+
+/* =====================================================
+   DELETE MODAL
+   ===================================================== */
+let pendingDelete = null;
+function confirmDelete(it) {
+  pendingDelete = it;
+  $("cf-msg").textContent = `លុបមុខម្ហូប "${it.name_kh}" មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។`;
+  $("cf-ov").classList.add("show");
+}
+const closeConfirm = () => { $("cf-ov").classList.remove("show"); pendingDelete = null; };
+$("cf-no").onclick = closeConfirm;
+$("cf-ov").addEventListener("click", e => { if (e.target.id === "cf-ov") closeConfirm(); });
+$("cf-yes").onclick = async () => {
+  const it = pendingDelete; closeConfirm(); if (!it) return;
+  const { error } = await admin({ action: "delete_item", match: { item_key: it.item_key } });
+  if (error) return toast(error, "err");
+  toast("បានលុបមុខម្ហូប", "ok");
+  items = items.filter(x => x.item_key !== it.item_key);
+  renderAll();
+};
+
+/* =====================================================
+   BULK TOOLS
+   ===================================================== */
+async function bulk(list, updates, okMsg) {
+  if (!list.length) return toast("គ្មានមុខម្ហូបត្រូវកែប្រែ");
+  let fail = 0;
+  for (const it of list) {
+    const { error } = await admin({ action: "update_stock", match: { item_key: it.item_key }, updates });
+    if (error) { fail++; if (fail === 1) toast(error, "err"); }
+  }
+  if (!fail) toast(`${okMsg} (${list.length})`, "ok");
+  loadMenu();
+}
+$("bulk-enable").onclick = () => bulk(items.filter(i => !isOn(i) && stockOf(i) > 0), { is_available: true }, "បានបើកលក់");
+$("bulk-disable-zero").onclick = () => bulk(items.filter(i => isOn(i) && stockOf(i) <= 0), { is_available: false }, "បានបិទលក់");
+
+/* =====================================================
+   BOOT
+   ===================================================== */
+async function refresh() {
+  const ic = $("refresh-ic"); ic.classList.add("spin");
+  
+  // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
+  localStorage.removeItem('davin_app_session');
+  
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs(), loadGreet()]);
+  ic.classList.remove("spin");
+}
+$("btn-refresh").onclick = refresh;
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+/* ---------- Images stored in Telegram ---------- */
+const imgSrc = u => String(u || "").startsWith("tg:") ? SUPABASE_URL + "/functions/v1/tg-image?f=" + encodeURIComponent(String(u).slice(3)) : u;
+function pickImage() {   // choose a photo, shrink it to max 1280px, return base64 JPEG
+  return new Promise(res => {
+    const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
+    i.onchange = () => {
+      const f = i.files[0]; if (!f) return res(null);
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(im.src); res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      im.onerror = () => res(null); im.src = URL.createObjectURL(f);
+    };
+    i.click();
+  });
+}
+async function uploadImage() {
+  const b64 = await pickImage(); if (!b64) return null;
+  toast("កំពុងផ្ទុកឡើង…");
+  const r = await admin({ action: "upload_image", data: b64 });
+  if (r.error) { toast(r.error, "err"); return null; }
+  return r.data.file_id;
+}
+let BN = [];
+async function loadBanners() {
+  const { data: rows } = await supa.from("app_settings").select("key, value").in("key", ["banners", "shop_logo"]);
+  const row = k => (rows || []).find(r => r.key === k);
+  const lg = row("shop_logo") && row("shop_logo").value; if (typeof lg === "string" && lg.startsWith("tg:")) $("logo-prev").src = imgSrc(lg);
+  let v = row("banners") && row("banners").value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = []; }
+  BN = Array.isArray(v) ? v : []; renderBanners();
+}
+function renderBanners() {
+  $("bn-list").innerHTML = BN.length ? BN.map((u, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+    <img src="${esc(imgSrc(u))}" style="width:96px;height:48px;object-fit:cover;border-radius:8px;background:#e8eeec">
+    <div style="flex:1" class="muted">បដា ${i + 1}</div>
+    ${i ? `<button class="btn btn-g btn-s" data-bn="up" data-i="${i}">↑</button>` : ""}<button class="btn btn-d btn-s" data-bn="del" data-i="${i}">🗑</button></div>`).join("")
+    : '<div class="muted" style="margin-bottom:8px">មិនទាន់មានបដា — កំពុងប្រើរូបលំនាំដើម</div>';
+}
+async function saveBanners() {
+  const r = await admin({ action: "update_setting", key: "banners", value: JSON.stringify(BN) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderBanners();
+}
+$("bn-add").onclick = async () => { const id = await uploadImage(); if (id) { BN.push("tg:" + id); await saveBanners(); } };
+$("bn-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-bn]"); if (!b) return; const i = Number(b.dataset.i);
+  if (b.dataset.bn === "del") { if (!confirm("លុបបដានេះ?")) return; BN.splice(i, 1); }
+  else BN.splice(i - 1, 0, BN.splice(i, 1)[0]);
+  await saveBanners();
+});
+
+// ---- category pictures (stored in Telegram, saved as setting "category_images") ----
+const CAT_LIST = [["kuy_teav", "គុយទាវ", "🍜"], ["rice", "បាយ", "🍚"], ["other", "នំបាញ់ចុក", "🥢"], ["drinks", "ភេសជ្ជៈ", "🧋"]];
+let CATIMG = {};
+function renderCatImgs() {
+  $("cat-img-list").innerHTML = CAT_LIST.map(([k, name, ico]) => `<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    ${CATIMG[k] ? `<img src="${esc(imgSrc(CATIMG[k]))}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;background:#e8eeec">` : `<div style="width:48px;height:48px;border-radius:50%;background:#e8eeec;display:flex;align-items:center;justify-content:center;font-size:24px">${ico}</div>`}
+    <div style="flex:1" class="lbl">${esc(name)}</div>
+    <button class="btn btn-g btn-s" data-cat="up" data-k="${k}">📷 ប្តូរ</button>
+    ${CATIMG[k] ? `<button class="btn btn-d btn-s" data-cat="del" data-k="${k}">🗑</button>` : ""}</div>`).join("");
+}
+async function saveCatImgs() {
+  const r = await admin({ action: "update_setting", key: "category_images", value: JSON.stringify(CATIMG) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderCatImgs();
+}
+async function loadCatImgs() {
+  const { data: rows } = await supa.from("app_settings").select("key, value").eq("key", "category_images");
+  let v = rows && rows[0] && rows[0].value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = {}; }
+  CATIMG = v && typeof v === "object" && !Array.isArray(v) ? v : {}; renderCatImgs();
+}
+$("cat-img-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-cat]"); if (!b) return; const k = b.dataset.k;
+  if (b.dataset.cat === "del") { delete CATIMG[k]; }
+  else { const id = await uploadImage(); if (!id) return; CATIMG[k] = "tg:" + id; }
+  await saveCatImgs();
+});
+$("logo-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const r = await admin({ action: "update_setting", key: "shop_logo", value: "tg:" + id }); if (r.error) toast(r.error, "err"); else { $("logo-prev").src = imgSrc("tg:" + id); toast("បានប្តូរឡូហ្គោ", "ok"); } };
+// menu photo: the new picture becomes the cover and replaces old ./images/ (GitHub) pictures
+$("f-img-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const t = $("f-img"); const keep = t.value.split("\n").map(x => x.trim()).filter(x => x && !x.startsWith("./images/")); t.value = ["tg:" + id, ...keep].join("\n"); toast("បានដាក់រូបថ្មី — សូមចុចរក្សាទុកម្ហូប", "ok"); };
+
+const u = tg?.initDataUnsafe?.user;
+$("who").textContent = u ? `${[u.first_name, u.last_name].filter(Boolean).join(" ")}${u.username ? "  @" + u.username : ""}  (ID ${u.id})` : "មិនទាន់ភ្ជាប់ Telegram";
+
+async function pwLogin() {
+  const pw = $("pw-in").value; if (!pw) return;
+  $("pw-go").disabled = true; $("pw-err").textContent = "";
+  const r = await admin({ action: "login", password: pw });
+  $("pw-go").disabled = false;
+  if (r.error) { $("pw-err").textContent = r.error; return; }
+  admToken = r.data.token || ""; try { localStorage.setItem("adm_token", admToken); } catch (e) {}
+  $("pw-in").value = ""; $("pw-gate").classList.remove("show");
+  refresh(); if (dlLoaded) loadDelivery();
+}
+$("pw-go").onclick = pwLogin;
+$("pw-in").addEventListener("keydown", e => { if (e.key === "Enter") pwLogin(); });
+$("pw-out").onclick = () => { admToken = ""; try { localStorage.removeItem("adm_token"); } catch (e) {} showPw(); };
+if (hasTG) {   // locked by default: the dashboard stays covered until the server says yes
+  showPw(); $("pw-in").disabled = true; $("pw-go").disabled = true; $("pw-err").textContent = "កំពុងពិនិត្យ…";
+  admin({ action: "ping" }).then(r => {
+    $("pw-in").disabled = false; $("pw-go").disabled = false;
+    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; }
+    else $("pw-err").textContent = (r.error && !/ពាក្យសម្ងាត់/.test(r.error)) ? r.error : "";
+  });
+}
+
+if (!hasTG) {
+  $("gate").classList.add("show");
+  $("gate-view").onclick = () => { viewOnly = true; $("gate").classList.remove("show"); toast("របៀបមើលប៉ុណ្ណោះ"); };
+}
+refresh();
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --- SUPABASE REALTIME BROADCAST RELOAD ---
+const adminChannel = supa.channel('admin-actions', {
+  config: { broadcast: { self: false } }
+});
+
+adminChannel.subscribe(status => {
+  if (status === 'SUBSCRIBED') {
+    console.log("Connected to Realtime broadcast channel.");
+  }
+});
+
+// Function to trigger reload on all user pages
+async function triggerReloadForAllUsers() {
+  if (viewOnly || !hasTG) {
+    toast("មុខងារនេះសម្រាប់តែអ្នកគ្រប់គ្រងប៉ុណ្ណោះ", "err");
+    return;
+  }
+  
+  await adminChannel.send({
+    type: 'broadcast',
+    event: 'force_reload',
+    payload: { timestamp: Date.now() }
+  });
+  
+  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!(Reload page)", "ok");
+  hapticN("success");
+}
+
+// Attach event listener to a button (You can place this button anywhere in your admin HTML)
+// Example: <button class="btn btn-p" id="btn-reload-all">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
+
+
+
+/* =====================================================
+   TELEGRAM LOGIN REQUIREMENT
+   ===================================================== */
+async function loadLoginSetting() {
+  const { data } = await supa.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
+  $("req-login").checked = !(data && (data.value === false || data.value === "false"));
+}
+$("req-login").addEventListener("change", async (e) => {
+  const on = e.target.checked;
+  const r = await admin({ action: "update_setting", key: "require_telegram_login", value: on });
+  if (r.error) { e.target.checked = !on; toast(r.error, "bad"); return; }
+  toast(on ? "បានបើក៖ ត្រូវចូលតាម Telegram" : "បានបិទ៖ កម្មង់បានដោយសេរី", "ok");
+});
+
+loadLoginSetting();
+
+/* ===== PAID ORDERS + TRACKING STAGE ===== */
+const STAGES = [["new", "ថ្មី"], ["preparing", "កំពុងរៀបចំ"], ["ready", "ហាងបានរៀបចំ"], ["done", "បានយកអីវ៉ាន់"]];
+async function loadOrders() {
+  const box = $("ord-list");
+  const r = await admin({ action: "list_orders" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.orders || [];
+  if (!rows.length) { box.textContent = "មិនទាន់មានការកម្មង់ទេ"; return; }
+  box.innerHTML = rows.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
+      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${STAGES.map(([k, l]) =>
+        `<button class="btn ${o.fulfillment === k ? "btn-p" : "btn-g"} btn-s" data-id="${esc(o.tran_id)}" data-f="${k}">${l}</button>`).join("")}</div>
+    </div>`;
+  }).join("");
+  box.querySelectorAll("button[data-f]").forEach(b => b.addEventListener("click", async () => {
+    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: b.dataset.f });
+    if (res.error) toast(res.error, "bad"); else { toast("បានរក្សាទុក", "ok"); loadOrders(); }
+  }));
+}
+$("ord-refresh").addEventListener("click", loadOrders);
+if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
+
+/* ===== DELIVERY: drivers + dispatching ===== */
+let DL = { orders: [], requests: [], drivers: [] };
+const DSTAT = { not_yet: "មិនទាន់ដឹក", delivering: "កំពុងដឹក", delivered: "បានទទួលអីវ៉ាន់" };
+const dnorm = s => !s || s === "pickup" ? "not_yet" : s === "arrived" ? "delivering" : s;   // old values -> nearest of the 3 stages
+let dlLoaded = false;;
+const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
+
+async function loadDelivery() {
+  const r = await admin({ action: "list_delivery" });
+  if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
+  DL = { orders: r.data.orders || [], requests: r.data.requests || [], drivers: r.data.drivers || [] };
+  dlLoaded = true;
+  const keep = {}; document.querySelectorAll("#dl-list select").forEach(x => { if (x.value) keep[x.id] = x.value; });
+  renderDrivers(); renderDelivery();
+  Object.keys(keep).forEach(k => { const x = $(k); if (x) x.value = keep[k]; });
+}
+function renderDrivers() {
+  const box = $("drv-list");
+  if (!DL.drivers.length) { box.textContent = "មិនទាន់មានអ្នកដឹកទេ"; return; }
+  const live = DL.drivers.filter(d => !d.blocked && d.is_active).length;
+  const off = DL.drivers.filter(d => !d.blocked && !d.is_active).length;
+  const busy = d => DL.orders.some(o => o.driver_id === d.id && o.dispatch === "approved" && dnorm(o.delivery_status) !== "delivered");
+  const seen = t => { try { return new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } };
+  const sorted = DL.drivers.slice().sort((x, y) => (Number(!x.blocked && x.is_active) < Number(!y.blocked && y.is_active)) - (Number(!x.blocked && x.is_active) > Number(!y.blocked && y.is_active)));
+  box.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-weight:700;color:var(--ink)">
+      <span style="padding:5px 12px;border-radius:99px;background:#d9f2ee;color:#0f766e">🟢 សកម្ម ${live}</span>
+      <span style="padding:5px 12px;border-radius:99px;background:#eceff3;color:#667">⚪ បិទ ${off}</span></div>` +
+    sorted.map(d => {
+      const on = !d.blocked && d.is_active;
+      const pill = d.blocked ? ["⛔ ត្រូវបានបិទ", "#fde8e8", "#c62828"] : on ? ["🟢 សកម្ម (ON)", "#d9f2ee", "#0f766e"] : ["⚪ បិទ (OFF)", "#eceff3", "#667"];
+      return `
+    <div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:700">${esc(d.name)} <span class="muted">· ID ${esc(d.login_id)}</span></div>
+        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${pill[1]};color:${pill[2]};white-space:nowrap">${pill[0]}</span></div>
+      <div class="muted">${busy(d) ? "🛵 កំពុងមានការងារដឹក" : on ? "រង់ចាំការងារ" : ""}${d.last_seen ? " · ឃើញចុងក្រោយ " + esc(seen(d.last_seen)) : ""}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-g btn-s" data-d="${d.blocked ? "unblock" : "block"}" data-id="${d.id}">${d.blocked ? "បើកវិញ" : "បិទ"}</button>
+        <button class="btn btn-g btn-s" data-d="pw" data-id="${d.id}">ប្ដូរពាក្យសម្ងាត់</button>
+        <button class="btn btn-d btn-s" data-d="del" data-id="${d.id}">លុប</button>
+      </div></div>`;
+    }).join("");
+}
+function trackBox(o) {
+  const id = esc(o.tran_id);
+  if (!o.track_code) return `<div style="margin:6px 0">🔢 លេខតាមដាន: <span class="muted">មិនទាន់មាន</span> <button class="btn btn-p btn-s" data-a="tcnew" data-id="${id}">➕ បង្កើតលេខ</button> <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="">✏️ វាយលេខខ្លួនឯង</button></div>`;
+  return `<div style="margin:6px 0">🔢 លេខតាមដាន: <b style="font-size:15px;letter-spacing:1px">${esc(o.track_code)}</b>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-p btn-s" data-a="tccopy" data-c="${esc(o.track_code)}" data-n="${esc(o.customer_name)}">📋 ចម្លងសារផ្ញើអតិថិជន</button>
+      <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="${esc(o.track_code)}">✏️ កែលេខ</button>
+      <button class="btn btn-d btn-s" data-a="tcdel" data-id="${id}">🗑 លុបលេខ</button></div></div>`;
+}
+function renderDelivery() {
+  const box = $("dl-list");
+  if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ"; return; }
+  const usable = DL.drivers.filter(d => !d.blocked).sort((x, y) => Number(y.is_active) - Number(x.is_active));
+  box.innerHTML = DL.orders.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    const map = o.lat != null ? `https://www.google.com/maps?q=${o.lat},${o.lng}` : (o.location_link || "");
+    const reqs = DL.requests.filter(q => q.tran_id === o.tran_id);
+    let state = "", actions = "";
+    if (o.dispatch === "approved") {
+      const cur = dnorm(o.delivery_status);
+      state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b>` +
+        `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${Object.entries(DSTAT).map(([k, l]) =>
+          `<span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${k === cur ? "var(--brand,#0f766e)" : "#eceff3"};color:${k === cur ? "#fff" : "#667"}">${k === cur ? "● " : ""}${l}</span>`).join("")}</div>` +
+        `<div class="muted" style="margin-top:4px">📡 ស្ថានភាពមកពីអ្នកដឹកចុចក្នុង app (admin មិនអាចកែបានទេ)</div>`;
+      if (cur === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
+      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — អាចលុបបាន</div>` +
+        `<button class="btn btn-d btn-s" data-a="delorder" data-id="${esc(o.tran_id)}">🗑 លុបការដឹកនេះ</button>` +
+        `<button class="btn btn-d btn-s" data-a="deldriver" data-id="${esc(o.tran_id)}" data-drv="${esc(o.driver_id)}">🗑 លុបអ្នកដឹក ${esc(drvName(o.driver_id))}</button>`;
+    } else {
+      state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
+      actions = (o.dispatch === "open"
+        ? `<button class="btn btn-g btn-s" data-a="unsend" data-id="${esc(o.tran_id)}">↩️ ដកចេញពី app</button>`
+        : `<button class="btn btn-p btn-s" data-a="send" data-id="${esc(o.tran_id)}">📤 ផ្ញើទៅ Delivery app</button>`);
+      actions += `<div style="display:flex;gap:6px;width:100%;margin-top:6px"><select id="sel-${esc(o.tran_id)}" style="flex:1;${"border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:var(--ink)"}">
+          <option value="">— ជ្រើសអ្នកដឹក —</option>${usable.map(d => `<option value="${d.id}">${d.is_active ? "🟢" : "⚪"} ${esc(d.name)}</option>`).join("")}</select>
+          <button class="btn btn-p btn-s" data-a="approve" data-id="${esc(o.tran_id)}">✅ អនុម័ត</button></div>`;
     }
-    new MutationObserver(sync).observe(tot, { childList: true, characterData: true, subtree: true });
-    sync();
-  })();
-  </script>
+    const reqHtml = reqs.length ? `<div style="margin-top:6px"><div class="muted">🙋 អ្នកស្នើសុំ:</div>${reqs.map(q =>
+      `<button class="btn btn-g btn-s" style="margin:3px 4px 0 0" data-a="approve" data-id="${esc(o.tran_id)}" data-drv="${q.driver_id}">✅ ${esc(drvName(q.driver_id))}</button>`).join("")}</div>` : "";
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)}</div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} <button class="btn btn-g btn-s" style="padding:2px 8px" data-a="phone" data-id="${esc(o.tran_id)}" data-p="${esc(o.phone)}">✏️ កែលេខ</button></div>
+      <div style="font-size:12.5px;margin:4px 0">${items}</div>
+      <div class="muted">📍 ${esc(o.address || "—")} ${map ? `· <a href="${esc(map)}" target="_blank" rel="noopener">🗺️ មើលផែនទី (Pin)</a>` : ""}</div>
+      ${trackBox(o)}
+      <div style="margin:6px 0">${state}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div>${reqHtml}</div>`;
+  }).join("");
+}
+async function dlAct(body, okMsg) {
+  const r = await admin(body);
+  if (r.error) toast(r.error, "bad"); else { toast(okMsg || "បានរក្សាទុក", "ok"); loadDelivery(); }
+}
+$("dl-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const id = b.dataset.id, act = b.dataset.a;
+  if (act === "phone") { const p = prompt("លេខទូរស័ព្ទថ្មី (សម្រាប់ទាក់ទងអ្នកទទួល):", b.dataset.p || ""); if (p) dlAct({ action: "edit_order_phone", tran_id: id, phone: p }); }
+  else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
+  else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
+  else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
+  else if (act === "tcnew") dlAct({ action: "set_track_code", tran_id: id }, "បានបង្កើតលេខតាមដាន");
+  else if (act === "tcedit") { const v = prompt("លេខតាមដាន (៤-១២ តួ អក្សរ ឬលេខ):", b.dataset.c || ""); if (v) dlAct({ action: "set_track_code", tran_id: id, code: v }, "បានរក្សាទុកលេខ"); }
+  else if (act === "tcdel") { if (confirm("លុបលេខតាមដាននេះ? អតិថិជននឹងមិនអាចមើលតាមលេខនេះបានទៀតទេ")) dlAct({ action: "set_track_code", tran_id: id, clear: true }, "បានលុបលេខ"); }
+  else if (act === "tccopy") {
+    const msg = `សួស្តី ${b.dataset.n || ""}! លេខតាមដានការកម្មង់របស់អ្នកក្នុង Epheap app គឺ ${b.dataset.c}\nសូមបញ្ចូលវាក្នុង «🔎 តាមដានអីវ៉ាន់» ដើម្បីមើលស្ថានភាព។ អរគុណ!`;
+    (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(() => toast("បានចម្លងសារ", "ok")).catch(() => prompt("ចម្លងសារនេះ:", msg));
+  }
+  else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
+  else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
+  else if (act === "approve") {
+    const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
+    if (!drv) { toast("សូមជ្រើសអ្នកដឹកជាមុន", "bad"); return; }
+    if (confirm("អនុម័តអ្នកដឹកនេះសម្រាប់កញ្ចប់នេះ?")) dlAct({ action: "approve_driver", tran_id: id, driver_id: Number(drv) }, "បានអនុម័ត");
+  }
+});
+setInterval(() => {   // live refresh of what the drivers are doing
+  if (dlLoaded && !document.hidden && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#dl-list"))) loadDelivery();
+}, 10000);
+$("drv-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-d]"); if (!b) return;
+  const id = Number(b.dataset.id), act = b.dataset.d;
+  if (act === "block" || act === "unblock") dlAct({ action: "set_driver", id, blocked: act === "block" });
+  else if (act === "pw") { const p = prompt("ពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៦ តួ):"); if (p) dlAct({ action: "set_driver", id, password: p }); }
+  else if (act === "del" && confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id, delete: true });
+});
+$("drv-add").addEventListener("click", async () => {
+  const r = await admin({ action: "create_driver", name: $("drv-name").value.trim(), login_id: $("drv-id").value.trim(), password: $("drv-pw").value });
+  if (r.error) { toast(r.error, "bad"); return; }
+  $("drv-name").value = $("drv-id").value = $("drv-pw").value = ""; toast("បានបន្ថែមអ្នកដឹក", "ok"); loadDelivery();
+});
+$("dl-refresh").addEventListener("click", loadDelivery);
+document.querySelector('.tab[data-tab="delivery"]').addEventListener("click", loadDelivery);
+setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
+</script>
 </body>
 </html>
