@@ -456,7 +456,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="wrap">
     <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
     <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
-    <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន</button>
+    <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន<span class="dot" id="dl-dot"></span></button>
     <button class="tab" data-tab="pay"><span class="ic">💵</span>ប្រាក់អ្នកដឹក<span class="dot" id="pay-dot"></span></button>
     <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
   </div>
@@ -1233,7 +1233,7 @@ async function pwLogin() {
   if (r.error) { $("pw-err").textContent = r.error; return; }
   admToken = r.data.token || ""; try { localStorage.setItem("adm_token", admToken); } catch (e) {}
   $("pw-in").value = ""; $("pw-gate").classList.remove("show");
-  refresh(); if (dlLoaded) loadDelivery(); loadPayouts();
+  refresh(); if (dlLoaded) loadDelivery(); loadPayouts(); pollDlBadge();
 }
 $("pw-go").onclick = pwLogin;
 $("pw-in").addEventListener("keydown", e => { if (e.key === "Enter") pwLogin(); });
@@ -1242,7 +1242,7 @@ if (hasTG) {   // locked by default: the dashboard stays covered until the serve
   showPw(); $("pw-in").disabled = true; $("pw-go").disabled = true; $("pw-err").textContent = "កំពុងពិនិត្យ…";
   admin({ action: "ping" }).then(r => {
     $("pw-in").disabled = false; $("pw-go").disabled = false;
-    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; loadPayouts(); }
+    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; loadPayouts(); pollDlBadge(); }
     else $("pw-err").textContent = (r.error && !/ពាក្យសម្ងាត់/.test(r.error)) ? r.error : "";
   });
 }
@@ -1375,11 +1375,26 @@ const dnorm = s => !s || s === "pickup" ? "not_yet" : s === "arrived" ? "deliver
 let dlLoaded = false;;
 const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
 
+/* red number on the delivery tab = paid delivery orders that still have NO approved driver */
+let dlBadgePrev = null;
+function updateDlBadge(orders) {
+  const n = (orders || []).filter(o => o.dispatch !== "approved").length;
+  const dot = $("dl-dot"); dot.textContent = n > 99 ? "99+" : n; dot.style.display = n ? "flex" : "none";
+  if (dlBadgePrev !== null && n > dlBadgePrev) { toast("🛵 មានការកម្មង់ដឹកថ្មី " + (n - dlBadgePrev), "ok"); try { navigator.vibrate && navigator.vibrate(200); } catch (e) {} }
+  dlBadgePrev = n;
+}
+async function pollDlBadge() {   // keeps the number fresh even when the delivery tab is not open
+  if (document.hidden) return;
+  const r = await admin({ action: "list_delivery" });
+  if (!r.error && r.data) updateDlBadge(r.data.orders);
+}
+setInterval(pollDlBadge, 15000);
 async function loadDelivery() {
   const r = await admin({ action: "list_delivery" });
   if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
   DL = { orders: r.data.orders || [], requests: r.data.requests || [], drivers: r.data.drivers || [] };
   dlLoaded = true;
+  updateDlBadge(DL.orders);
   const keep = {}; document.querySelectorAll("#dl-list select").forEach(x => { if (x.value) keep[x.id] = x.value; });
   renderDrivers(); renderDelivery();
   Object.keys(keep).forEach(k => { const x = $(k); if (x) x.value = keep[k]; });
