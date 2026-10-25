@@ -11,7 +11,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700;800&family=Battambang:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;500;700&display=swap">
   <style>
     :root {
       --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
@@ -27,7 +27,7 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body { margin: 0; }
     body {
-      font-family: 'Noto Sans Khmer', 'Battambang', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-family: 'Battambang', 'Noto Sans Khmer', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif;
       -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
       background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.65;
       padding-bottom: calc(108px + var(--safe-b));
@@ -36,6 +36,10 @@
     input, textarea { user-select: text; -webkit-user-select: text; font: inherit; color: inherit; }
     button { font: inherit; color: inherit; }
     h1, h2, h3, h4, p, label, select, input, textarea, button { font-family: inherit; }
+  /* Khmer typography: Battambang everywhere (Noto Sans Khmer as backup) */
+  :root { --font-head: 'Battambang', 'Noto Sans Khmer', system-ui, sans-serif; }
+  body { font-weight: 400; line-height: 1.7; letter-spacing: 0; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4, b, strong, button, [class*="price"], [class*="title"], [class*="name"] { font-family: var(--font-head); }
     button:focus-visible, input:focus-visible, textarea:focus-visible, [onclick]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
     .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
 
