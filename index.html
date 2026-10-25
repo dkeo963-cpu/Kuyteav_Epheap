@@ -1786,25 +1786,24 @@
       }
     }
 
-    // 3 map looks (same as the driver app): satellite with road names, clear street map, light road map
+    // 2 map looks (same as the driver app): satellite with road names, clear street map (all from Esri, no API key)
     const MAP_LOOKS = [
       ['🛰️ ផ្កាយរណប', () => [
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Imagery © Esri' }),
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: '© CARTO' })]],
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Esri' }),
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Esri' })]],
       ['🗺️ ផ្លូវច្បាស់', () => [
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Tiles © Esri, OpenStreetMap' })]],
-      ['🌤️ ស្រាល', () => [
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: '© OpenStreetMap © CARTO' })]]
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Tiles © Esri, OpenStreetMap' })]]
     ];
     let mapLookIdx = 0, mapLookGroup = null;   // 0 = satellite is the default; the customer's last choice is remembered
-    try { const v = parseInt(localStorage.getItem('cust_map'), 10); if (!isNaN(v)) mapLookIdx = ((v % MAP_LOOKS.length) + MAP_LOOKS.length) % MAP_LOOKS.length; } catch (e) {}
+    try { const v = parseInt(localStorage.getItem('cust_map2'), 10); if (!isNaN(v)) mapLookIdx = ((v % MAP_LOOKS.length) + MAP_LOOKS.length) % MAP_LOOKS.length; } catch (e) {}
     function setMapLook(i) {
       if (!pickerMap) return;
       mapLookIdx = i;
       if (mapLookGroup) pickerMap.removeLayer(mapLookGroup);
       mapLookGroup = L.layerGroup(MAP_LOOKS[i][1]()).addTo(pickerMap);
       const b = document.getElementById('map-lyr'); if (b) b.textContent = MAP_LOOKS[i][0];
-      try { localStorage.setItem('cust_map', String(i)); } catch (e) {}
+      try { localStorage.setItem('cust_map2', String(i)); } catch (e) {}
     }
     function cycleMapLook() {
       if (gMap) { gMap.setMapTypeId(gMap.getMapTypeId() === 'roadmap' ? 'hybrid' : 'roadmap'); return; }
