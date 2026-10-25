@@ -863,8 +863,11 @@
             <div style="font-size: 0.85rem; font-weight: 700; color: var(--sub); margin-bottom: 6px;">🛵 គោលការណ៍សេវាដឹកជញ្ជូន</div>
             <div style="font-size: 13px; font-weight: 600; color: var(--ink);">
               • ចម្ងាយក្រោម ២០០ម៖ <b>ឥតគិតថ្លៃ (Free)</b><br>
-              • ចម្ងាយពី ២០០ម ដល់ ២.០ គីឡូម៉ែត្រ៖ <b>$0.25</b><br>
-              • ចម្ងាយចាប់ពី ២.០ ដល់ ៥.០ គីឡូម៉ែត្រ៖ <b>$0.50</b><br>
+              • ចម្ងាយពី ២០០ម ដល់ ១ គីឡូម៉ែត្រ៖ <b>$0.25</b><br>
+              • ចម្ងាយពី ១ ដល់ ២ គីឡូម៉ែត្រ៖ <b>$0.38</b><br>
+              • ចម្ងាយពី ២ ដល់ ៣ គីឡូម៉ែត្រ៖ <b>$0.50</b><br>
+              • ចម្ងាយពី ៣ ដល់ ៤ គីឡូម៉ែត្រ៖ <b>$0.75</b><br>
+              • ចម្ងាយពី ៤ ដល់ ៥ គីឡូម៉ែត្រ៖ <b>$1.00</b><br>
               • ហាងកំណត់សេវាដឹកជញ្ជូនក្នុងរង្វង់អតិបរមា <b>៥ គីឡូម៉ែត្រ</b> ប៉ុណ្ណោះ។
             </div>
           </div>
@@ -1090,6 +1093,15 @@
     let tempLng = STORE_LNG;
     let storeMarker = null;
 
+    // Delivery fee by distance in km. Must match smart-function. USD has no half-cents, so $0.375 is charged as $0.38.
+    function feeForDistance(km) {
+      if (km < 0.2) return 0.00;   // under 200 m: free
+      if (km <= 1) return 0.25;    // 200 m - 1 km
+      if (km <= 2) return 0.38;    // 1 - 2 km
+      if (km <= 3) return 0.50;    // 2 - 3 km
+      if (km <= 4) return 0.75;    // 3 - 4 km
+      return 1.00;                 // 4 - 5 km
+    }
     function calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * (Math.PI / 180);
@@ -1872,7 +1884,7 @@
       clientLat = tempLat;
       clientLng = tempLng;
 
-      currentDeliveryFee = distance < 0.2 ? 0.00 : (distance <= 2.0 ? 0.25 : 0.50);
+      currentDeliveryFee = feeForDistance(distance);
       document.getElementById('input-address').value = `${clientLat.toFixed(5)}, ${clientLng.toFixed(5)}`;
       gpsLink = `https://maps.google.com/?q=${clientLat},${clientLng}`;
       isLocationPinned = true;
