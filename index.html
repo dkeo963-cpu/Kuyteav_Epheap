@@ -659,11 +659,10 @@
     .ab-item.open .ab-body { display: block; }
     .ab-body > div { margin-bottom: 14px; }
   
-    /* About window: header and close button stay put, only the list scrolls */
-    #info-modal .modal-card { display: flex; flex-direction: column; max-height: 85vh; max-height: 85dvh; overflow: hidden; }
-    #info-modal .modal-card > * { flex-shrink: 0; }
-    #info-modal .modal-card { max-height: calc(var(--vh, 1vh) * 85); }
-    #info-modal .ab-list { touch-action: pan-y; flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding-right: 4px; }
+    /* About window: ONE scroller (the whole card); the close button stays pinned at the bottom */
+    #info-modal .modal-card { max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; padding-bottom: 0; }
+    #info-modal .ab-list { max-height: none; overflow: visible; }
+    #info-modal .modal-card > div:last-child { position: sticky; bottom: 0; background: var(--surface); padding-bottom: calc(14px + var(--safe-b)) !important; margin-top: 14px !important; }
   </style>
 </head>
 <body>
