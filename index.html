@@ -620,6 +620,12 @@
 
     .food-card.flash { animation: cardFlash 2.2s ease; }
     @keyframes cardFlash { 0%,100% { box-shadow: 0 0 0 0 rgba(15,118,110,0); } 20%,70% { box-shadow: 0 0 0 4px rgba(15,118,110,.55); border-color: var(--brand); } }
+
+    .food-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .tag-disc, .tag-free { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+    .tag-disc { background: #fee2e2; color: #b91c1c; }
+    .tag-free { background: #dcfce7; color: #166534; }
+    .food-price s { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -1236,7 +1242,15 @@
     // Auto-sliding multi-banner logic
     const bannerImages = ["./images/banner1.png", "./images/banner2.png", "./images/banner1.png"];
     const imgUrl = u => String(u).startsWith('tg:') ? SUPABASE_URL + '/functions/v1/tg-image?f=' + encodeURIComponent(String(u).slice(3)) : u;
-    let promoItemKey = '';   // food the promo button jumps to (set in admin)
+    // --- discount + free delivery helpers (values come from the admin dashboard) ---
+    function discPct(it) { return (it && it.discount_active === true && Number(it.discount_percent) > 0) ? Math.min(Number(it.discount_percent), 99) : 0; }
+    function itemPrice(it, size) { const b = parseFloat(it && it.sizes ? it.sizes[size] : 0) || 0; const p = discPct(it); return p ? Math.round(b * (1 - p / 100) * 100) / 100 : b; }
+    function hasFreeDel() { return cart.some(c => { const m = menuItems.find(x => x.item_key === c.id); return m && m.free_delivery === true; }); }
+    function effFee() { return hasFreeDel() ? 0 : currentDeliveryFee; }
+    function priceHtml(it, size) {
+      const p = discPct(it), now = '$' + itemPrice(it, size).toFixed(2);
+      return p ? `<s style="color:var(--sub);font-weight:500;font-size:.8em">$${parseFloat(it.sizes[size]).toFixed(2)}</s> ${now}` : now;
+    }
     let catImages = {};   // category pictures set from the admin page (stored in Telegram)
     let currentBannerIndex = 0;
     let bannerInterval = null;
@@ -1245,12 +1259,11 @@
       const slider = document.getElementById('banner-slider');
       let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
       try {
-        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'promo_item', 'greet_text']);
+        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'greet_text']);
         const row = k => (data || []).find(r => r.key === k);
         let ci = row('category_images') && row('category_images').value; if (typeof ci === 'string') ci = JSON.parse(ci);
         if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
         const sv = k => { let x = row(k) && row(k).value; try { if (typeof x === 'string' && x.startsWith('"')) x = JSON.parse(x); } catch (e) {} return typeof x === 'string' ? x : ''; };
-        promoItemKey = sv('promo_item');
         const gt = sv('greet_text'); if (gt) { const g = document.querySelector('.greet-q'); if (g) g.textContent = gt; }
         let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
@@ -1279,6 +1292,7 @@
     function renderCategories() {
       const container = document.getElementById('category-cards-container');
       const categories = [
+        ...(menuItems.some(m => discPct(m)) ? [{ key: 'discount', name: 'បញ្ចុះតម្លៃ', icon: '🏷️' }] : []),
         { key: 'kuy_teav', name: 'គុយទាវ', icon: '🍜' },
         { key: 'rice', name: 'បាយ', icon: '🍚' },
         { key: 'other', name: 'នំបាញ់ចុក', icon: '🥢' },
@@ -1288,7 +1302,7 @@
         let pic = catImages[cat.key] ? imgUrl(catImages[cat.key]) : '';
         try {
           if (pic) throw 0;
-          const it = menuItems.find(m => m.category === cat.key && getItemImages(m)[0]);
+          const it = menuItems.find(m => (cat.key === 'discount' ? discPct(m) : m.category === cat.key) && getItemImages(m)[0]);
           if (it) pic = getItemImages(it)[0];
         } catch (e) {}
         const inner = pic
@@ -1325,12 +1339,12 @@
       const container = document.getElementById('food-list');
       const search = document.getElementById('search-input').value.toLowerCase();
       const filtered = menuItems.filter(item => {
-        const matchesCat = currentCategory === 'all' || item.category === currentCategory;
+        const matchesCat = currentCategory === 'all' || (currentCategory === 'discount' ? discPct(item) > 0 : item.category === currentCategory);
         const matchesSearch = item.name_kh.toLowerCase().includes(search) || item.name_en.toLowerCase().includes(search);
         return matchesCat && matchesSearch;
       });
 
-      const catNames = { kuy_teav: 'គុយទាវ', rice: 'បាយ', other: 'នំបាញ់ចុក', drinks: 'ភេសជ្ជៈ' };
+      const catNames = { discount: 'បញ្ចុះតម្លៃ', kuy_teav: 'គុយទាវ', rice: 'បាយ', other: 'នំបាញ់ចុក', drinks: 'ភេសជ្ជៈ' };
       const secT = document.getElementById('sec-title'), secC = document.getElementById('sec-count');
       if (secT) secT.textContent = catNames[currentCategory] || 'មុខម្ហូបទាំងអស់';
       if (secC) secC.textContent = filtered.length + ' មុខ';
@@ -1360,9 +1374,10 @@
             <div class="food-body">
               <div class="food-name">${item.name_kh} ${item.is_popular ? '<span class="pop-badge">ពេញនិយម</span>' : ''}</div>
               <div class="food-sub">${item.name_en}</div>
+              ${(discPct(item) || item.free_delivery === true) ? `<div class="food-tags">${discPct(item) ? `<span class="tag-disc">🏷 -${discPct(item)}%</span>` : ''}${item.free_delivery === true ? '<span class="tag-free">🛵 ដឹកឥតគិតថ្លៃ</span>' : ''}</div>` : ''}
             </div>
             <div class="food-side${totalInCart > 0 ? ' in-cart' : ''}">
-              <span class="food-price">$${parseFloat(item.sizes[firstSize]).toFixed(2)}</span>
+              <span class="food-price">${priceHtml(item, firstSize)}</span>
               ${totalInCart === 0
                 ? `<button type="button" class="add-btn" aria-label="Add" ${!isAvailable ? 'disabled' : ''} onclick="openSizeModal('${item.item_key}')">+</button>`
                 : `<div class="card-stepper">
@@ -1428,7 +1443,7 @@
       document.getElementById('size-options-container').innerHTML = sizeKeys.map(sizeKey => `
         <div class="size-tile ${sizeKey === selectedSize ? 'selected' : ''}" id="size-tile-${sizeKey}" onclick="selectSizeOption('${sizeKey}')">
           <span>ជ្រើសរើស :  ${sizeKey.toUpperCase()}</span>
-          <span style="color: var(--brand);">$${parseFloat(activeModalItem.sizes[sizeKey]).toFixed(2)}</span>
+          <span style="color: var(--brand);">${priceHtml(activeModalItem, sizeKey)}</span>
         </div>
       `).join('');
       document.getElementById('size-modal').style.display = 'flex';
@@ -1495,12 +1510,14 @@
         return; 
       }
       triggerBtn.disabled = false;
-      const subtotal = cart.reduce((sum, c) => sum + parseFloat(menuItems.find(m => m.item_key === c.id)?.sizes[c.size] || 0) * c.quantity, 0);
-      const grandTotal = subtotal + (selectedOrderType === 'delivery' ? currentDeliveryFee : 0);
+      const subtotal = cart.reduce((sum, c) => sum + itemPrice(menuItems.find(m => m.item_key === c.id), c.size) * c.quantity, 0);
+      const grandTotal = subtotal + (selectedOrderType === 'delivery' ? effFee() : 0);
       document.getElementById('trigger-total').innerText = `$${grandTotal.toFixed(2)}`;
       document.getElementById('final-total').innerText = `$${grandTotal.toFixed(2)}`;
       document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
-      document.getElementById('summary-delivery').innerText = currentDeliveryFee === 0 ? 'ឥតគិតថ្លៃ (Free)' : `$${currentDeliveryFee.toFixed(2)}`;
+      document.getElementById('summary-delivery').innerHTML = hasFreeDel()
+        ? (currentDeliveryFee > 0 ? `<s style="color:var(--sub)">$${currentDeliveryFee.toFixed(2)}</s> ` : '') + '<b style="color:var(--ok)">ឥតគិតថ្លៃ</b> · ម្ហូបនេះដឹកឥតគិតថ្លៃថ្ងៃនេះ'
+        : (currentDeliveryFee === 0 ? 'ឥតគិតថ្លៃ (Free)' : `$${currentDeliveryFee.toFixed(2)}`);
       document.getElementById('summary-grandtotal').innerText = `$${grandTotal.toFixed(2)}`;
       
       renderMenu();
@@ -1526,7 +1543,7 @@
             <div>
               <div style="font-weight: 700;">${product?.name_kh || c.id} (${c.size.toUpperCase()})</div>
               ${optionsHtml}
-              <div style="font-size: 0.8rem; color: var(--sub);">$${product?.sizes[c.size]} × ${c.quantity}</div>
+              <div style="font-size: 0.8rem; color: var(--sub);">$${itemPrice(product, c.size).toFixed(2)} × ${c.quantity}</div>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
               <div class="qty-stepper">
@@ -1534,7 +1551,7 @@
                 <span style="font-weight: 800; font-size: 0.9rem;">${c.quantity}</span>
                 <button class="stepper-btn" onclick="changeQty(${idx}, 1)">+</button>
               </div>
-              <span style="font-weight: 800; color: var(--brand);">$${(parseFloat(product?.sizes[c.size] || 0) * c.quantity).toFixed(2)}</span>
+              <span style="font-weight: 800; color: var(--brand);">$${(itemPrice(product, c.size) * c.quantity).toFixed(2)}</span>
             </div>
           </div>
         `;
@@ -2181,16 +2198,13 @@
   // header helpers: scroll to menu + cart count badge
   function goPromo() {
     try {
-      var it = promoItemKey && menuItems.find(function (m) { return m.item_key === promoItemKey; });
-      if (!it) return goMenu();
-      currentCategory = it.category;
-      var si = document.getElementById('search-input'); if (si) si.value = '';
-      renderCategories(); renderMenu();
-      var card = document.querySelector('.food-card[data-key="' + promoItemKey + '"]');
-      if (!card) return goMenu();
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.classList.add('flash'); setTimeout(function () { card.classList.remove('flash'); }, 2200);
-    } catch (e) { goMenu(); }
+      if (menuItems.some(function (m) { return discPct(m) > 0; })) {
+        currentCategory = 'discount';
+        var si = document.getElementById('search-input'); if (si) si.value = '';
+        renderCategories(); renderMenu();
+      }
+    } catch (e) {}
+    goMenu();
   }
   function goMenu() {
     var el = document.getElementById('category-cards-container');
