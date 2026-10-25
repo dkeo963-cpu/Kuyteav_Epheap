@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{--ink:#10211f;--sub:#5d6f6c;--line:#dfe7e5;--bg:#eef2f1;--deep:#0b3d39;--brand:#0f766e;--mint:#d9f2ee;--amber:#b45309;--amber-l:#fdf1dc;--bad:#c62828;--sb:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -65,6 +66,11 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
 .tag.g{background:var(--mint);color:var(--brand)}.tag.b{background:#e8eefc;color:#3b5bdb}
 .job{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .job .amt{font-weight:800;font-size:17px;color:var(--brand);white-space:nowrap}
+#map-canvas{position:relative;z-index:0;isolation:isolate;background:#e8eeec}
+.me-dot{width:20px;height:20px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.45);position:relative}
+.me-dot::after{content:"";position:absolute;inset:-9px;border-radius:50%;background:rgba(26,115,232,.28);animation:mePulse 1.8s ease-out infinite}
+@keyframes mePulse{0%{transform:scale(.5);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.dest-pin{font-size:30px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));transform:translate(-50%,-100%)}
 .trk{margin:0 0 12px;padding:10px 12px;border-radius:14px;font-size:13px;font-weight:700;background:var(--amber-l);color:var(--amber)}
 .trk.ok{background:var(--mint);color:var(--brand)}.trk.bad{background:#fde8e8;color:var(--bad)}
 #toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;z-index:99;max-width:90%;font-weight:600}
@@ -96,12 +102,13 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       <div id="map-empty" class="empty"><span>🗺️</span>ចុច «🗺️ ផែនទី» នៅលើការងារ ដើម្បីមើលទីតាំងអតិថិជននៅទីនេះ</div>
       <div id="map-box" class="hide">
         <div class="muted" id="map-info" style="margin:0 2px 8px"></div>
-        <div class="card" style="padding:0;overflow:hidden"><iframe id="map-frame" title="map" style="width:100%;height:58vh;border:0;display:block" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+        <div id="map-stat" style="margin:0 2px 8px;font-weight:700;color:var(--brand)"></div>
+        <div class="card" style="padding:0;overflow:hidden"><div id="map-canvas" style="height:58vh;width:100%"></div></div>
         <div class="acts">
-          <button class="chip" id="map-me" style="border:0;cursor:pointer;font:inherit">📍 ពីទីតាំងខ្ញុំ</button>
+          <button class="chip" id="map-me" style="border:0;cursor:pointer;font:inherit">🎯 តាមទីតាំងខ្ញុំ</button>
           <a class="chip" id="map-ext" target="_blank" rel="noopener">🧭 Google Maps</a>
         </div>
-        <div class="muted" style="margin:0 2px">ផែនទីនេះនៅក្នុង app — ការចែករំលែកទីតាំងបន្តដំណើរការ។ ប៊ូតុង «Google Maps» នឹងបើក app ផ្សេង ហើយទីតាំងអាចឈប់ផ្ញើ។</div>
+        <div class="muted" style="margin:0 2px">ចំណុចខៀវ = ទីតាំងអ្នក (រំកិលតាមពេលពិត) · 🏠 = អតិថិជន។ ផែនទីនេះនៅក្នុង app — ការចែករំលែកទីតាំងបន្តដំណើរការ។ ប៊ូតុង «Google Maps» នឹងបើក app ផ្សេង ហើយទីតាំងអាចឈប់ផ្ញើ។</div>
       </div>
     </section>
     <section id="p-me" class="hide">
@@ -133,6 +140,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
 </div>
 <div id="toast" class="hide"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function () {
   var API = 'https://lykgwttlhqedyrkxfoja.supabase.co/functions/v1/driver-api';
@@ -156,6 +164,8 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
     window.scrollTo(0, 0);
     if (t === 'me') loadEarnings();
+    if (t === 'map') { if (curMap) { ensureMapWatch(); setTimeout(function () { if (lmap) lmap.invalidateSize(); }, 60); } }
+    else if (!trackingId) stopMapWatch();   // save battery when the map is not on screen
   }
   document.querySelectorAll('nav button').forEach(function (b) { b.onclick = function () { setTab(b.dataset.t); }; });
 
@@ -260,37 +270,81 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     });
   }
 
-  /* in-app map: shows Google Maps inside this page, so the driver never leaves the app and live sharing keeps running */
-  var mineData = [], curMap = null;
-  function mapDest(o) { return o.lat != null && o.lng != null ? o.lat + ',' + o.lng : (o.address || ''); }
-  function mapSrc(o) {
-    var dest = mapDest(o); if (!dest) return '';
-    var base = 'https://maps.google.com/maps?output=embed&z=16&hl=km';
-    if (lastPos) return base + '&saddr=' + encodeURIComponent(lastPos.latitude + ',' + lastPos.longitude) + '&daddr=' + encodeURIComponent(dest);
-    return base + '&q=' + encodeURIComponent(dest);
-  }
+  /* in-app LIVE map (Leaflet + OpenStreetMap): the blue dot moves with the phone's GPS, like Google Maps.
+     It is part of this page, so the driver never leaves the app and live sharing to the customer keeps running. */
+  var mineData = [], curMap = null, lmap = null, meMarker = null, accCircle = null, destMarker = null, routeLine = null;
+  var mapWatchId = null, follow = true, mapFitted = false, routeBusy = false, routeFrom = null, routeAt = 0;
+  function hav(a1, o1, a2, o2) { var R = 6371, r = Math.PI / 180, dA = (a2 - a1) * r, dO = (o2 - o1) * r; var x = Math.sin(dA / 2) * Math.sin(dA / 2) + Math.cos(a1 * r) * Math.cos(a2 * r) * Math.sin(dO / 2) * Math.sin(dO / 2); return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); }
   function mapExt(o) {
     if (o.lat != null && o.lng != null) return 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng;
     if (o.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address);
     return o.location_link || '#';
   }
+  function initLeaflet() {
+    if (lmap) return true;
+    if (typeof L === 'undefined') { $('map-stat').textContent = '⚠️ មិនអាចផ្ទុកផែនទីបានទេ — សូមពិនិត្យអ៊ីនធឺណិត'; return false; }
+    lmap = L.map('map-canvas', { zoomControl: true }).setView([11.5564, 104.9282], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(lmap);
+    lmap.on('dragstart', function () { follow = false; });   // driver moved the map by hand: stop auto-centering
+    return true;
+  }
+  function stopMapWatch() { if (mapWatchId != null && navigator.geolocation) navigator.geolocation.clearWatch(mapWatchId); mapWatchId = null; }
+  function ensureMapWatch() {
+    if (!token || !curMap || trackingId || watchId != null || mapWatchId != null) return;   // while delivering, the tracking watch already feeds the map
+    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
+    mapWatchId = navigator.geolocation.watchPosition(function (p) { lastPos = p.coords; onPos(p.coords); },
+      function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ — សូមបើក GPS'); }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
+  }
+  function drawRoute(ll, dest) {
+    if (routeBusy) return; routeBusy = true; routeFrom = ll; routeAt = Date.now();
+    var url = 'https://router.project-osrm.org/route/v1/driving/' + ll[1] + ',' + ll[0] + ';' + dest[1] + ',' + dest[0] + '?overview=full&geometries=geojson';
+    fetch(url).then(function (r) { return r.json(); }).then(function (j) {
+      var rt = j && j.routes && j.routes[0]; if (!rt) throw 0;
+      var pts = rt.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
+      if (routeLine) routeLine.setLatLngs(pts); else routeLine = L.polyline(pts, { color: '#1a73e8', weight: 6, opacity: .85 }).addTo(lmap);
+      $('map-stat').textContent = '🛣️ ' + (rt.distance / 1000).toFixed(1) + ' គម · ⏱ ~' + Math.max(1, Math.round(rt.duration / 60)) + ' នាទី';
+    }).catch(function () {
+      var pts = [ll, dest];
+      if (routeLine) routeLine.setLatLngs(pts); else routeLine = L.polyline(pts, { color: '#1a73e8', weight: 4, dashArray: '8 8' }).addTo(lmap);
+      $('map-stat').textContent = '📏 ចម្ងាយត្រង់ ' + hav(ll[0], ll[1], dest[0], dest[1]).toFixed(1) + ' គម';
+    }).then(function () { routeBusy = false; });
+  }
+  function onPos(c) {   // called on EVERY GPS update: this is what makes the blue dot move
+    if (!lmap || !c) return;
+    var ll = [c.latitude, c.longitude];
+    if (meMarker) meMarker.setLatLng(ll); else meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000 }).addTo(lmap);
+    if (accCircle) { accCircle.setLatLng(ll).setRadius(Math.min(c.accuracy || 0, 200)); } else accCircle = L.circle(ll, { radius: Math.min(c.accuracy || 0, 200), color: '#1a73e8', weight: 1, fillOpacity: .1 }).addTo(lmap);
+    var dest = curMap && curMap.lat != null && curMap.lng != null ? [Number(curMap.lat), Number(curMap.lng)] : null;
+    if (!mapFitted) { mapFitted = true; if (dest) lmap.fitBounds([ll, dest], { padding: [50, 50], maxZoom: 17 }); else lmap.setView(ll, 16); }
+    else if (follow) lmap.panTo(ll);
+    if (dest && (!routeFrom || hav(routeFrom[0], routeFrom[1], ll[0], ll[1]) > 0.15 || Date.now() - routeAt > 30000)) drawRoute(ll, dest);
+  }
   function drawMap() {
     $('map-empty').classList.toggle('hide', !!curMap); $('map-box').classList.toggle('hide', !curMap);
     if (!curMap) return;
     $('map-info').innerHTML = '<b>' + esc(curMap.customer_name) + '</b>' + (curMap.address ? ' · 📍 ' + esc(curMap.address) : '');
-    $('map-frame').src = mapSrc(curMap);
     $('map-ext').href = mapExt(curMap);
+    if (!initLeaflet()) return;
+    setTimeout(function () { lmap.invalidateSize(); }, 60);
+    mapFitted = false; follow = true; routeFrom = null; $('map-stat').textContent = '';
+    if (routeLine) { lmap.removeLayer(routeLine); routeLine = null; }
+    if (destMarker) { lmap.removeLayer(destMarker); destMarker = null; }
+    if (curMap.lat != null && curMap.lng != null) {
+      destMarker = L.marker([Number(curMap.lat), Number(curMap.lng)], { icon: L.divIcon({ className: '', html: '<div class="dest-pin">🏠</div>', iconSize: [0, 0] }) }).addTo(lmap);
+      lmap.setView([Number(curMap.lat), Number(curMap.lng)], 15);
+    } else { $('map-stat').textContent = 'ℹ️ អតិថិជនមិនបានបិទជាប់ទីតាំងទេ — មើលអាសយដ្ឋានខាងលើ'; }
+    ensureMapWatch();
+    if (lastPos) onPos(lastPos);
   }
   function openMap(id) {
     var o = mineData.filter(function (x) { return x.tran_id === id; })[0];
     if (!o) return;
     curMap = o; setTab('map'); drawMap();
   }
-  $('map-me').onclick = function () {
-    if (!curMap) return;
-    if (lastPos) { drawMap(); return; }
-    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
-    navigator.geolocation.getCurrentPosition(function (p) { lastPos = p.coords; drawMap(); }, function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ'); }, { enableHighAccuracy: true, timeout: 10000 });
+  $('map-me').onclick = function () {   // re-center on me and follow again
+    if (!lmap) return;
+    follow = true;
+    if (meMarker) lmap.setView(meMarker.getLatLng(), Math.max(lmap.getZoom(), 16)); else ensureMapWatch();
   };
 
   /* live location: ONLY while the stage is "delivering".
@@ -321,7 +375,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (watchId != null) navigator.geolocation.clearWatch(watchId);
     var first = true;
     watchId = navigator.geolocation.watchPosition(function (p) {
-      lastPos = p.coords; gpsErr = null;
+      lastPos = p.coords; gpsErr = null; onPos(p.coords);
       if (first) { first = false; postPos(); }   // send the very first fix at once
       showTrk();
     }, function (err) { gpsErr = err && err.code === 1 ? 'denied' : 'err'; showTrk(); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
@@ -330,6 +384,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (trackingId === id) return;
     stopTracking(); trackingId = id; gpsErr = null; lastSent = 0;
     if (!navigator.geolocation) { gpsErr = 'err'; toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); showTrk(); return; }
+    stopMapWatch();
     watchGps();
     postTimer = setInterval(postPos, 6000);
     trkTimer = setInterval(showTrk, 2000);
@@ -341,6 +396,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     watchId = null; clearInterval(postTimer); postTimer = null; clearInterval(trkTimer); trkTimer = null; trackingId = null; lastPos = null;
     if (wake) { try { wake.release(); } catch (e) {} wake = null; }
     showTrk();
+    if (tab === 'map') ensureMapWatch();   // keep the blue dot moving after the delivery is finished
   }
   document.addEventListener('visibilitychange', function () {
     if (!trackingId) return;
