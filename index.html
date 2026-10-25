@@ -589,10 +589,28 @@
     .greet { padding: 2px 2px 12px; }
     .greet-hi { font-size: 14px; font-weight: 600; color: var(--sub); }
     .greet-q { font-size: 24px; font-weight: 800; line-height: 1.5; color: var(--ink); }
-    /* Greeting style 2: soft float up & down (style 1 = no class, stays still) */
-    .greet-q.anim-float { animation: greetFloat 2.6s ease-in-out infinite; will-change: transform; }
-    @keyframes greetFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-    @media (prefers-reduced-motion: reduce) { .greet-q.anim-float { animation: none; } }
+    /* Greeting styles 2-10 (style 1 = no class, stays still) */
+@keyframes gFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes gBounce { 0%,100% { transform: translateY(0); animation-timing-function: cubic-bezier(.3,0,.9,.6); } 45% { transform: translateY(-14px); animation-timing-function: cubic-bezier(.1,.4,.7,1); } 60% { transform: translateY(0); } 72% { transform: translateY(-4px); } 82% { transform: translateY(0); } }
+@keyframes gWobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+@keyframes gPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes gSwing { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+@keyframes gSway { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+@keyframes gJelly { 0%,100% { transform: scale(1,1); } 30% { transform: scale(1.08,.92); } 50% { transform: scale(.94,1.06); } 70% { transform: scale(1.03,.97); } }
+@keyframes gHeart { 0%,40%,100% { transform: scale(1); } 10% { transform: scale(1.08); } 20% { transform: scale(1); } 30% { transform: scale(1.08); } }
+@keyframes gTada { 0%,60%,100% { transform: scale(1) rotate(0); } 10%,20% { transform: scale(.96) rotate(-2.5deg); } 30%,50% { transform: scale(1.06) rotate(2.5deg); } 40% { transform: scale(1.06) rotate(-2.5deg); } }
+.greet-q.anim-float { animation: gFloat 2.6s ease-in-out infinite; }
+.greet-q.anim-bounce { animation: gBounce 1.8s infinite; }
+.greet-q.anim-wobble { animation: gWobble 2.4s ease-in-out infinite; }
+.greet-q.anim-pulse { animation: gPulse 2s ease-in-out infinite; }
+.greet-q.anim-swing { animation: gSwing 3s ease-in-out infinite; transform-origin: left top; }
+.greet-q.anim-sway { animation: gSway 3s ease-in-out infinite; }
+.greet-q.anim-jelly { animation: gJelly 2.2s ease-in-out infinite; }
+.greet-q.anim-heartbeat { animation: gHeart 1.8s ease-in-out infinite; }
+.greet-q.anim-tada { animation: gTada 2.6s ease-in-out infinite; }
+.greet-q[class*="anim-"] { transform-origin: left center; will-change: transform; }
+.greet-q.anim-swing { transform-origin: left top; }
+@media (prefers-reduced-motion: reduce) { .greet-q[class*="anim-"] { animation: none !important; } }
     .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 10px; }
     .sec-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--ink); }
     .sec-head span { font-size: 13px; color: var(--sub); font-weight: 600; }
@@ -1359,7 +1377,8 @@
         if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
         const sv = k => { let x = row(k) && row(k).value; try { if (typeof x === 'string' && x.startsWith('"')) x = JSON.parse(x); } catch (e) {} return typeof x === 'string' ? x : ''; };
         const gt = sv('greet_text'); if (gt) { const g = document.querySelector('.greet-q'); if (g) g.textContent = gt; }
-        const gq = document.querySelector('.greet-q'); if (gq) gq.classList.toggle('anim-float', sv('greet_anim') === 'float');
+        const gq = document.querySelector('.greet-q');
+        if (gq) { gq.className = gq.className.replace(/\banim-\S+/g, '').trim(); const ga = sv('greet_anim'); if (/^(float|bounce|wobble|pulse|swing|sway|jelly|heartbeat|tada)$/.test(ga)) gq.classList.add('anim-' + ga); }
         let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
         const lg = row('shop_logo') && row('shop_logo').value;
