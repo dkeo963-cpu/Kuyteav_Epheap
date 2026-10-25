@@ -273,10 +273,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
           <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
           <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
         </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">មុខម្ហូបប្រូម៉ូសិន (ប៊ូតុង «កម្មង់ឥឡូវ» នឹងទៅកាន់មុខម្ហូបនេះ):</label>
-          <select id="promo-item-select" style="height: 38px; width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 10px; background: #fafcfb;"><option value="">— មិនជ្រើស (ទៅកាន់ម៉ឺនុយ) —</option></select>
-        </div>
         <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
       </div>
     </div>
@@ -438,6 +434,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         <span>ស្លាក "ពេញនិយម" 🔥</span>
         <label class="sw"><input type="checkbox" id="f-pop"><span></span></label>
       </div>
+      <div class="switch-row">
+        <span>🏷 បញ្ចុះតម្លៃ (Discount)</span>
+        <label class="sw"><input type="checkbox" id="f-disc"><span></span></label>
+      </div>
+      <div id="f-disc-box">
+        <label for="f-disc-pct">បញ្ចុះតម្លៃ (%)</label>
+        <input type="number" id="f-disc-pct" min="1" max="99" inputmode="numeric" placeholder="ឧ. 20">
+        <div class="hint">តម្លៃថ្មីគណនាពីតម្លៃទំហំនីមួយៗ — ប៊ូតុង «កម្មង់ឥឡូវ» នៅទំព័រអតិថិជន នឹងបង្ហាញមុខម្ហូបដែលបើកបញ្ចុះតម្លៃ</div>
+      </div>
+      <div class="switch-row">
+        <span>🛵 ដឹកជញ្ជូនឥតគិតថ្លៃសម្រាប់មុខម្ហូបនេះ</span>
+        <label class="sw"><input type="checkbox" id="f-free"><span></span></label>
+      </div>
     </div>
     <div class="sheet-f">
       <button class="btn btn-p" id="sheet-save">រក្សាទុក</button>
@@ -596,23 +605,12 @@ $("promo-toggle").addEventListener("change", async e => {
 
 
 // ---- promo food + greeting text ----
-let PROMO_ITEM = "";
-function fillPromoItems() {
-  const sel = $("promo-item-select"); if (!sel) return;
-  sel.innerHTML = '<option value="">— មិនជ្រើស (ទៅកាន់ម៉ឺនុយ) —</option>' +
-    (items || []).map(i => `<option value="${esc(i.item_key)}">${esc(i.name_kh)}</option>`).join("");
-  sel.value = PROMO_ITEM;
-}
-async function loadPromoItem() {
-  const { data } = await supa.from("app_settings").select("key, value").in("key", ["promo_item"]);
-  let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
-  PROMO_ITEM = typeof v === "string" ? v : ""; fillPromoItems();
-}
 async function loadGreet() {
   const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text"]);
   let v = data && data[0] && data[0].value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {}
   $("greet-input").value = typeof v === "string" ? v : "";
 }
+$("f-disc").addEventListener("change", () => { $("f-disc-box").style.display = $("f-disc").checked ? "" : "none"; });
 $("greet-save").addEventListener("click", async () => {
   const r = await admin({ action: "update_setting", key: "greet_text", value: $("greet-input").value.trim() });
   toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok");
@@ -622,8 +620,6 @@ $("promo-save-btn").addEventListener("click", async () => {
   const text = $("promo-msg-input").value.trim();
   
   await admin({ action: "update_setting", key: "promo_badge", value: badge });
-  PROMO_ITEM = $("promo-item-select").value;
-  await admin({ action: "update_setting", key: "promo_item", value: PROMO_ITEM });
   const { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
   
   if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
@@ -697,7 +693,6 @@ async function loadMenu() {
     CATEGORIES.findIndex(c => c.key === a.category) - CATEGORIES.findIndex(c => c.key === b.category)
     || String(a.name_kh).localeCompare(String(b.name_kh)));
   renderAll();
-  fillPromoItems();
 }
 
 const stockOf = i => Number.isFinite(+i.stock_quantity) ? +i.stock_quantity : 0;
@@ -783,7 +778,7 @@ function renderMenu() {
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <span class="pill ok" style="background:var(--brand-l);color:var(--brand)">${esc(catLabel(i.category))}</span>
-        ${i.is_popular ? '<span class="pill pop">ពេញនិយម</span>' : ""}${badge}
+        ${i.is_popular ? '<span class="pill pop">ពេញនិយម</span>' : ""}${i.discount_active === true && i.discount_percent > 0 ? `<span class="pill ok">🏷 -${esc(i.discount_percent)}%</span>` : ""}${i.free_delivery === true ? '<span class="pill ok">🛵 ដឹកឥតគិតថ្លៃ</span>' : ""}${badge}
       </div>
       <div class="item-m">
         <div class="step">
@@ -912,6 +907,10 @@ function openItem(key) {
   $("f-cat").value = it?.category || (cat !== "all" ? cat : "kuy_teav");
   $("f-stock").value = it ? stockOf(it) : 50;
   $("f-pop").checked = !!it?.is_popular;
+  $("f-disc").checked = it?.discount_active === true;
+  $("f-disc-pct").value = it?.discount_percent > 0 ? it.discount_percent : "";
+  $("f-free").checked = it?.free_delivery === true;
+  $("f-disc-box").style.display = $("f-disc").checked ? "" : "none";
   $("f-img").value = it ? (Array.isArray(it.images) ? it.images : (it.image_url ? [it.image_url] : [])).join("\n") : "";
   $("size-list").innerHTML = "";
   const sizes = it?.sizes && Object.keys(it.sizes).length ? it.sizes : { normal: 2.5 };
@@ -955,7 +954,11 @@ $("sheet-save").addEventListener("click", async () => {
     stock_quantity: Math.max(0, parseInt($("f-stock").value, 10) || 0),
     sizes, images: images.length ? images : [`./images/${key}.png`],
     is_popular: $("f-pop").checked,
+    discount_active: $("f-disc").checked && (parseFloat($("f-disc-pct").value) > 0),
+    discount_percent: Math.min(99, Math.max(0, parseFloat($("f-disc-pct").value) || 0)),
+    free_delivery: $("f-free").checked,
   };
+  if ($("f-disc").checked && !(parseFloat($("f-disc-pct").value) > 0)) return toast("សូមបញ្ចូលភាគរយបញ្ចុះតម្លៃ", "err");
 
   const btn = $("sheet-save");
   btn.disabled = true; btn.textContent = "កំពុងរក្សាទុក…";
@@ -1017,7 +1020,7 @@ async function refresh() {
   // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
   localStorage.removeItem('davin_app_session');
   
-  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs(), loadPromoItem(), loadGreet()]);
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs(), loadGreet()]);
   ic.classList.remove("spin");
 }
 $("btn-refresh").onclick = refresh;
