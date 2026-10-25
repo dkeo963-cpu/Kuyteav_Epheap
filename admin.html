@@ -48,7 +48,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* ---------- Bottom tabs ---------- */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
-.tabs .wrap{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+.tabs .wrap{display:grid;grid-template-columns:repeat(5,1fr);padding:0}
 .tab{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--sub);position:relative}
 .tab .ic{font-size:20px;line-height:1}
 .tab.on{color:var(--brand)}
@@ -392,6 +392,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   </section>
 
   <!-- ========== SETTINGS / ABOUT ========== -->
+  <!-- ========== DRIVER MONEY ========== -->
+  <section id="page-pay" class="page">
+    <div class="card">
+      <h2 class="h2">💵 សំណើសុំប្រាក់ពីអ្នកដឹក <span id="pay-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">បង់ប្រាក់ឱ្យអ្នកដឹកខ្លួនឯងជាមុនសិន រួចចុច «បានបង់រួច»។</p>
+      <div id="pay-pending" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="pay-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card">
+      <h2 class="h2">👥 ប្រាក់ដែលអ្នកដឹកមាន (មិនទាន់ស្នើ)</h2>
+      <div id="pay-bal" class="muted">…</div>
+    </div>
+    <div class="card">
+      <h2 class="h2">📜 ប្រវត្តិ</h2>
+      <div id="pay-hist" class="muted">…</div>
+    </div>
+  </section>
+
   <section id="page-more" class="page">
     <div class="card">
       <h2 class="h2">👤 អ្នកគ្រប់គ្រង</h2>
@@ -439,6 +457,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
     <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
     <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន</button>
+    <button class="tab" data-tab="pay"><span class="ic">💵</span>ប្រាក់អ្នកដឹក<span class="dot" id="pay-dot"></span></button>
     <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
   </div>
 </nav>
@@ -1214,7 +1233,7 @@ async function pwLogin() {
   if (r.error) { $("pw-err").textContent = r.error; return; }
   admToken = r.data.token || ""; try { localStorage.setItem("adm_token", admToken); } catch (e) {}
   $("pw-in").value = ""; $("pw-gate").classList.remove("show");
-  refresh(); if (dlLoaded) loadDelivery();
+  refresh(); if (dlLoaded) loadDelivery(); loadPayouts();
 }
 $("pw-go").onclick = pwLogin;
 $("pw-in").addEventListener("keydown", e => { if (e.key === "Enter") pwLogin(); });
@@ -1223,7 +1242,7 @@ if (hasTG) {   // locked by default: the dashboard stays covered until the serve
   showPw(); $("pw-in").disabled = true; $("pw-go").disabled = true; $("pw-err").textContent = "កំពុងពិនិត្យ…";
   admin({ action: "ping" }).then(r => {
     $("pw-in").disabled = false; $("pw-go").disabled = false;
-    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; }
+    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; loadPayouts(); }
     else $("pw-err").textContent = (r.error && !/ពាក្យសម្ងាត់/.test(r.error)) ? r.error : "";
   });
 }
@@ -1485,6 +1504,40 @@ $("drv-add").addEventListener("click", async () => {
 });
 $("dl-refresh").addEventListener("click", loadDelivery);
 document.querySelector('.tab[data-tab="delivery"]').addEventListener("click", loadDelivery);
+
+/* ===== DRIVER MONEY REQUESTS ===== */
+const pmoney = n => "$" + Number(n || 0).toFixed(2);
+const fmtT = t => String(t || "").slice(0, 16).replace("T", " ");
+async function loadPayouts() {
+  const r = await admin({ action: "list_payouts" });
+  if (r.error || !r.data) { $("pay-pending").textContent = r.error || ""; return; }
+  const pays = r.data.payouts || [], drivers = r.data.drivers || [], bal = r.data.unrequested || {};
+  const dn = id => { const d = drivers.find(x => String(x.id) === String(id)); return d ? `${esc(d.name)} <span class="muted">· ${esc(d.login_id)}</span>` : "—"; };
+  const pend = pays.filter(p => p.status === "pending");
+  const dot = $("pay-dot"); dot.textContent = pend.length; dot.style.display = pend.length ? "flex" : "none";
+  $("pay-count").textContent = pend.length ? `(${pend.length})` : "";
+  $("pay-pending").innerHTML = pend.length ? pend.map(p => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="font-weight:700">${dn(p.driver_id)}</div><div style="font-weight:800;font-size:20px;color:var(--brand)">${pmoney(p.amount)}</div></div>
+      <div class="muted">ស្នើសុំនៅ ${esc(fmtT(p.requested_at))}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-p btn-s" data-pid="${p.id}" data-dec="paid" data-amt="${esc(p.amount)}">✅ បានបង់រួច</button>
+        <button class="btn btn-d btn-s" data-pid="${p.id}" data-dec="rejected">❌ បដិសេធ</button>
+      </div></div>`).join("") : "មិនមានសំណើកំពុងរង់ចាំទេ";
+  $("pay-pending").querySelectorAll("button[data-pid]").forEach(b => b.addEventListener("click", async () => {
+    const paid = b.dataset.dec === "paid";
+    if (!confirm(paid ? `បានបង់ប្រាក់ ${pmoney(b.dataset.amt)} ឱ្យអ្នកដឹករួចមែនទេ?` : "បដិសេធសំណើនេះ? ប្រាក់នឹងត្រឡប់ទៅគណនីអ្នកដឹកវិញ។")) return;
+    const res = await admin({ action: "decide_payout", id: Number(b.dataset.pid), decision: b.dataset.dec });
+    if (res.error) toast(res.error, "bad"); else { toast(paid ? "បានកត់ត្រាថាបង់រួច" : "បានបដិសេធ", "ok"); loadPayouts(); }
+  }));
+  const rows = drivers.filter(d => bal[d.id] > 0);
+  $("pay-bal").innerHTML = rows.length ? rows.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)"><span>${dn(d.id)}</span><b>${pmoney(bal[d.id])}</b></div>`).join("") : "គ្មាន";
+  const done = pays.filter(p => p.status !== "pending");
+  $("pay-hist").innerHTML = done.length ? done.map(p => `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)">
+      <span>${dn(p.driver_id)}<div class="muted">${esc(fmtT(p.decided_at || p.requested_at))}</div></span>
+      <span style="text-align:right"><b>${pmoney(p.amount)}</b><div class="muted">${p.status === "paid" ? "✅ បានបង់" : "❌ បដិសេធ"}</div></span></div>`).join("") : "មិនទាន់មានប្រវត្តិ";
+}
+$("pay-refresh").addEventListener("click", loadPayouts);
+document.querySelector('.tab[data-tab="pay"]').addEventListener("click", loadPayouts);
 setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
 </script>
 </body>
