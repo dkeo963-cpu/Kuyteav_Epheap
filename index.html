@@ -416,6 +416,12 @@
       font-size: 18px; cursor: pointer; color: var(--brand);
     }
     .map-recenter-btn:active { background: #f0f0f0; }
+    .map-lyr-btn {
+      position: absolute; top: 12px; left: 12px; z-index: 500; height: 38px; padding: 0 14px; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--line); box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      font: inherit; font-size: 13px; font-weight: 800; color: var(--ink); cursor: pointer;
+    }
+    .map-lyr-btn:active { background: #f0f0f0; }
     .map-footer { padding: 14px 16px calc(14px + var(--safe-b)); background: var(--surface); border-top: 1px solid var(--line); z-index: 10; }
     .map-addr-preview { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   
@@ -1066,6 +1072,7 @@
           </svg>
         </div>
         <button type="button" class="map-recenter-btn" onclick="recenterMapToUser()" title="ទីតាំងបច្ចុប្បន្ន">🎯</button>
+        <button type="button" class="map-lyr-btn" id="map-lyr" onclick="cycleMapLook()" title="ប្តូរប្រភេទផែនទី">🛰️ ផ្កាយរណប</button>
       </div>
       <div class="map-footer">
         <div class="map-addr-preview">
@@ -1080,8 +1087,8 @@
   </div>
 
   <script>
-    const STORE_LAT = 10.5866326;
-    const STORE_LNG =  103.7630411;
+    const STORE_LAT = 11.5300546;
+    const STORE_LNG = 104.8039416;
     const MAX_DELIVERY_KM = 5.0;
 
     let clientLat = null;
@@ -1779,6 +1786,31 @@
       }
     }
 
+    // 3 map looks (same as the driver app): satellite with road names, clear street map, light road map
+    const MAP_LOOKS = [
+      ['🛰️ ផ្កាយរណប', () => [
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Imagery © Esri' }),
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: '© CARTO' })]],
+      ['🗺️ ផ្លូវច្បាស់', () => [
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, maxNativeZoom: 18, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: 'Tiles © Esri, OpenStreetMap' })]],
+      ['🌤️ ស្រាល', () => [
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false, attribution: '© OpenStreetMap © CARTO' })]]
+    ];
+    let mapLookIdx = 0, mapLookGroup = null;   // 0 = satellite is the default; the customer's last choice is remembered
+    try { const v = parseInt(localStorage.getItem('cust_map'), 10); if (!isNaN(v)) mapLookIdx = ((v % MAP_LOOKS.length) + MAP_LOOKS.length) % MAP_LOOKS.length; } catch (e) {}
+    function setMapLook(i) {
+      if (!pickerMap) return;
+      mapLookIdx = i;
+      if (mapLookGroup) pickerMap.removeLayer(mapLookGroup);
+      mapLookGroup = L.layerGroup(MAP_LOOKS[i][1]()).addTo(pickerMap);
+      const b = document.getElementById('map-lyr'); if (b) b.textContent = MAP_LOOKS[i][0];
+      try { localStorage.setItem('cust_map', String(i)); } catch (e) {}
+    }
+    function cycleMapLook() {
+      if (gMap) { gMap.setMapTypeId(gMap.getMapTypeId() === 'roadmap' ? 'hybrid' : 'roadmap'); return; }
+      setMapLook((mapLookIdx + 1) % MAP_LOOKS.length);
+    }
+
     function openLeafletMap(initialLat, initialLng) {
       if (!pickerMap) {
         pickerMap = L.map('picker-map', {
@@ -1788,12 +1820,8 @@
           zoomAnimation: true, fadeAnimation: true, markerZoomAnimation: true
         }).setView([initialLat, initialLng], 17);
 
-        L.tileLayer(MAPTILER_KEY
-          ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
-          : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, keepBuffer: 6, updateWhenIdle: false, updateWhenZooming: false
-        }).addTo(pickerMap);
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(pickerMap);
+        L.control.attribution({ prefix: false, position: 'bottomleft' }).addTo(pickerMap);
+        setMapLook(mapLookIdx);
 
         L.control.zoom({ position: 'topright' }).addTo(pickerMap);
 
