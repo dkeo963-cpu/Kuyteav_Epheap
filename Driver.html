@@ -50,7 +50,7 @@ h2{font-size:16px;margin:4px 2px 12px}
 .tag{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--amber-l);color:var(--amber);font-size:12px;font-weight:700}
 .empty{text-align:center;padding:36px 16px;color:var(--sub)}.empty span{font-size:42px;display:block}
 /* tabs */
-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:6px 8px calc(6px + var(--sb))}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px calc(6px + var(--sb))}
 nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;color:var(--sub);font-size:11.5px;font-weight:700;position:relative;cursor:pointer}
 nav button.on{color:var(--brand);background:var(--mint)}
 nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -65,6 +65,8 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
 .tag.g{background:var(--mint);color:var(--brand)}.tag.b{background:#e8eefc;color:#3b5bdb}
 .job{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .job .amt{font-weight:800;font-size:17px;color:var(--brand);white-space:nowrap}
+.trk{margin:0 0 12px;padding:10px 12px;border-radius:14px;font-size:13px;font-weight:700;background:var(--amber-l);color:var(--amber)}
+.trk.ok{background:var(--mint);color:var(--brand)}.trk.bad{background:#fde8e8;color:var(--bad)}
 #toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;z-index:99;max-width:90%;font-weight:600}
 </style>
 </head>
@@ -86,8 +88,22 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     <button class="sw" id="tgl" role="switch" aria-checked="false"><span id="swl">បិទ</span><span class="tr"></span></button>
   </header>
   <main>
+    <div id="trk" class="trk hide"></div>
     <section id="p-mine"><h2>📦 ការងាររបស់ខ្ញុំ</h2><div id="mine"></div></section>
     <section id="p-open" class="hide"><h2>🆕 ការកម្មង់ត្រូវការអ្នកដឹក</h2><div id="open"></div></section>
+    <section id="p-map" class="hide">
+      <h2>🗺️ ផែនទី</h2>
+      <div id="map-empty" class="empty"><span>🗺️</span>ចុច «🗺️ ផែនទី» នៅលើការងារ ដើម្បីមើលទីតាំងអតិថិជននៅទីនេះ</div>
+      <div id="map-box" class="hide">
+        <div class="muted" id="map-info" style="margin:0 2px 8px"></div>
+        <div class="card" style="padding:0;overflow:hidden"><iframe id="map-frame" title="map" style="width:100%;height:58vh;border:0;display:block" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+        <div class="acts">
+          <button class="chip" id="map-me" style="border:0;cursor:pointer;font:inherit">📍 ពីទីតាំងខ្ញុំ</button>
+          <a class="chip" id="map-ext" target="_blank" rel="noopener">🧭 Google Maps</a>
+        </div>
+        <div class="muted" style="margin:0 2px">ផែនទីនេះនៅក្នុង app — ការចែករំលែកទីតាំងបន្តដំណើរការ។ ប៊ូតុង «Google Maps» នឹងបើក app ផ្សេង ហើយទីតាំងអាចឈប់ផ្ញើ។</div>
+      </div>
+    </section>
     <section id="p-me" class="hide">
       <h2>👤 គណនី</h2>
       <div class="card bal">
@@ -111,6 +127,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   <nav>
     <button data-t="mine" class="on"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/></svg>ការងារ<em id="b-mine" class="hide"></em></button>
     <button data-t="open"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ការកម្មង់ថ្មី<em id="b-open" class="hide"></em></button>
+    <button data-t="map"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>ផែនទី</button>
     <button data-t="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>គណនី</button>
   </nav>
 </div>
@@ -135,7 +152,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   function logout() { token = ''; localStorage.removeItem('drv_token'); stopTracking(); clearInterval(timer); $('app').classList.add('hide'); $('login').classList.remove('hide'); }
   function setTab(t) {
     tab = t;
-    ['mine', 'open', 'me'].forEach(function (k) { $('p-' + k).classList.toggle('hide', k !== t); });
+    ['mine', 'open', 'map', 'me'].forEach(function (k) { $('p-' + k).classList.toggle('hide', k !== t); });
     document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
     window.scrollTo(0, 0);
     if (t === 'me') loadEarnings();
@@ -202,6 +219,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       $('mstate').textContent = active ? '🟢 កំពុងសកម្ម' : '⚪ បិទ';
 
       var m = j.mine || [];
+      mineData = m;
       badge('b-mine', m.length);
       $('mine').innerHTML = m.length ? m.map(function (o) {
         var map = o.lat != null ? 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng : (o.location_link || '');
@@ -214,9 +232,10 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
           '<div class="lbl"><span class="' + (go ? '' : 'c') + '">មិនទាន់ដឹក</span><span class="' + (go ? 'c' : '') + '">កំពុងដឹក</span><span>បានទទួល</span></div>' +
           (o.address ? '<div class="addr">📍 ' + esc(o.address) + '</div>' : '') +
           '<div class="acts"><a class="chip" href="tel:' + esc(o.phone) + '">📞 ' + esc(o.phone) + '</a>' +
-          (map ? '<a class="chip" href="' + esc(map) + '" target="_blank" rel="noopener">🗺️ ផែនទី</a>' : '') + '</div>' +
+          (o.lat != null || o.address || map ? '<button class="chip" data-map="' + id + '" style="border:0;cursor:pointer;font:inherit">🗺️ ផែនទី</button>' : '') + '</div>' +
           itemsHtml(o.items) + btn + '</div>';
       }).join('') : '<div class="empty"><span>📭</span>គ្មានការងារទេ<br>ចូលទៅ «ការកម្មង់ថ្មី» ដើម្បីស្នើសុំដឹក</div>';
+      document.querySelectorAll('#mine button[data-map]').forEach(function (b) { b.onclick = function () { openMap(b.dataset.map); }; });
       document.querySelectorAll('#mine button[data-s]').forEach(function (b) {
         b.onclick = function () { b.disabled = true; call({ action: 'stage', tran_id: b.dataset.id, stage: b.dataset.s }).then(function (r) { if (r.error) toast(r.error); refresh(); }); };
       });
@@ -241,24 +260,96 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     });
   }
 
-  /* live location: ONLY while the stage is "delivering" */
+  /* in-app map: shows Google Maps inside this page, so the driver never leaves the app and live sharing keeps running */
+  var mineData = [], curMap = null;
+  function mapDest(o) { return o.lat != null && o.lng != null ? o.lat + ',' + o.lng : (o.address || ''); }
+  function mapSrc(o) {
+    var dest = mapDest(o); if (!dest) return '';
+    var base = 'https://maps.google.com/maps?output=embed&z=16&hl=km';
+    if (lastPos) return base + '&saddr=' + encodeURIComponent(lastPos.latitude + ',' + lastPos.longitude) + '&daddr=' + encodeURIComponent(dest);
+    return base + '&q=' + encodeURIComponent(dest);
+  }
+  function mapExt(o) {
+    if (o.lat != null && o.lng != null) return 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng;
+    if (o.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address);
+    return o.location_link || '#';
+  }
+  function drawMap() {
+    $('map-empty').classList.toggle('hide', !!curMap); $('map-box').classList.toggle('hide', !curMap);
+    if (!curMap) return;
+    $('map-info').innerHTML = '<b>' + esc(curMap.customer_name) + '</b>' + (curMap.address ? ' · 📍 ' + esc(curMap.address) : '');
+    $('map-frame').src = mapSrc(curMap);
+    $('map-ext').href = mapExt(curMap);
+  }
+  function openMap(id) {
+    var o = mineData.filter(function (x) { return x.tran_id === id; })[0];
+    if (!o) return;
+    curMap = o; setTab('map'); drawMap();
+  }
+  $('map-me').onclick = function () {
+    if (!curMap) return;
+    if (lastPos) { drawMap(); return; }
+    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
+    navigator.geolocation.getCurrentPosition(function (p) { lastPos = p.coords; drawMap(); }, function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ'); }, { enableHighAccuracy: true, timeout: 10000 });
+  };
+
+  /* live location: ONLY while the stage is "delivering".
+     A phone can only share its position while the app is open and the screen is on,
+     so the driver is shown a clear status + reminder the whole time. */
+  var gpsErr = null, lastSent = 0, trkTimer = null, wasHidden = false;
+  function pad(x) { return (x < 10 ? '0' : '') + x; }
+  function showTrk() {
+    var t = $('trk');
+    if (!trackingId) { t.classList.add('hide'); return; }
+    var cls = 'trk', msg;
+    if (gpsErr === 'denied') { cls += ' bad'; msg = '❌ មិនបានអនុញ្ញាត Location — សូមបើក Location ឱ្យ app/browser នេះ'; }
+    else if (gpsErr) { cls += ' bad'; msg = '⚠️ រកទីតាំងមិនឃើញ — សូមបើក GPS នៅលើទូរស័ព្ទ'; }
+    else if (!lastSent) { msg = '⏳ កំពុងរកទីតាំង GPS…'; }
+    else {
+      var age = Math.round((Date.now() - lastSent) / 1000), d = new Date(lastSent);
+      if (age > 20) { cls += ' bad'; msg = '⚠️ ទីតាំងមិនបានផ្ញើអស់ ' + age + ' វិនាទី — សូមពិនិត្យអ៊ីនធឺណិត និង GPS'; }
+      else { cls += ' ok'; msg = '📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន · ផ្ញើចុងក្រោយ ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+    }
+    t.className = cls;
+    t.innerHTML = msg + '<div style="font-weight:500;margin-top:3px">📱 សូមបើកទូរស័ព្ទ ទុកអេក្រង់ភ្លឺ និងកុំចាកចេញពី app រហូតដល់ដឹកដល់</div>';
+  }
+  function postPos() {
+    if (!lastPos || !trackingId) return;
+    call({ action: 'location', tran_id: trackingId, lat: lastPos.latitude, lng: lastPos.longitude }).then(function (r) { if (!r.error && r.tracking) lastSent = Date.now(); });
+  }
+  function watchGps() {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    var first = true;
+    watchId = navigator.geolocation.watchPosition(function (p) {
+      lastPos = p.coords; gpsErr = null;
+      if (first) { first = false; postPos(); }   // send the very first fix at once
+      showTrk();
+    }, function (err) { gpsErr = err && err.code === 1 ? 'denied' : 'err'; showTrk(); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
+  }
   function startTracking(id) {
     if (trackingId === id) return;
-    stopTracking(); trackingId = id;
-    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
-    watchId = navigator.geolocation.watchPosition(function (p) { lastPos = p.coords; }, function () {}, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
-    postTimer = setInterval(function () {
-      if (lastPos) call({ action: 'location', tran_id: trackingId, lat: lastPos.latitude, lng: lastPos.longitude });
-    }, 6000);
+    stopTracking(); trackingId = id; gpsErr = null; lastSent = 0;
+    if (!navigator.geolocation) { gpsErr = 'err'; toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); showTrk(); return; }
+    watchGps();
+    postTimer = setInterval(postPos, 6000);
+    trkTimer = setInterval(showTrk, 2000);
     if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
+    showTrk();
   }
   function stopTracking() {
-    if (watchId != null) navigator.geolocation.clearWatch(watchId);
-    watchId = null; clearInterval(postTimer); postTimer = null; trackingId = null; lastPos = null;
+    if (watchId != null && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
+    watchId = null; clearInterval(postTimer); postTimer = null; clearInterval(trkTimer); trkTimer = null; trackingId = null; lastPos = null;
     if (wake) { try { wake.release(); } catch (e) {} wake = null; }
+    showTrk();
   }
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible' && trackingId && navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
+    if (!trackingId) return;
+    if (document.visibilityState === 'hidden') { wasHidden = true; return; }
+    // back on screen: phones pause GPS + screen lock in the background, so start them again
+    if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
+    if (navigator.geolocation) watchGps();
+    if (wasHidden) { wasHidden = false; toast('⚠️ ទីតាំងអាចត្រូវបានផ្អាកពេលចេញពី app — កំពុងចាប់ផ្ដើមឡើងវិញ'); }
+    showTrk();
   });
 
   if (token) start();
