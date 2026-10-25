@@ -589,6 +589,10 @@
     .greet { padding: 2px 2px 12px; }
     .greet-hi { font-size: 14px; font-weight: 600; color: var(--sub); }
     .greet-q { font-size: 24px; font-weight: 800; line-height: 1.5; color: var(--ink); }
+    /* Greeting style 2: soft float up & down (style 1 = no class, stays still) */
+    .greet-q.anim-float { animation: greetFloat 2.6s ease-in-out infinite; will-change: transform; }
+    @keyframes greetFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @media (prefers-reduced-motion: reduce) { .greet-q.anim-float { animation: none; } }
     .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 10px; }
     .sec-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--ink); }
     .sec-head span { font-size: 13px; color: var(--sub); font-weight: 600; }
@@ -1243,7 +1247,7 @@
         const { data, error } = await supabaseClient
           .from('app_settings')
           .select('key, value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge']);
+          .in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
         
         if (!error && data) {
           const activeItem = data.find(i => i.key === 'promo_active');
@@ -1268,6 +1272,15 @@
 
             document.querySelectorAll('.promo-msg-text').forEach(el => el.innerText = msgText);
             document.querySelectorAll('.promo-badge-text').forEach(el => el.innerText = badgeText);
+
+            // Colours chosen in the admin dashboard (empty = keep the default look)
+            const colour = k => { const c = cleanVal(data.find(i => i.key === k)?.value, ''); return /^#[0-9a-fA-F]{6}$/.test(c) ? c : ''; };
+            bannerEl.style.background = colour('promo_bg');
+            bannerEl.style.color = colour('promo_color');
+            document.querySelectorAll('.top-promo-badge').forEach(el => {
+              el.style.background = colour('promo_badge_bg');
+              el.style.color = colour('promo_badge_color');
+            });
           } else if (bannerEl) {
             bannerEl.style.display = 'none';
           }
@@ -1340,12 +1353,13 @@
       const slider = document.getElementById('banner-slider');
       let list = bannerImages;   // admin can replace these from the dashboard (stored in Telegram)
       try {
-        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'greet_text']);
+        const { data } = await supabaseClient.from('app_settings').select('key, value').in('key', ['banners', 'shop_logo', 'category_images', 'greet_text', 'greet_anim']);
         const row = k => (data || []).find(r => r.key === k);
         let ci = row('category_images') && row('category_images').value; if (typeof ci === 'string') ci = JSON.parse(ci);
         if (ci && typeof ci === 'object' && !Array.isArray(ci)) { catImages = ci; renderCategories(); }
         const sv = k => { let x = row(k) && row(k).value; try { if (typeof x === 'string' && x.startsWith('"')) x = JSON.parse(x); } catch (e) {} return typeof x === 'string' ? x : ''; };
         const gt = sv('greet_text'); if (gt) { const g = document.querySelector('.greet-q'); if (g) g.textContent = gt; }
+        const gq = document.querySelector('.greet-q'); if (gq) gq.classList.toggle('anim-float', sv('greet_anim') === 'float');
         let v = row('banners') && row('banners').value; if (typeof v === 'string') v = JSON.parse(v);
         if (Array.isArray(v) && v.length) list = v.map(imgUrl);
         const lg = row('shop_logo') && row('shop_logo').value;
