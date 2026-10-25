@@ -2,358 +2,1558 @@
 <html lang="km">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Delivery · Kuyteav_Epheap</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700;800&family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ផ្ទាំងគ្រប់គ្រង - តូបគុយទាវ អ៊ីភាព</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--ink:#10211f;--sub:#5d6f6c;--line:#dfe7e5;--bg:#eef2f1;--deep:#0b3d39;--brand:#0f766e;--mint:#d9f2ee;--amber:#b45309;--amber-l:#fdf1dc;--bad:#c62828;--sb:env(safe-area-inset-bottom,0px)}
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Noto+Sans+Khmer:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#f1f4f3; --surface:#ffffff; --line:#dde4e2; --ink:#14201f; --sub:#5f706d;
+  --brand:#0f766e; --brand-d:#0b5c56; --brand-l:#e3f3f1;
+  --ok:#15803d; --ok-l:#e5f5ea;
+  --warn:#b45309; --warn-l:#fdf1dc;
+  --bad:#c62828; --bad-l:#fde8e8;
+  --r:14px; --r-s:10px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:'Kantumruy Pro','Noto Sans Khmer','Khmer OS Battambang',system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--ink);font-size:14px}
-button,input{font:inherit;color:inherit}
-.hide{display:none!important}.muted{color:var(--sub);font-size:12.5px}
-/* login */
-#login{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:24px;background:linear-gradient(170deg,var(--deep) 0 42%,var(--bg) 42%)}
-#login .box{background:#fff;border-radius:24px;padding:24px 20px;max-width:420px;width:100%;margin:0 auto;box-shadow:0 18px 40px rgba(11,61,57,.18)}
-#login h1{margin:0 0 4px;font-size:22px;color:var(--deep)}
-.hero{color:#fff;max-width:420px;width:100%;margin:0 auto 18px;font-size:40px}
-input{width:100%;height:52px;border:1.5px solid var(--line);border-radius:14px;padding:0 14px;font-size:16px;background:#f8fbfa;margin-top:10px;outline:0}
-input:focus{border-color:var(--brand);background:#fff}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:15.5px;cursor:pointer;margin-top:12px;transition:transform .1s}
-.btn:active{transform:scale(.98)}.btn:disabled{opacity:.5}
-.btn.soft{background:var(--mint);color:var(--brand)}.btn.red{background:#fde8e8;color:var(--bad)}
-/* top bar */
-.top{position:sticky;top:0;z-index:20;background:var(--deep);color:#fff;padding:14px 16px 16px;border-radius:0 0 24px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.top b{font-size:17px;display:block}.top small{opacity:.7}
-.sw{display:flex;align-items:center;gap:10px;border:0;border-radius:99px;background:rgba(255,255,255,.12);padding:6px 6px 6px 14px;color:#fff;font-weight:800;cursor:pointer}
-.sw .tr{width:52px;height:30px;border-radius:99px;background:#46605d;position:relative;transition:.2s}
-.sw .tr::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
-.sw.on .tr{background:#34d399}.sw.on .tr::after{left:25px}
-/* content */
-main{padding:14px 14px calc(96px + var(--sb));max-width:520px;margin:0 auto}
-h2{font-size:16px;margin:4px 2px 12px}
-.card{background:#fff;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(16,33,31,.06)}
-.row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.price{font-weight:800;font-size:20px;color:var(--brand)}
-.name{font-weight:800;font-size:16px}
-.rail{display:flex;align-items:center;margin:14px 4px 4px}
-.rail i{width:14px;height:14px;border-radius:50%;background:#cfdad8;flex:none}
-.rail b{flex:1;height:4px;background:#cfdad8;margin:0 2px;border-radius:2px}
-.rail .d{background:var(--brand)}
-.lbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub)}.lbl .c{color:var(--brand);font-weight:800}
-.acts{display:flex;gap:8px;margin:12px 0 4px}
-.chip{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border-radius:14px;background:var(--mint);color:var(--brand);font-weight:700;text-decoration:none}
-.items{margin:10px 0 2px;padding:10px 12px;background:#f5f8f7;border-radius:14px;font-size:13.5px}
-.items div{display:flex;justify-content:space-between;gap:8px}
-.addr{margin-top:8px;font-size:13px;color:var(--sub)}
-.tag{display:inline-block;padding:3px 10px;border-radius:99px;background:var(--amber-l);color:var(--amber);font-size:12px;font-weight:700}
-.empty{text-align:center;padding:36px 16px;color:var(--sub)}.empty span{font-size:42px;display:block}
-/* tabs */
-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 8px calc(6px + var(--sb))}
-nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;color:var(--sub);font-size:11.5px;font-weight:700;position:relative;cursor:pointer}
-nav button.on{color:var(--brand);background:var(--mint)}
-nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-style:normal;line-height:18px;text-align:center;padding:0 5px}
-.bal{background:linear-gradient(160deg,var(--deep),#0f766e);color:#fff}
-.bal .big{font-size:36px;font-weight:800;line-height:1.2;margin:2px 0 8px}
-.bal .muted{color:rgba(255,255,255,.75)}
-.bal .mini{display:flex;gap:6px;justify-content:space-between;margin:6px 0 2px;font-size:12px}
-.bal .mini div{flex:1;background:rgba(255,255,255,.12);border-radius:12px;padding:6px 8px}
-.bal .mini b{display:block;font-size:14px}
-.bal .btn{background:#fff;color:var(--deep);margin-top:10px}
-.tag.g{background:var(--mint);color:var(--brand)}.tag.b{background:#e8eefc;color:#3b5bdb}
-.job{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.job .amt{font-weight:800;font-size:17px;color:var(--brand);white-space:nowrap}
-.trk{margin:0 0 12px;padding:10px 12px;border-radius:14px;font-size:13px;font-weight:700;background:var(--amber-l);color:var(--amber)}
-.trk.ok{background:var(--mint);color:var(--brand)}.trk.bad{background:#fde8e8;color:var(--bad)}
-#toast{position:fixed;left:50%;bottom:calc(88px + var(--sb));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;z-index:99;max-width:90%;font-weight:600}
+html,body{margin:0}
+body{
+  font-family:'Battambang', 'Noto Sans Khmer', 'Khmer OS Battambang', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  background:var(--bg); color:var(--ink); font-size:14px; line-height:1.65;
+  padding-bottom:calc(120px + var(--safe-b));
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+h1,h2,h3,h4,p,label,select,input,textarea,button{font-family:inherit}
+body{font-weight:400;line-height:1.7;letter-spacing:0;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+input,select,textarea{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:960px;margin:0 auto;padding:0 14px}
+
+/* ---------- Header ---------- */
+.top{position:sticky;top:0;z-index:50;background:var(--ink);color:#fff;padding:12px 0}
+.top .wrap{display:flex;align-items:center;gap:10px}
+.top h1{font-size:16px;font-weight:800;margin:0;flex:1;min-width:0}
+.top small{display:block;font-weight:500;font-size:11px;opacity:.65}
+.icon-btn{height:36px;padding:0 12px;border-radius:var(--r-s);background:rgba(255,255,255,.12);color:#fff;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.icon-btn:active{background:rgba(255,255,255,.22)}
+.spin{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- Bottom tabs ---------- */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(5,1fr);padding:0}
+.tab{padding:10px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--sub);position:relative}
+.tab .ic{font-size:20px;line-height:1}
+.tab.on{color:var(--brand)}
+.tab.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--brand)}
+.tab .dot{position:absolute;top:6px;left:calc(50% + 8px);min-width:17px;height:17px;border-radius:9px;background:var(--bad);color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px}
+
+/* ---------- Common ---------- */
+.page{display:none;padding-top:16px}
+.page.on{display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.h2{font-size:15px;font-weight:800;margin:0 0 2px}
+.muted{color:var(--sub);font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.sec-title{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:22px 0 10px}
+
+.btn{height:40px;padding:0 16px;border-radius:var(--r-s);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .08s}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:active{background:var(--brand-d)}
+.btn-g{background:#e8eeec;color:var(--ink)}
+.btn-d{background:var(--bad-l);color:var(--bad)}
+.btn-s{height:32px;padding:0 11px;font-size:12px}
+
+/* ---------- Switch ---------- */
+.sw{position:relative;width:50px;height:28px;flex-shrink:0;display:inline-block}
+.pcol{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--sub)}
+.pcol input[type=color]{width:100%;height:38px;padding:2px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb;cursor:pointer}
+
+@keyframes gFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes gBounce { 0%,100% { transform: translateY(0); animation-timing-function: cubic-bezier(.3,0,.9,.6); } 45% { transform: translateY(-14px); animation-timing-function: cubic-bezier(.1,.4,.7,1); } 60% { transform: translateY(0); } 72% { transform: translateY(-4px); } 82% { transform: translateY(0); } }
+@keyframes gWobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-2.5deg); } 75% { transform: rotate(2.5deg); } }
+@keyframes gPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes gSwing { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+@keyframes gSway { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+@keyframes gJelly { 0%,100% { transform: scale(1,1); } 30% { transform: scale(1.08,.92); } 50% { transform: scale(.94,1.06); } 70% { transform: scale(1.03,.97); } }
+@keyframes gHeart { 0%,40%,100% { transform: scale(1); } 10% { transform: scale(1.08); } 20% { transform: scale(1); } 30% { transform: scale(1.08); } }
+@keyframes gTada { 0%,60%,100% { transform: scale(1) rotate(0); } 10%,20% { transform: scale(.96) rotate(-2.5deg); } 30%,50% { transform: scale(1.06) rotate(2.5deg); } 40% { transform: scale(1.06) rotate(-2.5deg); } }
+#greet-prev.anim-float { animation: gFloat 2.6s ease-in-out infinite; }
+#greet-prev.anim-bounce { animation: gBounce 1.8s infinite; }
+#greet-prev.anim-wobble { animation: gWobble 2.4s ease-in-out infinite; }
+#greet-prev.anim-pulse { animation: gPulse 2s ease-in-out infinite; }
+#greet-prev.anim-swing { animation: gSwing 3s ease-in-out infinite; transform-origin: left top; }
+#greet-prev.anim-sway { animation: gSway 3s ease-in-out infinite; }
+#greet-prev.anim-jelly { animation: gJelly 2.2s ease-in-out infinite; }
+#greet-prev.anim-heartbeat { animation: gHeart 1.8s ease-in-out infinite; }
+#greet-prev.anim-tada { animation: gTada 2.6s ease-in-out infinite; }
+#greet-prev[class*="anim-"] { transform-origin: left center; will-change: transform; }
+#greet-prev.anim-swing { transform-origin: left top; }
+@media (prefers-reduced-motion: reduce) { #greet-prev[class*="anim-"] { animation: none !important; } }
+#greet-styles{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#greet-styles label{display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:600;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb;cursor:pointer}
+#greet-styles label.on{border-color:var(--brand);background:#e8f4f1}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;background:#c3cecb;border-radius:28px;transition:.2s;cursor:pointer}
+.sw span::before{content:"";position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw input:checked+span{background:var(--ok)}
+.sw input:checked+span::before{transform:translateX(22px)}
+.sw input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+
+/* ---------- Status cards ---------- */
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ctl .lbl{font-size:12px;color:var(--sub);font-weight:600}
+.ctl .val{font-size:17px;font-weight:800;margin-top:2px}
+.ctl .val.ok{color:var(--ok)} .ctl .val.bad{color:var(--bad)} .ctl .val.warn{color:var(--warn)}
+.wait-row{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.wait-row label{font-size:12px;font-weight:700;color:var(--sub);flex:1}
+.num{width:76px;height:36px;border:1px solid var(--line);border-radius:var(--r-s);text-align:center;font-weight:800;background:#fafcfb}
+
+/* ---------- Stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{border-radius:var(--r);padding:12px 14px;background:var(--surface);border:1px solid var(--line);text-align:left;width:100%}
+.stat b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stat span{font-size:12px;color:var(--sub);font-weight:600}
+.stat.warn b{color:var(--warn)} .stat.bad b{color:var(--bad)} .stat.ok b{color:var(--ok)}
+.stat:active{background:#f6f9f8}
+
+/* ---------- Low stock list ---------- */
+.low-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.low-row:last-child{border-bottom:0}
+.low-row .nm{flex:1;min-width:0;font-weight:700}
+.low-row .nm small{display:block;font-weight:500;color:var(--sub);font-size:11px}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:800}
+.pill.warn{background:var(--warn-l);color:var(--warn)}
+.pill.bad{background:var(--bad-l);color:var(--bad)}
+.pill.ok{background:var(--ok-l);color:var(--ok)}
+.pill.pop{background:#ffe9e0;color:#c2410c}
+
+/* ---------- Menu toolbar ---------- */
+.toolbar{position:sticky;top:60px;z-index:40;background:var(--bg);padding:10px 0 8px}
+.search{position:relative}
+.search input{width:100%;height:42px;padding:0 14px 0 38px;border:1px solid var(--line);border-radius:var(--r-s);background:var(--surface)}
+.search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-style:normal;opacity:.5}
+.pills{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill-b{flex-shrink:0;height:34px;padding:0 13px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:12px;color:var(--sub)}
+.pill-b.on{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ---------- Menu cards ---------- */
+.menu{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+@media(min-width:640px){.menu{grid-template-columns:1fr 1fr}}
+@media(min-width:900px){.menu{grid-template-columns:repeat(3,1fr)}}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:10px}
+.item.off{background:#faf3f3;border-color:#efc9c9}
+.item-h{display:flex;gap:11px;align-items:center}
+.thumb{width:58px;height:58px;border-radius:12px;background:#e8eeec;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.item-h .t{flex:1;min-width:0}
+.item-h .t b{display:block;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-h .t small{display:block;color:var(--sub);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{font-size:12px;font-weight:700;color:var(--brand);margin-top:2px}
+.item-m{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.step{display:flex;align-items:center;background:#eef3f1;border-radius:var(--r-s);overflow:hidden}
+.step button{width:38px;height:38px;font-size:20px;font-weight:700;color:var(--ink)}
+.step button:active{background:#dbe5e2}
+.step input{width:50px;height:38px;border:0;background:transparent;text-align:center;font-weight:800;font-size:15px;-moz-appearance:textfield}
+.step input::-webkit-outer-spin-button,.step input::-webkit-inner-spin-button{-webkit-appearance:none}
+.avail{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--sub)}
+.item-f{display:flex;gap:8px;justify-content:flex-end;border-top:1px dashed var(--line);padding-top:10px}
+.empty{grid-column:1/-1;text-align:center;padding:44px 10px;color:var(--sub)}
+.empty .big{font-size:34px;margin-bottom:6px}
+
+/* ---------- FAB ---------- */
+.fab{position:fixed;right:16px;bottom:calc(84px + var(--safe-b));z-index:55;height:50px;padding:0 20px;border-radius:25px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 8px 20px rgba(15,118,110,.4);display:none;align-items:center;gap:8px}
+.fab.show{display:inline-flex}
+.fab:active{background:var(--brand-d)}
+
+/* ---------- Sheet / modal ---------- */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(10,20,19,.55);display:none;align-items:flex-end;justify-content:center}
+.ov.show{display:flex}
+@media(min-width:700px){.ov{align-items:center;padding:20px}}
+.sheet{background:var(--surface);width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;animation:up .2s ease-out}
+@media(min-width:700px){.sheet{border-radius:20px}}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+.sheet-h h3{margin:0;font-size:16px;font-weight:800}
+.x{width:34px;height:34px;border-radius:50%;background:#e8eeec;font-weight:800}
+.sheet-b{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.sheet-f{padding:12px 16px calc(12px + var(--safe-b));border-top:1px solid var(--line);display:flex;gap:8px}
+.sheet-f .btn-p{flex:1}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:5px}
+.f input[type=text],.f input[type=number],.f select,.f textarea{width:100%;height:42px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-s);background:#fafcfb}
+.f textarea{height:auto;min-height:74px;padding:10px 12px;resize:vertical;font-size:12px}
+.f input:disabled{background:#eef2f1;color:var(--sub)}
+.f .hint{font-size:11px;color:var(--sub);margin-top:4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.size-row{display:grid;grid-template-columns:1fr 96px 38px;gap:8px;margin-bottom:8px}
+.size-row button{height:42px;border-radius:var(--r-s);background:var(--bad-l);color:var(--bad);font-weight:800}
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:#f3f7f6;border-radius:var(--r-s);font-weight:700;font-size:13px}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;left:50%;bottom:calc(92px + var(--safe-b));transform:translate(-50%,20px);z-index:300;max-width:calc(100% - 28px);padding:11px 16px;border-radius:12px;background:var(--ink);color:#fff;font-weight:600;font-size:13px;opacity:0;pointer-events:none;transition:.22s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--bad)}
+.toast.ok{background:var(--ok)}
+
+/* ---------- Gate ---------- */
+.gate{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;align-items:center;justify-content:center;padding:24px;text-align:center}
+.gate.show{display:flex}
+.gate .box{max-width:340px}
+.gate .big{font-size:48px;margin-bottom:8px}
+.gate h2{margin:0 0 8px;font-size:18px}
+.skeleton{background:linear-gradient(90deg,#e6ecea 25%,#f2f6f5 50%,#e6ecea 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:var(--r);height:118px}
+@keyframes sk{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div id="login">
-  <div class="hero">🛵</div>
+
+
+<!-- Access gate (shown when not opened inside Telegram) -->
+<div id="gate" class="gate">
   <div class="box">
-    <h1>ចូលគណនីអ្នកដឹក</h1><div class="muted">Epheap Delivery</div>
-    <input id="lid" placeholder="ID របស់អ្នកដឹក" autocomplete="username" autocapitalize="off">
-    <input id="lpw" type="password" placeholder="ពាក្យសម្ងាត់" autocomplete="current-password">
-    <button class="btn" id="lbtn">ចូល</button>
-    <div class="muted" id="lerr" style="margin-top:10px;color:var(--bad)"></div>
+    <div class="big">🔒</div>
+    <h2>សូមបើកតាម Telegram</h2>
+    <p class="muted" style="font-size:13px">ទំព័រនេះអាចកែប្រែទិន្នន័យបានតែនៅពេលបើកតាមរយៈ Telegram Bot របស់ហាងប៉ុណ្ណោះ។</p>
+    <button class="btn btn-g" id="gate-view" style="margin-top:12px">មើលតែប៉ុណ្ណោះ (View only)</button>
+  </div>
+</div>
+<!-- Admin password -->
+<div id="pw-gate" class="gate">
+  <div class="box" style="width:100%">
+    <div class="big">🔑</div>
+    <h2>ពាក្យសម្ងាត់ Admin</h2>
+    <input id="pw-in" type="password" autocomplete="current-password" placeholder="បញ្ចូលពាក្យសម្ងាត់" style="width:100%;height:50px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;background:var(--surface);color:var(--ink);font:inherit;font-size:16px;margin-top:6px">
+    <button class="btn btn-p" id="pw-go" style="width:100%;margin-top:10px;height:48px">ចូល</button>
+    <div id="pw-err" style="color:var(--bad);margin-top:8px;font-size:13px"></div>
+  </div>
+</div>
+<header class="top">
+  <div class="wrap">
+    <h1>ផ្ទាំងគ្រប់គ្រងហាង<small>តូបគុយទាវ អ៊ីភាព</small></h1>
+    <button class="icon-btn" id="btn-refresh" aria-label="ធ្វើបច្ចុប្បន្នភាព"><span id="refresh-ic">🔄</span> Refresh</button>
+    <a class="icon-btn" href="index.html" target="_blank" rel="noopener">👁️ ហាង</a>
+  </div>
+</header>
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">🔄 គ្រប់គ្រងទំព័រអតិថិជន (ចុច Reload page អតិថន)</h2>
+  <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
+  <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+</div>
+<main class="wrap">
+  <!-- ========== HOME ========== -->
+  <section id="page-home" class="page on">
+    <!-- Shop banners (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🖼 បដាស្លាយ (Banners)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញនៅទំព័រអតិថិជន</div>
+      <div id="bn-list"></div>
+      <button class="btn btn-p btn-s" id="bn-add">➕ បន្ថែមបដា</button>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)">
+        <img id="logo-prev" src="./images/Logo.JPG" alt="" style="width:48px;height:48px;border-radius:12px;object-fit:cover;background:#e8eeec">
+        <div style="flex:1"><div class="lbl">🏷 ឡូហ្គោហាង (Logo)</div></div>
+        <button class="btn btn-g btn-s" id="logo-up">📷 ប្តូរ</button>
+      </div>
+    </div>
+    <!-- Category pictures (stored in Telegram) -->
+    <div class="card">
+      <div class="lbl">🍜 រូបប្រភេទម្ហូប (Category pictures)</div>
+      <div class="muted" style="margin-bottom:8px">រូបត្រូវរក្សាទុកក្នុង Telegram · បង្ហាញក្នុងប៊ូតុងប្រភេទនៅទំព័រអតិថិជន</div>
+      <div id="cat-img-list"></div>
+    </div>
+    <!-- Greeting question on the customer page -->
+    <div class="card">
+      <div class="lbl">💬 អត្ថបទស្វាគមន៍ (Greeting question)</div>
+      <div class="muted" style="margin-bottom:8px">បង្ហាញក្រោម «សួស្ដី …» នៅទំព័រអតិថិជន</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="greet-input" maxlength="80" placeholder="ថ្ងៃនេះចង់ញ៉ាំអ្វី?" style="flex:1;height:38px;border:1px solid var(--line);border-radius:var(--r-s);padding:0 10px;background:#fafcfb;">
+        <button class="btn btn-p btn-s" id="greet-save">រក្សាទុក</button>
+      </div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+        <div id="greet-styles"></div>
+        <div id="greet-prev" style="font-weight:800;font-size:18px;padding:6px 2px">ថ្ងៃនេះចង់ញ៉ាំអ្វី?</div>
+      </div>
+    </div>
+    <!-- Top Promotion Banner Control -->
+    <div class="card">
+      <div class="ctl" style="margin-bottom: 12px;">
+        <div>
+          <div class="lbl">ប្រូម៉ូសិនបដាខាងលើ (Top Promotion Banner)</div>
+          <div id="promo-status-text" class="val">…</div>
+          <div class="muted">បង្ហាញ ឬបិទប្រូម៉ូសិននៅផ្នែកខាងលើរបស់អតិថិជន</div>
+        </div>
+        <label class="sw"><input type="checkbox" id="promo-toggle"><span></span></label>
+      </div>
+      <div class="wait-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">អត្ថបទផ្លាកសញ្ញា (Badge Text):</label>
+          <input type="text" id="promo-badge-input" placeholder="Free Delivery" style="height: 38px; width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 0 10px; background: #fafcfb;">
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">សារប្រូម៉ូសិន (Message Text):</label>
+          <textarea id="promo-msg-input" placeholder="we will free delivery for more than 10items for you at every products..." style="width: 100%; border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px 10px; background: #fafcfb; min-height: 50px; font-size: 12px;"></textarea>
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 700; color: var(--sub);">ពណ៌ (Colors):</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <label class="pcol">ផ្ទៃបដា (Banner background)<input type="color" id="promo-bg" value="#e4f3ef"></label>
+            <label class="pcol">អក្សរបដា (Banner text)<input type="color" id="promo-color" value="#14201f"></label>
+            <label class="pcol">ផ្ទៃផ្លាកសញ្ញា (Badge background)<input type="color" id="promo-badge-bg" value="#fde68a"></label>
+            <label class="pcol">អក្សរផ្លាកសញ្ញា (Badge text)<input type="color" id="promo-badge-color" value="#92400e"></label>
+          </div>
+          <div id="promo-prev" style="margin-top:8px;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;display:flex;gap:10px;align-items:center;overflow:hidden;white-space:nowrap"><span id="promo-prev-badge" style="padding:2px 10px;border-radius:99px;font-weight:800;font-size:12px">Badge</span><span id="promo-prev-msg">Preview</span></div>
+          <button type="button" class="btn btn-g btn-s" id="promo-color-reset" style="margin-top:8px">↺ ពណ៌ដើម (Reset colors)</button>
+        </div>
+        <button class="btn btn-p btn-s" id="promo-save-btn" style="align-self: flex-end;">រក្សាទុកប្រូម៉ូសិន</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">ស្ថានភាពហាង</div>
+            <div id="store-text" class="val">…</div>
+            <div class="muted">បើក/បិទ ការទទួលការកម្មង់</div>
+          </div>
+          <label class="sw"><input type="checkbox" id="store-toggle"><span></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ctl">
+          <div>
+            <div class="lbl">សេវាដឹកជញ្ជូន</div>
+            <div id="delivery-text" class="val">…</div>
+          </div>
+          <label class="sw"><input type="checkbox" id="delivery-toggle"><span></span></label>
+        </div>
+        <div class="wait-row">
+          <label for="wait-input">រយៈពេលរង់ចាំ (នាទី)</label>
+          <input class="num" type="number" id="wait-input" min="1" max="180" inputmode="numeric" placeholder="15">
+          <button class="btn btn-p btn-s" id="wait-save">រក្សាទុក</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="sec-title">
+      <div>
+        <h2 class="h2">⚠️ ស្តុកជិតអស់</h2>
+        <div class="muted">មុខម្ហូបដែលនៅសល់ ≤ <span id="low-n"></span> ឬអស់ស្តុក</div>
+      </div>
+    </div>
+    <div class="card" id="low-list" style="padding:4px 14px"></div>
+  </section>
+
+  <!-- ========== MENU ========== -->
+  <section id="page-menu" class="page">
+    <div class="toolbar">
+      <div class="search">
+        <i>🔍</i>
+        <input type="search" id="search" placeholder="ស្វែងរកឈ្មោះម្ហូប…" autocomplete="off">
+      </div>
+      <div class="pills" id="cat-pills"></div>
+    </div>
+    <div class="menu" id="menu"></div>
+  </section>
+
+  <!-- ========== DELIVERY ========== -->
+  <section id="page-delivery" class="page">
+    <div class="card">
+      <h2 class="h2">🛵 អ្នកដឹក (Drivers)</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <input id="drv-name" placeholder="ឈ្មោះ" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <input id="drv-id" placeholder="ID ចូលកម្មវិធី" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px" autocapitalize="off">
+        <input id="drv-pw" placeholder="ពាក្យសម្ងាត់ (≥6)" style="flex:1;min-width:110px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--ink);font:inherit;font-size:13px">
+        <button class="btn btn-p btn-s" id="drv-add">➕ បន្ថែម</button>
+      </div>
+      <div id="drv-list" class="muted">កំពុងផ្ទុក…</div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📦 ការដឹកជញ្ជូនដែលបានបង់ប្រាក់</h2>
+      <p class="muted" style="margin:4px 0 10px">១) «ផ្ញើទៅ Delivery app» ឱ្យអ្នកដឹកស្នើ ឬ ២) ជ្រើសអ្នកដឹកផ្ទាល់ រួចចុច «អនុម័ត»។ ក្រោយអនុម័ត ព័ត៌មាន និងផែនទីទើបបង្ហាញក្នុងកម្មវិធីអ្នកដឹក។</p>
+      <div id="dl-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="dl-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+  </section>
+
+  <!-- ========== SETTINGS / ABOUT ========== -->
+  <!-- ========== DRIVER MONEY ========== -->
+  <section id="page-pay" class="page">
+    <div class="card">
+      <h2 class="h2">💵 សំណើសុំប្រាក់ពីអ្នកដឹក <span id="pay-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">បង់ប្រាក់ឱ្យអ្នកដឹកខ្លួនឯងជាមុនសិន រួចចុច «បានបង់រួច»។</p>
+      <div id="pay-pending" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="pay-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card">
+      <h2 class="h2">👥 ប្រាក់ដែលអ្នកដឹកមាន (មិនទាន់ស្នើ)</h2>
+      <div id="pay-bal" class="muted">…</div>
+    </div>
+    <div class="card">
+      <h2 class="h2">📜 ប្រវត្តិ</h2>
+      <div id="pay-hist" class="muted">…</div>
+    </div>
+  </section>
+
+  <section id="page-more" class="page">
+    <div class="card">
+      <h2 class="h2">👤 អ្នកគ្រប់គ្រង</h2>
+      <div id="who" class="muted" style="margin-top:6px"></div>
+      <button class="btn btn-g btn-s" id="pw-out" style="margin-top:8px">🔒 ចាកចេញ (Admin)</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧰 អាប់ដេត រហ័ស</h2>
+      <p class="muted" style="margin:4px 0 12px">សកម្មភាពលើមុខម្ហូបទាំងអស់ក្នុងពេលតែមួយ</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-g" id="bulk-enable">✅ បើកលក់មុខម្ហូបទាំងអស់ដែលមានស្តុក</button>
+        <button class="btn btn-g" id="bulk-disable-zero">⛔ បិទមុខម្ហូបដែលអស់ស្តុក (0)</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🧾 ការកម្មង់ទាំងអស់ <span id="ord-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">⏳ មិនទាន់ទទួល · ✅ បានទទួលរួច។ ពេលចុច ✅ ការកម្មង់នឹងចូលប្រវត្តិ ហើយកែលែងបាន។</p>
+      <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
+      <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📜 ប្រវត្តិ (បានទទួលរួច) <span id="hist-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">🔒 ចាក់សោ មិនអាចកែបានទេ · Admin អាចលុបបាន។</p>
+      <div id="hist-list" class="muted">…</div>
+      <button class="btn btn-d btn-s" id="hist-clear" style="margin-top:8px;display:none">🗑 លុបប្រវត្តិទាំងអស់</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">🔐 ការចូលតាម Telegram</h2>
+      <p class="muted" style="margin:4px 0 10px">បើក: អតិថិជនត្រូវចូលតាម Telegram (ក្នុង browser) ហើយត្រូវមាន Username ។ បិទ: កម្មង់បានដោយសេរី។</p>
+      <div class="switch-row"><span>តម្រូវឱ្យចូលតាម Telegram និងមាន Username</span>
+        <label class="sw"><input type="checkbox" id="req-login"><span></span></label></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
+      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)។</p>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab" id="fab-add"><span style="font-size:20px;line-height:1">＋</span> បន្ថែមម្ហូប</button>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tab on" data-tab="home"><span class="ic">📊</span>ទិដ្ឋភាពទូទៅ<span class="dot" id="low-dot"></span></button>
+    <button class="tab" data-tab="menu"><span class="ic">🍜</span>មុខម្ហូប</button>
+    <button class="tab" data-tab="delivery"><span class="ic">🛵</span>ដឹកជញ្ជូន<span class="dot" id="dl-dot"></span></button>
+    <button class="tab" data-tab="pay"><span class="ic">💵</span>ប្រាក់អ្នកដឹក<span class="dot" id="pay-dot"></span></button>
+    <button class="tab" data-tab="more"><span class="ic">⚙️</span>ផ្សេងៗ</button>
+  </div>
+</nav>
+
+<!-- Item modal -->
+<div class="ov" id="item-ov">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-h">
+      <h3 id="sheet-title">បន្ថែមមុខម្ហូបថ្មី</h3>
+      <button class="x" id="sheet-x" aria-label="បិទ">✕</button>
+    </div>
+    <div class="sheet-b f">
+      <input type="hidden" id="f-edit">
+      <div>
+        <label for="f-key">កូដមុខម្ហូប (Item key) *</label>
+        <input type="text" id="f-key" placeholder="kuy_teav_special" autocapitalize="off" autocomplete="off">
+        <div class="hint">អក្សរអង់គ្លេសតូច លេខ និង _ ប៉ុណ្ណោះ។ មិនអាចប្តូរបានក្រោយបង្កើត។</div>
+      </div>
+      <div class="row2">
+        <div><label for="f-kh">ឈ្មោះខ្មែរ *</label><input type="text" id="f-kh" placeholder="គុយទាវពិសេស"></div>
+        <div><label for="f-en">ឈ្មោះអង់គ្លេស *</label><input type="text" id="f-en" placeholder="Special Noodle"></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label for="f-cat">ប្រភេទ *</label>
+          <select id="f-cat"></select>
+        </div>
+        <div><label for="f-stock">ស្តុក *</label><input type="number" id="f-stock" min="0" inputmode="numeric" value="50"></div>
+      </div>
+      <div>
+        <label>ទំហំ និងតម្លៃ ($) *</label>
+        <div id="size-list"></div>
+        <button class="btn btn-g btn-s" id="size-add" type="button">＋ បន្ថែមទំហំ</button>
+      </div>
+      <div>
+        <label for="f-img">រូបភាព (URL មួយបន្ទាត់ម្តង)</label>
+        <textarea id="f-img" placeholder="./images/kuy_teav.png"></textarea>
+        <button type="button" class="btn btn-g btn-s" id="f-img-up" style="margin-top:6px">📷 ផ្ទុករូបឡើង (Telegram)</button>
+        <div class="hint">ទុកទទេ ប្រសិនបើគ្មានរូប — ប្រព័ន្ធនឹងប្រើ ./images/កូដ.png</div>
+      </div>
+      <div class="switch-row">
+        <span>ស្លាក "ពេញនិយម" 🔥</span>
+        <label class="sw"><input type="checkbox" id="f-pop"><span></span></label>
+      </div>
+      <div class="switch-row">
+        <span>🏷 បញ្ចុះតម្លៃ (Discount)</span>
+        <label class="sw"><input type="checkbox" id="f-disc"><span></span></label>
+      </div>
+      <div id="f-disc-box">
+        <label for="f-disc-pct">បញ្ចុះតម្លៃ (%)</label>
+        <input type="number" id="f-disc-pct" min="1" max="99" inputmode="numeric" placeholder="ឧ. 20">
+        <div class="hint">តម្លៃថ្មីគណនាពីតម្លៃទំហំនីមួយៗ — ប៊ូតុង «កម្មង់ឥឡូវ» នៅទំព័រអតិថិជន នឹងបង្ហាញមុខម្ហូបដែលបើកបញ្ចុះតម្លៃ</div>
+      </div>
+      <div class="switch-row">
+        <span>🛵 ដឹកជញ្ជូនឥតគិតថ្លៃសម្រាប់មុខម្ហូបនេះ</span>
+        <label class="sw"><input type="checkbox" id="f-free"><span></span></label>
+      </div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn btn-p" id="sheet-save">រក្សាទុក</button>
+      <button class="btn btn-g" id="sheet-cancel">បោះបង់</button>
+    </div>
   </div>
 </div>
 
-<div id="app" class="hide">
-  <header class="top">
-    <div><b id="dname"></b><small>ID: <span id="did"></span></small></div>
-    <button class="sw" id="tgl" role="switch" aria-checked="false"><span id="swl">បិទ</span><span class="tr"></span></button>
-  </header>
-  <main>
-    <div id="trk" class="trk hide"></div>
-    <section id="p-mine"><h2>📦 ការងាររបស់ខ្ញុំ</h2><div id="mine"></div></section>
-    <section id="p-open" class="hide"><h2>🆕 ការកម្មង់ត្រូវការអ្នកដឹក</h2><div id="open"></div></section>
-    <section id="p-map" class="hide">
-      <h2>🗺️ ផែនទី</h2>
-      <div id="map-empty" class="empty"><span>🗺️</span>ចុច «🗺️ ផែនទី» នៅលើការងារ ដើម្បីមើលទីតាំងអតិថិជននៅទីនេះ</div>
-      <div id="map-box" class="hide">
-        <div class="muted" id="map-info" style="margin:0 2px 8px"></div>
-        <div class="card" style="padding:0;overflow:hidden"><iframe id="map-frame" title="map" style="width:100%;height:58vh;border:0;display:block" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
-        <div class="acts">
-          <button class="chip" id="map-me" style="border:0;cursor:pointer;font:inherit">📍 ពីទីតាំងខ្ញុំ</button>
-          <a class="chip" id="map-ext" target="_blank" rel="noopener">🧭 Google Maps</a>
-        </div>
-        <div class="muted" style="margin:0 2px">ផែនទីនេះនៅក្នុង app — ការចែករំលែកទីតាំងបន្តដំណើរការ។ ប៊ូតុង «Google Maps» នឹងបើក app ផ្សេង ហើយទីតាំងអាចឈប់ផ្ញើ។</div>
-      </div>
-    </section>
-    <section id="p-me" class="hide">
-      <h2>👤 គណនី</h2>
-      <div class="card bal">
-        <div class="muted">💰 ប្រាក់ដែលអាចស្នើសុំបាន</div>
-        <div class="big" id="e-avail">$0.00</div>
-        <div class="mini">
-          <div><span class="muted">សរុបទទួលបាន</span><b id="e-total">$0.00</b></div>
-          <div><span class="muted">កំពុងរង់ចាំ</span><b id="e-pend">$0.00</b></div>
-          <div><span class="muted">បានបង់រួច</span><b id="e-paid">$0.00</b></div>
-        </div>
-        <button class="btn" id="e-req" disabled>💸 ស្នើសុំប្រាក់ពីអ្នកគ្រប់គ្រង</button>
-        <div class="muted" id="e-note" style="margin-top:6px;text-align:center"></div>
-      </div>
-      <div class="card"><div class="name" id="mname"></div><div class="muted">ID: <span id="mid"></span></div>
-        <div style="margin-top:10px"><span class="tag" id="mstate"></span></div>
-        <button class="btn red" id="out">ចាកចេញ</button></div>
-      <h2>🧾 ការដឹកដែលបានបញ្ចប់ <span class="muted" id="e-n"></span></h2>
-      <div id="e-list"></div>
-    </section>
-  </main>
-  <nav>
-    <button data-t="mine" class="on"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"/></svg>ការងារ<em id="b-mine" class="hide"></em></button>
-    <button data-t="open"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ការកម្មង់ថ្មី<em id="b-open" class="hide"></em></button>
-    <button data-t="map"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>ផែនទី</button>
-    <button data-t="me"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>គណនី</button>
-  </nav>
+<!-- Confirm modal -->
+<div class="ov" id="cf-ov" style="z-index:200;align-items:center;padding:20px">
+  <div class="sheet" style="border-radius:20px;max-width:360px">
+    <div class="sheet-b" style="text-align:center;padding:24px 20px 14px">
+      <div style="font-size:34px">🗑️</div>
+      <div id="cf-msg" style="font-weight:700"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn btn-g" id="cf-no" style="flex:1">បោះបង់</button>
+      <button class="btn btn-d" id="cf-yes" style="flex:1">បាទ/ចាស លុប</button>
+    </div>
+  </div>
 </div>
-<div id="toast" class="hide"></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-(function () {
-  var API = 'https://lykgwttlhqedyrkxfoja.supabase.co/functions/v1/driver-api';
-  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs';
-  var $ = function (id) { return document.getElementById(id); };
-  var token = localStorage.getItem('drv_token') || '';
-  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine';
+/* =====================================================
+   CONFIG
+   ===================================================== */
+const SUPABASE_URL = "https://lykgwttlhqedyrkxfoja.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs";
+const ADMIN_FUNCTION = "update-settings";   // Supabase Edge Function name
+const LOW_STOCK = 10;                        // "low stock" threshold
 
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
-  function toast(m) { var t = $('toast'); t.textContent = m; t.classList.remove('hide'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.add('hide'); }, 3000); }
-  function call(body) {
-    body.token = token;
-    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }); })
-      .catch(function () { return { error: 'មិនអាចភ្ជាប់បានទេ' }; });
-  }
-  function logout() { token = ''; localStorage.removeItem('drv_token'); stopTracking(); clearInterval(timer); $('app').classList.add('hide'); $('login').classList.remove('hide'); }
-  function setTab(t) {
-    tab = t;
-    ['mine', 'open', 'map', 'me'].forEach(function (k) { $('p-' + k).classList.toggle('hide', k !== t); });
-    document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
-    window.scrollTo(0, 0);
-    if (t === 'me') loadEarnings();
-  }
-  document.querySelectorAll('nav button').forEach(function (b) { b.onclick = function () { setTab(b.dataset.t); }; });
+const CATEGORIES = [
+  { key: "kuy_teav", label: "🍜 គុយទាវ" },
+  { key: "rice",     label: "🍚 បាយ" },
+  { key: "other",    label: "🍛 នំបាញ់ចុក" },
+  { key: "drinks",   label: "🧋 ភេសជ្ជៈ" },
+];
 
-  $('lbtn').onclick = function () {
-    $('lerr').textContent = ''; $('lbtn').disabled = true;
-    call({ action: 'login', login_id: $('lid').value.trim(), password: $('lpw').value }).then(function (j) {
-      $('lbtn').disabled = false;
-      if (j.error) { $('lerr').textContent = j.error; return; }
-      token = j.token; localStorage.setItem('drv_token', token); $('lpw').value = ''; start();
+/* =====================================================
+   HELPERS
+   ===================================================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const money = n => "$" + Number(n).toFixed(2);
+const catLabel = k => (CATEGORIES.find(c => c.key === k) || { label: k }).label;
+
+const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const tg = window.Telegram?.WebApp;
+const hasTG = !!(tg && tg.initData);
+let viewOnly = false;
+let admToken = ""; try { admToken = localStorage.getItem("adm_token") || ""; } catch (e) {}
+function showPw() { $("pw-gate").classList.add("show"); setTimeout(() => $("pw-in").focus(), 50); }
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+  try { tg.setHeaderColor("#14201f"); tg.setBackgroundColor("#f1f4f3"); } catch (_) {}
+  try { tg.enableClosingConfirmation(); } catch (_) {}
+}
+const haptic = (t = "light") => { try { tg?.HapticFeedback?.impactOccurred(t); } catch (_) {} };
+const hapticN = (t) => { try { tg?.HapticFeedback?.notificationOccurred(t); } catch (_) {} };
+
+let toastTimer;
+function toast(msg, type = "") {
+  const el = $("toast");
+  el.textContent = msg;
+  el.className = "toast show " + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  if (type === "ok") hapticN("success");
+  if (type === "err") hapticN("error");
+}
+
+/** Secured call: Telegram initData is verified server-side by the Edge Function */
+async function admin(body) {
+  if (viewOnly || !hasTG) return { error: "សូមបើកតាម Telegram ដើម្បីកែប្រែទិន្នន័យ" };
+  const { data, error } = await supa.functions.invoke(ADMIN_FUNCTION, {
+    body: { ...body, initData: tg.initData, token: admToken },
+  });
+  if (error) {
+    let msg = error.message, code = "";
+    try {
+      if (error.context?.json) {
+        const j = await error.context.json();
+        if (j?.error) msg = j.error;
+        if (j?.code) code = j.code;
+      }
+    } catch (_) {}
+    if (code === "LOGIN") showPw();
+    return { error: msg };
+  }
+  if (data?.code === "LOGIN") showPw();
+  if (data?.error) return { error: data.error };
+  return { data };
+}
+
+/* =====================================================
+   STATE
+   ===================================================== */
+let items = [];
+let cat = "all";
+let query = "";
+const stockTimers = {};
+
+/* =====================================================
+   NAVIGATION
+   ===================================================== */
+function showTab(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("on", p.id === "page-" + name));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.tab === name));
+  $("fab-add").classList.toggle("show", name === "menu");
+  window.scrollTo({ top: 0 });
+  haptic();
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => showTab(t.dataset.tab)));
+
+/* =====================================================
+   PROMOTIONAL BANNER
+   ===================================================== */
+async function loadPromoBanner() {
+  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
+  if (data) {
+    const activeItem = data.find(i => i.key === 'promo_active');
+    const textItem = data.find(i => i.key === 'promo_text');
+    const badgeItem = data.find(i => i.key === 'promo_badge');
+
+    const cleanVal = (val, fallback) => {
+      if (val === undefined || val === null) return fallback;
+      let str = typeof val === 'string' ? val : JSON.stringify(val);
+      if (str.startsWith('"') && str.endsWith('"')) {
+        try { str = JSON.parse(str); } catch(e) {}
+      }
+      return str || fallback;
+    };
+
+    const active = activeItem ? (activeItem.value === true || activeItem.value === 'true') : false;
+    const text = cleanVal(textItem?.value, "");
+    const badge = cleanVal(badgeItem?.value, "");
+
+    $("promo-toggle").checked = active;
+    setText($("promo-status-text"), active ? "កំពុងបើកបង្ហាញ" : "បានបិទ", active ? "ok" : "bad");
+    $("promo-badge-input").value = badge;
+    $("promo-msg-input").value = text;
+
+    // saved colours (empty = default look on the customer page)
+    promoColorsCustom = false;
+    COLOR_FIELDS.forEach(([key, id]) => {
+      const c = cleanVal(data.find(i => i.key === key)?.value, "");
+      if (/^#[0-9a-fA-F]{6}$/.test(c)) { $(id).value = c; promoColorsCustom = true; }
     });
-  };
-  $('out').onclick = logout;
-  function toggle() { call({ action: 'set_active', active: !active }).then(function (j) { if (j.error) toast(j.error); refresh(); }); }
-  $('tgl').onclick = toggle;
+    updatePromoPreview();
+  }
+}
+const COLOR_FIELDS = [["promo_bg", "promo-bg"], ["promo_color", "promo-color"], ["promo_badge_bg", "promo-badge-bg"], ["promo_badge_color", "promo-badge-color"]];
+const COLOR_DEFAULTS = { "promo-bg": "#e4f3ef", "promo-color": "#14201f", "promo-badge-bg": "#fde68a", "promo-badge-color": "#92400e" };
+let promoColorsCustom = false;
+function updatePromoPreview() {
+  $("promo-prev").style.background = $("promo-bg").value;
+  $("promo-prev").style.color = $("promo-color").value;
+  $("promo-prev-badge").style.background = $("promo-badge-bg").value;
+  $("promo-prev-badge").style.color = $("promo-badge-color").value;
+  $("promo-prev-badge").textContent = $("promo-badge-input").value || "Badge";
+  $("promo-prev-msg").textContent = $("promo-msg-input").value || "Preview";
+}
+COLOR_FIELDS.forEach(([, id]) => $(id).addEventListener("input", () => { promoColorsCustom = true; updatePromoPreview(); }));
+$("promo-badge-input").addEventListener("input", updatePromoPreview);
+$("promo-msg-input").addEventListener("input", updatePromoPreview);
+$("promo-color-reset").addEventListener("click", () => {
+  COLOR_FIELDS.forEach(([, id]) => { $(id).value = COLOR_DEFAULTS[id]; });
+  promoColorsCustom = false; updatePromoPreview();
+  toast("ចុច «រក្សាទុកប្រូម៉ូសិន» ដើម្បីប្រើពណ៌ដើម", "ok");
+});
 
-  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(refresh, 8000); }
+$("promo-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("promo-status-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "promo_active", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកប្រូម៉ូសិនបដា" : "បានបិទប្រូម៉ូសិនបដា", "ok");
+  loadPromoBanner();
+});
 
-  function itemsHtml(items) {
-    return '<div class="items">' + (items || []).map(function (i) {
-      return '<div><span>' + esc(i.name) + (i.sugar ? ' <span class="muted">(ស្ករ ' + esc(i.sugar) + ', ' + esc(i.ice) + ')</span>' : '') + '</span><b>×' + esc(i.qty) + '</b></div>';
-    }).join('') + '</div>';
-  }
-  function usd(n) { return '$' + Number(n || 0).toFixed(2); }
-  function when(t) { if (!t) return ''; var d = new Date(t); if (isNaN(d)) return String(t).slice(0, 16).replace('T', ' '); var p = function (x) { return (x < 10 ? '0' : '') + x; }; return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()); }
-  var earnPending = false;
-  function loadEarnings() {
-    call({ action: 'earnings' }).then(function (j) {
-      if (j.code === 'LOGIN') { logout(); return; }
-      if (j.error) return;
-      $('e-avail').textContent = usd(j.available); $('e-total').textContent = usd(j.total);
-      $('e-pend').textContent = usd(j.pending); $('e-paid').textContent = usd(j.paid);
-      earnPending = !!j.has_pending;
-      $('e-req').disabled = !(j.available > 0) || earnPending;
-      $('e-note').textContent = earnPending ? '⏳ សំណើកំពុងរង់ចាំការអនុម័តពីអ្នកគ្រប់គ្រង' : (j.available > 0 ? '' : 'មិនទាន់មានប្រាក់សម្រាប់ស្នើសុំ');
-      var l = j.list || [];
-      $('e-n').textContent = l.length ? '(' + l.length + ')' : '';
-      var tagOf = { unpaid: '<span class="tag">មិនទាន់ស្នើ</span>', pending: '<span class="tag b">⏳ រង់ចាំ</span>', paid: '<span class="tag g">✅ បានបង់</span>' };
-      $('e-list').innerHTML = l.length ? l.map(function (x) {
-        return '<div class="card"><div class="job"><div><div class="name">' + esc(x.customer_name || '—') + '</div><div class="muted">' + esc(when(x.delivered_at)) + '</div>' +
-          (x.items ? '<div class="muted" style="margin-top:2px">' + esc(x.items) + '</div>' : '') + '</div>' +
-          '<div style="text-align:right"><div class="amt">+' + usd(x.amount) + '</div><div style="margin-top:6px">' + (tagOf[x.state] || '') + '</div></div></div></div>';
-      }).join('') : '<div class="empty"><span>🛵</span>មិនទាន់មានការដឹកដែលបានបញ្ចប់ទេ</div>';
-    });
-  }
-  $('e-req').onclick = function () {
-    var a = $('e-avail').textContent;
-    if (!confirm('ស្នើសុំប្រាក់ ' + a + ' ពីអ្នកគ្រប់គ្រង?')) return;
-    $('e-req').disabled = true;
-    call({ action: 'request_payout' }).then(function (r) { if (r.error) toast(r.error); else toast('បានផ្ញើសំណើ ' + usd(r.amount) + ' ហើយ'); loadEarnings(); });
-  };
-  function badge(id, n) { var e = $(id); e.textContent = n; e.classList.toggle('hide', !n); }
 
-  function refresh() {
-    call({ action: 'list' }).then(function (j) {
-      if (j.code === 'LOGIN') { logout(); return; }
-      if (j.error) return;
-      active = j.is_active; me = j.driver;
-      if (tab === 'me') loadEarnings();
-      $('dname').textContent = me.name; $('did').textContent = me.login_id; $('mname').textContent = me.name; $('mid').textContent = me.login_id;
-      $('tgl').classList.toggle('on', active); $('tgl').setAttribute('aria-checked', active); $('swl').textContent = active ? 'សកម្ម' : 'បិទ';
-      $('mstate').textContent = active ? '🟢 កំពុងសកម្ម' : '⚪ បិទ';
+// ---- promo food + greeting text ----
+async function loadGreet() {
+  const { data } = await supa.from("app_settings").select("key, value").in("key", ["greet_text", "greet_anim"]);
+  const val = k => { let v = (data || []).find(r => r.key === k)?.value; try { if (typeof v === "string" && v.startsWith('"')) v = JSON.parse(v); } catch (e) {} return typeof v === "string" ? v : ""; };
+  $("greet-input").value = val("greet_text");
+  setGreetAnim(val("greet_anim"));
+}
+const GREET_STYLES = [
+  ["none", "1 · ធម្មតា (Normal)"], ["float", "2 · Float ឡើងចុះ"], ["bounce", "3 · Bounce លោត"], ["wobble", "4 · Wobble ញ័រ"], ["pulse", "5 · Pulse ពង្រីក"],
+  ["swing", "6 · Swing យោល"], ["sway", "7 · Sway ទៅឆ្វេងស្ដាំ"], ["jelly", "8 · Jelly ជែលលី"], ["heartbeat", "9 · Heartbeat ដើមទ្រូង"], ["tada", "10 · Tada អបអរ"]
+];
+$("greet-styles").innerHTML = GREET_STYLES.map(([k, t]) => `<label><input type="radio" name="greet-anim" value="${k}"${k === "none" ? " checked" : ""}> ${t}</label>`).join("");
+function setGreetAnim(v) {
+  if (!GREET_STYLES.some(g => g[0] === v)) v = "none";
+  document.querySelectorAll('input[name="greet-anim"]').forEach(r => { r.checked = r.value === v; r.parentElement.classList.toggle("on", r.checked); });
+  const p = $("greet-prev");
+  p.className = v === "none" ? "" : "anim-" + v;
+}
+document.querySelectorAll('input[name="greet-anim"]').forEach(r => r.addEventListener("change", () => setGreetAnim(r.value)));
+$("f-disc").addEventListener("change", () => { $("f-disc-box").style.display = $("f-disc").checked ? "" : "none"; });
+$("greet-save").addEventListener("click", async () => {
+  const anim = document.querySelector('input[name="greet-anim"]:checked')?.value || "none";
+  await admin({ action: "update_setting", key: "greet_anim", value: anim });
+  const r = await admin({ action: "update_setting", key: "greet_text", value: $("greet-input").value.trim() });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok");
+});
+$("promo-save-btn").addEventListener("click", async () => {
+  const badge = $("promo-badge-input").value.trim();
+  const text = $("promo-msg-input").value.trim();
+  
+  await admin({ action: "update_setting", key: "promo_badge", value: badge });
+  let { error } = await admin({ action: "update_setting", key: "promo_text", value: text });
+  for (const [key, id] of COLOR_FIELDS) {
+    const r = await admin({ action: "update_setting", key, value: promoColorsCustom ? $(id).value : "" });
+    if (r.error && !error) error = r.error;
+  }
+  
+  if (error) toast(error, "err"); else toast("បានរក្សាទុកសារប្រូម៉ូសិន", "ok");
+  loadPromoBanner();
+});
 
-      var m = j.mine || [];
-      mineData = m;
-      badge('b-mine', m.length);
-      $('mine').innerHTML = m.length ? m.map(function (o) {
-        var map = o.lat != null ? 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng : (o.location_link || '');
-        var st = o.delivery_status, go = (st === 'delivering' || st === 'arrived'), id = esc(o.tran_id);
-        var btn = go
-          ? '<button class="btn" data-s="delivered" data-id="' + id + '">✅ អតិថិជនបានទទួលអីវ៉ាន់ (Finish)</button><div class="muted" style="text-align:center;margin-top:6px">📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន</div>'
-          : '<button class="btn" data-s="delivering" data-id="' + id + '">🛵 ចាប់ផ្ដើមដឹក (Start)</button><div class="muted" style="text-align:center;margin-top:6px">ការតាមដានទីតាំងចាប់ផ្ដើមពេលចុចប៊ូតុងនេះ</div>';
-        return '<div class="card"><div class="row"><div class="name">' + esc(o.customer_name) + '</div><div class="price">$' + Number(o.total).toFixed(2) + '</div></div>' +
-          '<div class="rail"><i class="d"></i><b class="' + (go ? 'd' : '') + '"></b><i class="' + (go ? 'd' : '') + '"></i><b></b><i></i></div>' +
-          '<div class="lbl"><span class="' + (go ? '' : 'c') + '">មិនទាន់ដឹក</span><span class="' + (go ? 'c' : '') + '">កំពុងដឹក</span><span>បានទទួល</span></div>' +
-          (o.address ? '<div class="addr">📍 ' + esc(o.address) + '</div>' : '') +
-          '<div class="acts"><a class="chip" href="tel:' + esc(o.phone) + '">📞 ' + esc(o.phone) + '</a>' +
-          (o.lat != null || o.address || map ? '<button class="chip" data-map="' + id + '" style="border:0;cursor:pointer;font:inherit">🗺️ ផែនទី</button>' : '') + '</div>' +
-          itemsHtml(o.items) + btn + '</div>';
-      }).join('') : '<div class="empty"><span>📭</span>គ្មានការងារទេ<br>ចូលទៅ «ការកម្មង់ថ្មី» ដើម្បីស្នើសុំដឹក</div>';
-      document.querySelectorAll('#mine button[data-map]').forEach(function (b) { b.onclick = function () { openMap(b.dataset.map); }; });
-      document.querySelectorAll('#mine button[data-s]').forEach(function (b) {
-        b.onclick = function () { b.disabled = true; call({ action: 'stage', tran_id: b.dataset.id, stage: b.dataset.s }).then(function (r) { if (r.error) toast(r.error); refresh(); }); };
-      });
+/* =====================================================
+   STORE + DELIVERY SETTINGS
+   ===================================================== */
+function setText(el, text, cls) { el.textContent = text; el.className = "val " + cls; }
 
-      var d = m.filter(function (o) { return o.delivery_status === 'delivering'; })[0];
-      if (d) startTracking(d.tran_id); else stopTracking();
+async function loadStore() {
+  const { data, error } = await supa.from("app_settings").select("value").eq("key", "is_store_open").single();
+  const open = (error || !data) ? true : !!data.value;
+  $("store-toggle").checked = open;
+  setText($("store-text"), open ? "បើកដំណើរការ" : "បិទហាង", open ? "ok" : "bad");
+}
 
-      var o2 = j.open || [], req = j.requested || [];
-      badge('b-open', active ? o2.length : 0);
-      $('open').innerHTML = !active
-        ? '<div class="empty"><span>😴</span>អ្នកកំពុងបិទ<br>សូមបើក «សកម្ម» ដើម្បីមើលបញ្ជី<button class="btn" id="goon">🟢 បើកសកម្ម</button></div>'
-        : o2.length ? o2.map(function (o) {
-          var asked = req.indexOf(o.tran_id) >= 0;
-          return '<div class="card"><div class="row"><span class="price">$' + Number(o.total).toFixed(2) + '</span><span class="tag">ថ្មី</span></div>' +
-            '<div class="muted" style="margin-top:4px">អាសយដ្ឋាន និងផែនទី នឹងបង្ហាញពេលអនុម័ត</div>' + itemsHtml(o.items) +
-            (asked ? '<button class="btn soft" disabled>⏳ បានស្នើហើយ — រង់ចាំអនុម័ត</button>' : '<button class="btn" data-r="' + esc(o.tran_id) + '">🙋 ស្នើសុំដឹក (Request)</button>') + '</div>';
-        }).join('') : '<div class="empty"><span>🍃</span>មិនទាន់មានការកម្មង់ថ្មីទេ</div>';
-      if ($('goon')) $('goon').onclick = toggle;
-      document.querySelectorAll('#open button[data-r]').forEach(function (b) {
-        b.onclick = function () { b.disabled = true; call({ action: 'request', tran_id: b.dataset.r }).then(function (r) { if (r.error) toast(r.error); else toast('បានស្នើសុំហើយ'); refresh(); }); };
-      });
-    });
-  }
+async function loadDelivery() {
+  const { data, error } = await supa.from("delivery_status")
+    .select("is_delivery_available, estimated_wait_minutes").eq("id", 1).single();
+  if (error || !data) return;
+  $("delivery-toggle").checked = !!data.is_delivery_available;
+  setText($("delivery-text"), data.is_delivery_available ? "មានជើងដឹកជញ្ចូន" : "ផ្អាកដឹកបណ្តោះអាសន្ន",
+          data.is_delivery_available ? "ok" : "warn");
+  $("wait-input").value = data.estimated_wait_minutes || 15;
+}
 
-  /* in-app map: shows Google Maps inside this page, so the driver never leaves the app and live sharing keeps running */
-  var mineData = [], curMap = null;
-  function mapDest(o) { return o.lat != null && o.lng != null ? o.lat + ',' + o.lng : (o.address || ''); }
-  function mapSrc(o) {
-    var dest = mapDest(o); if (!dest) return '';
-    var base = 'https://maps.google.com/maps?output=embed&z=16&hl=km';
-    if (lastPos) return base + '&saddr=' + encodeURIComponent(lastPos.latitude + ',' + lastPos.longitude) + '&daddr=' + encodeURIComponent(dest);
-    return base + '&q=' + encodeURIComponent(dest);
-  }
-  function mapExt(o) {
-    if (o.lat != null && o.lng != null) return 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng;
-    if (o.address) return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(o.address);
-    return o.location_link || '#';
-  }
-  function drawMap() {
-    $('map-empty').classList.toggle('hide', !!curMap); $('map-box').classList.toggle('hide', !curMap);
-    if (!curMap) return;
-    $('map-info').innerHTML = '<b>' + esc(curMap.customer_name) + '</b>' + (curMap.address ? ' · 📍 ' + esc(curMap.address) : '');
-    $('map-frame').src = mapSrc(curMap);
-    $('map-ext').href = mapExt(curMap);
-  }
-  function openMap(id) {
-    var o = mineData.filter(function (x) { return x.tran_id === id; })[0];
-    if (!o) return;
-    curMap = o; setTab('map'); drawMap();
-  }
-  $('map-me').onclick = function () {
-    if (!curMap) return;
-    if (lastPos) { drawMap(); return; }
-    if (!navigator.geolocation) { toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); return; }
-    navigator.geolocation.getCurrentPosition(function (p) { lastPos = p.coords; drawMap(); }, function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ'); }, { enableHighAccuracy: true, timeout: 10000 });
-  };
+$("store-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("store-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "is_store_open", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកហាង" : "បានបិទហាង", "ok");
+  loadStore();
+});
 
-  /* live location: ONLY while the stage is "delivering".
-     A phone can only share its position while the app is open and the screen is on,
-     so the driver is shown a clear status + reminder the whole time. */
-  var gpsErr = null, lastSent = 0, trkTimer = null, wasHidden = false;
-  function pad(x) { return (x < 10 ? '0' : '') + x; }
-  function showTrk() {
-    var t = $('trk');
-    if (!trackingId) { t.classList.add('hide'); return; }
-    var cls = 'trk', msg;
-    if (gpsErr === 'denied') { cls += ' bad'; msg = '❌ មិនបានអនុញ្ញាត Location — សូមបើក Location ឱ្យ app/browser នេះ'; }
-    else if (gpsErr) { cls += ' bad'; msg = '⚠️ រកទីតាំងមិនឃើញ — សូមបើក GPS នៅលើទូរស័ព្ទ'; }
-    else if (!lastSent) { msg = '⏳ កំពុងរកទីតាំង GPS…'; }
-    else {
-      var age = Math.round((Date.now() - lastSent) / 1000), d = new Date(lastSent);
-      if (age > 20) { cls += ' bad'; msg = '⚠️ ទីតាំងមិនបានផ្ញើអស់ ' + age + ' វិនាទី — សូមពិនិត្យអ៊ីនធឺណិត និង GPS'; }
-      else { cls += ' ok'; msg = '📡 កំពុងចែករំលែកទីតាំងទៅអតិថិជន · ផ្ញើចុងក្រោយ ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
-    }
-    t.className = cls;
-    t.innerHTML = msg + '<div style="font-weight:500;margin-top:3px">📱 សូមបើកទូរស័ព្ទ ទុកអេក្រង់ភ្លឺ និងកុំចាកចេញពី app រហូតដល់ដឹកដល់</div>';
+$("delivery-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  const { error } = await admin({ action: "update_delivery", updates: { is_delivery_available: want } });
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(want ? "បានបើកសេវាដឹកជញ្ជូន" : "បានផ្អាកសេវាដឹកជញ្ជូន", "ok");
   }
-  function postPos() {
-    if (!lastPos || !trackingId) return;
-    call({ action: 'location', tran_id: trackingId, lat: lastPos.latitude, lng: lastPos.longitude }).then(function (r) { if (!r.error && r.tracking) lastSent = Date.now(); });
+  loadDelivery();
+});
+
+$("wait-save").addEventListener("click", async () => {
+  let m = parseInt($("wait-input").value, 10);
+  if (!m || m < 1 || m > 180) { toast("សូមបញ្ចូលចន្លោះ 1 – 180 នាទី", "err"); return; }
+  const { error } = await admin({ action: "update_delivery", updates: { estimated_wait_minutes: m } });
+  if (error) {
+    toast(error, "err");
+  } else {
+    toast(`បានរក្សាុករយៈពេលរង់ចាំ ${m} នាទី`, "ok");
   }
-  function watchGps() {
-    if (watchId != null) navigator.geolocation.clearWatch(watchId);
-    var first = true;
-    watchId = navigator.geolocation.watchPosition(function (p) {
-      lastPos = p.coords; gpsErr = null;
-      if (first) { first = false; postPos(); }   // send the very first fix at once
-      showTrk();
-    }, function (err) { gpsErr = err && err.code === 1 ? 'denied' : 'err'; showTrk(); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 });
+  loadDelivery();
+});
+
+/* =====================================================
+   MENU LOAD + RENDER
+   ===================================================== */
+async function loadMenu() {
+  if (!items.length) $("menu").innerHTML = '<div class="skeleton"></div>'.repeat(3);
+  const { data, error } = await supa.from("menu_items").select("*");
+  if (error) {
+    $("menu").innerHTML = `<div class="empty"><div class="big">⚠️</div>មិនអាចទាញយកទិន្នន័យបាន<br><small>${esc(error.message)}</small></div>`;
+    return;
   }
-  function startTracking(id) {
-    if (trackingId === id) return;
-    stopTracking(); trackingId = id; gpsErr = null; lastSent = 0;
-    if (!navigator.geolocation) { gpsErr = 'err'; toast('ឧបករណ៍នេះមិនគាំទ្រ GPS ទេ'); showTrk(); return; }
-    watchGps();
-    postTimer = setInterval(postPos, 6000);
-    trkTimer = setInterval(showTrk, 2000);
-    if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
-    showTrk();
+  items = (data || []).sort((a, b) =>
+    CATEGORIES.findIndex(c => c.key === a.category) - CATEGORIES.findIndex(c => c.key === b.category)
+    || String(a.name_kh).localeCompare(String(b.name_kh)));
+  renderAll();
+}
+
+const stockOf = i => Number.isFinite(+i.stock_quantity) ? +i.stock_quantity : 0;
+const isOn = i => i.is_available !== false;
+
+function renderAll() { renderStats(); renderLow(); renderPills(); renderMenu(); }
+
+function renderStats() {
+  const total = items.length;
+  const sold = items.filter(i => isOn(i) && stockOf(i) > 0).length;
+  const low  = items.filter(i => stockOf(i) > 0 && stockOf(i) <= LOW_STOCK).length;
+  const out  = items.filter(i => stockOf(i) <= 0).length;
+  const off  = items.filter(i => !isOn(i)).length;
+  $("stats").innerHTML = `
+    <button class="stat" data-go="all"><b>${total}</b><span>មុខម្ហូបសរុប</span></button>
+    <button class="stat ok" data-go="sell"><b>${sold}</b><span>កំពុងលក់</span></button>
+    <button class="stat warn" data-go="low"><b>${low}</b><span>ស្តុកជិតអស់</span></button>
+    <button class="stat bad" data-go="out"><b>${out}</b><span>អស់ស្តុក${off ? ` • បិទ ${off}` : ""}</span></button>`;
+  const need = low + out;
+  const dot = $("low-dot");
+  dot.style.display = need ? "flex" : "none";
+  dot.textContent = need;
+}
+
+function renderLow() {
+  $("low-n").textContent = LOW_STOCK;
+  const list = items.filter(i => stockOf(i) <= LOW_STOCK).sort((a, b) => stockOf(a) - stockOf(b));
+  if (!list.length) {
+    $("low-list").innerHTML = `<div class="empty" style="padding:26px 0"><div class="big">👍</div>ស្តុកគ្រប់គ្រាន់ទាំងអស់</div>`;
+    return;
   }
-  function stopTracking() {
-    if (watchId != null && navigator.geolocation) navigator.geolocation.clearWatch(watchId);
-    watchId = null; clearInterval(postTimer); postTimer = null; clearInterval(trkTimer); trkTimer = null; trackingId = null; lastPos = null;
-    if (wake) { try { wake.release(); } catch (e) {} wake = null; }
-    showTrk();
-  }
-  document.addEventListener('visibilitychange', function () {
-    if (!trackingId) return;
-    if (document.visibilityState === 'hidden') { wasHidden = true; return; }
-    // back on screen: phones pause GPS + screen lock in the background, so start them again
-    if (navigator.wakeLock) navigator.wakeLock.request('screen').then(function (w) { wake = w; }).catch(function () {});
-    if (navigator.geolocation) watchGps();
-    if (wasHidden) { wasHidden = false; toast('⚠️ ទីតាំងអាចត្រូវបានផ្អាកពេលចេញពី app — កំពុងចាប់ផ្ដើមឡើងវិញ'); }
-    showTrk();
+  $("low-list").innerHTML = list.map(i => `
+    <div class="low-row">
+      <div class="nm">${esc(i.name_kh)}<small>${esc(i.name_en)}</small></div>
+      <span class="pill ${stockOf(i) <= 0 ? "bad" : "warn"}">${stockOf(i) <= 0 ? "អស់" : "នៅសល់ " + stockOf(i)}</span>
+      <button class="btn btn-p btn-s" data-act="plus10" data-key="${esc(i.item_key)}">+10</button>
+    </div>`).join("");
+}
+
+function renderPills() {
+  const all = [{ key: "all", label: "ទាំងអស់" }, ...CATEGORIES];
+  $("cat-pills").innerHTML = all.map(c =>
+    `<button class="pill-b ${cat === c.key ? "on" : ""}" data-cat="${c.key}">${c.label}</button>`).join("");
+}
+
+let special = ""; // 'low' | 'out' | 'sell' quick filter from stat cards
+
+function renderMenu() {
+  const q = query.trim().toLowerCase();
+  const list = items.filter(i => {
+    if (cat !== "all" && i.category !== cat) return false;
+    if (q && !(`${i.name_kh} ${i.name_en} ${i.item_key}`.toLowerCase().includes(q))) return false;
+    if (special === "low"  && !(stockOf(i) > 0 && stockOf(i) <= LOW_STOCK)) return false;
+    if (special === "out"  && stockOf(i) > 0) return false;
+    if (special === "sell" && !(isOn(i) && stockOf(i) > 0)) return false;
+    return true;
   });
 
-  if (token) start();
-})();
+  const chip = special
+    ? `<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px"><span class="pill warn">ត្រង៖ ${{low:"ស្តុកជិតអស់",out:"អស់ស្តុក",sell:"កំពុងលក់"}[special]}</span><button class="btn btn-g btn-s" data-act="clear-filter">លុបការត្រង</button></div>`
+    : "";
+
+  if (!list.length) {
+    $("menu").innerHTML = chip + `<div class="empty"><div class="big">🍽️</div>មិនមានមុខម្ហូបត្រូវនឹងការស្វែងរកទេ</div>`;
+    return;
+  }
+
+  $("menu").innerHTML = chip + list.map(i => {
+    const s = stockOf(i), on = isOn(i);
+    const img = coverOf(i);
+    const prices = Object.entries(i.sizes || {}).map(([k, v]) => `${esc(k)} ${money(v)}`).join(" • ");
+    const badge = s <= 0 ? '<span class="pill bad">អស់ស្តុក</span>'
+                : s <= LOW_STOCK ? '<span class="pill warn">ជិតអស់</span>' : "";
+    return `
+    <article class="item ${on ? "" : "off"}" data-key="${esc(i.item_key)}">
+      <div class="item-h">
+        <div class="thumb"><img src="${esc(imgSrc(img))}" alt="" data-fb="${esc(i.icon || "🍜")}" loading="lazy"></div>
+        <div class="t">
+          <b>${esc(i.name_kh)}</b>
+          <small>${esc(i.name_en)}</small>
+          <div class="price">${prices || "—"}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="pill ok" style="background:var(--brand-l);color:var(--brand)">${esc(catLabel(i.category))}</span>
+        ${i.is_popular ? '<span class="pill pop">ពេញនិយម</span>' : ""}${i.discount_active === true && i.discount_percent > 0 ? `<span class="pill ok">🏷 -${esc(i.discount_percent)}%</span>` : ""}${i.free_delivery === true ? '<span class="pill ok">🛵 ដឹកឥតគិតថ្លៃ</span>' : ""}${badge}
+      </div>
+      <div class="item-m">
+        <div class="step">
+          <button data-act="dec" aria-label="បន្ថយ">−</button>
+          <input type="number" min="0" inputmode="numeric" value="${s}" data-act="stock-input" aria-label="ស្តុក">
+          <button data-act="inc" aria-label="បន្ថែម">+</button>
+        </div>
+        <div class="avail">${on ? "កំពុងលក់" : "បិទលក់"}
+          <label class="sw"><input type="checkbox" data-act="avail" ${on ? "checked" : ""}><span></span></label>
+        </div>
+      </div>
+      <div class="item-f">
+        <button class="btn btn-g btn-s" data-act="edit">✏️ កែប្រែ</button>
+        <button class="btn btn-d btn-s" data-act="del">🗑️ លុប</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function coverOf(i) {
+  if (Array.isArray(i.images) && i.images.length) return i.images[0];
+  if (i.image_url) return i.image_url;
+  return `./images/${i.item_key}.png`;
+}
+
+// Image fallback
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t.tagName === "IMG" && t.dataset.fb) t.replaceWith(document.createTextNode(t.dataset.fb));
+}, true);
+
+/* =====================================================
+   INTERACTIONS
+   ===================================================== */
+$("search").addEventListener("input", e => { query = e.target.value; renderMenu(); });
+
+$("cat-pills").addEventListener("click", e => {
+  const b = e.target.closest("[data-cat]"); if (!b) return;
+  cat = b.dataset.cat; renderPills(); renderMenu(); haptic();
+});
+
+$("stats").addEventListener("click", e => {
+  const b = e.target.closest("[data-go]"); if (!b) return;
+  special = ["low", "out", "sell"].includes(b.dataset.go) ? b.dataset.go : "";
+  cat = "all"; query = ""; $("search").value = "";
+  renderPills(); renderMenu(); showTab("menu");
+});
+
+$("low-list").addEventListener("click", e => {
+  const b = e.target.closest('[data-act="plus10"]'); if (!b) return;
+  const it = items.find(x => x.item_key === b.dataset.key);
+  if (it) setStock(it.item_key, stockOf(it) + 10, true);
+});
+
+$("menu").addEventListener("click", e => {
+  const clr = e.target.closest('[data-act="clear-filter"]');
+  if (clr) { special = ""; renderMenu(); return; }
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  const act = e.target.closest("[data-act]")?.dataset.act;
+  if (act === "inc") setStock(key, stockOf(it) + 1);
+  else if (act === "dec") setStock(key, Math.max(0, stockOf(it) - 1));
+  else if (act === "edit") openItem(key);
+  else if (act === "del") confirmDelete(it);
+});
+
+$("menu").addEventListener("change", e => {
+  const card = e.target.closest(".item"); if (!card) return;
+  const key = card.dataset.key;
+  if (e.target.dataset.act === "stock-input") {
+    const v = Math.max(0, parseInt(e.target.value, 10) || 0);
+    setStock(key, v, true);
+  } else if (e.target.dataset.act === "avail") {
+    setAvail(key, e.target.checked);
+  }
+});
+
+function setStock(key, value, immediate = false) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.stock_quantity = value;
+  renderAll();
+  haptic();
+  clearTimeout(stockTimers[key]);
+  const send = async () => {
+    const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { stock_quantity: value } });
+    if (error) { toast(error, "err"); loadMenu(); }
+    else toast("បានរក្សាទុកស្តុក", "ok");
+  };
+  if (immediate) send(); else stockTimers[key] = setTimeout(send, 650);
+}
+
+async function setAvail(key, on) {
+  const it = items.find(x => x.item_key === key); if (!it) return;
+  it.is_available = on; renderAll();
+  const { error } = await admin({ action: "update_stock", match: { item_key: key }, updates: { is_available: on } });
+  if (error) { toast(error, "err"); loadMenu(); }
+  else toast(on ? "បើកលក់ហើយ" : "បិទលក់ហើយ", "ok");
+}
+
+/* =====================================================
+   ADD / EDIT MODAL
+   ===================================================== */
+$("f-cat").innerHTML = CATEGORIES.map(c => `<option value="${c.key}">${c.label}</option>`).join("");
+
+function sizeRow(name = "", price = "") {
+  const d = document.createElement("div");
+  d.className = "size-row";
+  d.innerHTML = `
+    <input type="text" placeholder="ឈ្មោះទំហំ (normal)" value="${esc(name)}" aria-label="ឈ្មោះទំហំ">
+    <input type="number" step="0.05" min="0" inputmode="decimal" placeholder="2.50" value="${esc(price)}" aria-label="តម្លៃ">
+    <button type="button" aria-label="លុបទំហំ">✕</button>`;
+  d.querySelector("button").onclick = () => { d.remove(); };
+  $("size-list").appendChild(d);
+}
+$("size-add").onclick = () => sizeRow();
+
+function openItem(key) {
+  const it = key ? items.find(x => x.item_key === key) : null;
+  $("sheet-title").textContent = it ? "កែប្រែមុខម្ហូប" : "បន្ថែមមុខម្ហូបថ្មី";
+  $("f-edit").value = it ? it.item_key : "";
+  $("f-key").value = it ? it.item_key : "";
+  $("f-key").disabled = !!it;
+  $("f-kh").value = it?.name_kh || "";
+  $("f-en").value = it?.name_en || "";
+  $("f-cat").value = it?.category || (cat !== "all" ? cat : "kuy_teav");
+  $("f-stock").value = it ? stockOf(it) : 50;
+  $("f-pop").checked = !!it?.is_popular;
+  $("f-disc").checked = it?.discount_active === true;
+  $("f-disc-pct").value = it?.discount_percent > 0 ? it.discount_percent : "";
+  $("f-free").checked = it?.free_delivery === true;
+  $("f-disc-box").style.display = $("f-disc").checked ? "" : "none";
+  $("f-img").value = it ? (Array.isArray(it.images) ? it.images : (it.image_url ? [it.image_url] : [])).join("\n") : "";
+  $("size-list").innerHTML = "";
+  const sizes = it?.sizes && Object.keys(it.sizes).length ? it.sizes : { normal: 2.5 };
+  Object.entries(sizes).forEach(([k, v]) => sizeRow(k, v));
+  $("item-ov").classList.add("show");
+  if (tg?.BackButton) { tg.BackButton.show(); tg.BackButton.onClick(closeItem); }
+}
+
+function closeItem() {
+  $("item-ov").classList.remove("show");
+  if (tg?.BackButton) { tg.BackButton.offClick(closeItem); tg.BackButton.hide(); }
+}
+$("fab-add").onclick = () => openItem(null);
+$("sheet-x").onclick = $("sheet-cancel").onclick = closeItem;
+$("item-ov").addEventListener("click", e => { if (e.target.id === "item-ov") closeItem(); });
+
+$("sheet-save").addEventListener("click", async () => {
+  const editKey = $("f-edit").value;
+  const key = $("f-key").value.trim();
+  const kh = $("f-kh").value.trim();
+  const en = $("f-en").value.trim();
+
+  if (!/^[a-z0-9_]{2,40}$/.test(key)) return toast("កូដមុខម្ហូប៖ a-z, 0-9, _ (2–40 តួអក្សរ)", "err");
+  if (!kh || !en) return toast("សូមបំពេញឈ្មោះខ្មែរ និងអង់គ្លេស", "err");
+  if (!editKey && items.some(i => i.item_key === key)) return toast("កូដនេះមានរួចហើយ", "err");
+
+  const sizes = {};
+  for (const row of $("size-list").children) {
+    const [n, p] = row.querySelectorAll("input");
+    const name = n.value.trim(), price = parseFloat(p.value);
+    if (!name && !p.value) continue;
+    if (!name || !(price >= 0)) return toast("ទំហំ និងតម្លៃមិនត្រឹមត្រូវ", "err");
+    if (name in sizes) return toast(`ឈ្មោះទំហំស្ទួន៖ ${name}`, "err");
+    sizes[name] = Math.round(price * 100) / 100;
+  }
+  if (!Object.keys(sizes).length) return toast("សូមបន្ថែមយ៉ាងហោចណាស់ ១ ទំហំ", "err");
+
+  const images = $("f-img").value.split("\n").map(s => s.trim()).filter(Boolean);
+  const updates = {
+    name_kh: kh, name_en: en, category: $("f-cat").value,
+    stock_quantity: Math.max(0, parseInt($("f-stock").value, 10) || 0),
+    sizes, images: images.length ? images : [`./images/${key}.png`],
+    is_popular: $("f-pop").checked,
+    discount_active: $("f-disc").checked && (parseFloat($("f-disc-pct").value) > 0),
+    discount_percent: Math.min(99, Math.max(0, parseFloat($("f-disc-pct").value) || 0)),
+    free_delivery: $("f-free").checked,
+  };
+  if ($("f-disc").checked && !(parseFloat($("f-disc-pct").value) > 0)) return toast("សូមបញ្ចូលភាគរយបញ្ចុះតម្លៃ", "err");
+
+  const btn = $("sheet-save");
+  btn.disabled = true; btn.textContent = "កំពុងរក្សាទុក…";
+  const body = editKey
+    ? { action: "update_stock", match: { item_key: editKey }, updates }
+    : { action: "add_item", updates: { ...updates, item_key: key, is_available: true } };
+  const { error } = await admin(body);
+  btn.disabled = false; btn.textContent = "រក្សាទុក";
+
+  if (error) return toast(error, "err");
+  toast("បានរក្សាទុកមុខម្ហូប", "ok");
+  closeItem();
+  loadMenu();
+});
+
+/* =====================================================
+   DELETE MODAL
+   ===================================================== */
+let pendingDelete = null;
+function confirmDelete(it) {
+  pendingDelete = it;
+  $("cf-msg").textContent = `លុបមុខម្ហូប "${it.name_kh}" មែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។`;
+  $("cf-ov").classList.add("show");
+}
+const closeConfirm = () => { $("cf-ov").classList.remove("show"); pendingDelete = null; };
+$("cf-no").onclick = closeConfirm;
+$("cf-ov").addEventListener("click", e => { if (e.target.id === "cf-ov") closeConfirm(); });
+$("cf-yes").onclick = async () => {
+  const it = pendingDelete; closeConfirm(); if (!it) return;
+  const { error } = await admin({ action: "delete_item", match: { item_key: it.item_key } });
+  if (error) return toast(error, "err");
+  toast("បានលុបមុខម្ហូប", "ok");
+  items = items.filter(x => x.item_key !== it.item_key);
+  renderAll();
+};
+
+/* =====================================================
+   BULK TOOLS
+   ===================================================== */
+async function bulk(list, updates, okMsg) {
+  if (!list.length) return toast("គ្មានមុខម្ហូបត្រូវកែប្រែ");
+  let fail = 0;
+  for (const it of list) {
+    const { error } = await admin({ action: "update_stock", match: { item_key: it.item_key }, updates });
+    if (error) { fail++; if (fail === 1) toast(error, "err"); }
+  }
+  if (!fail) toast(`${okMsg} (${list.length})`, "ok");
+  loadMenu();
+}
+$("bulk-enable").onclick = () => bulk(items.filter(i => !isOn(i) && stockOf(i) > 0), { is_available: true }, "បានបើកលក់");
+$("bulk-disable-zero").onclick = () => bulk(items.filter(i => isOn(i) && stockOf(i) <= 0), { is_available: false }, "បានបិទលក់");
+
+/* =====================================================
+   BOOT
+   ===================================================== */
+async function refresh() {
+  const ic = $("refresh-ic"); ic.classList.add("spin");
+  
+  // លុបទិន្នន័យកន្ត្រក/Session ដែលបានរក្សាទុក
+  localStorage.removeItem('davin_app_session');
+  
+  await Promise.all([loadPromoBanner(), loadStore(), loadDelivery(), loadMenu(), loadBanners(), loadCatImgs(), loadGreet()]);
+  ic.classList.remove("spin");
+}
+$("btn-refresh").onclick = refresh;
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+
+/* ---------- Images stored in Telegram ---------- */
+const imgSrc = u => String(u || "").startsWith("tg:") ? SUPABASE_URL + "/functions/v1/tg-image?f=" + encodeURIComponent(String(u).slice(3)) : u;
+function pickImage() {   // choose a photo, shrink it to max 1280px, return base64 JPEG
+  return new Promise(res => {
+    const i = document.createElement("input"); i.type = "file"; i.accept = "image/*";
+    i.onchange = () => {
+      const f = i.files[0]; if (!f) return res(null);
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(im.src); res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      im.onerror = () => res(null); im.src = URL.createObjectURL(f);
+    };
+    i.click();
+  });
+}
+async function uploadImage() {
+  const b64 = await pickImage(); if (!b64) return null;
+  toast("កំពុងផ្ទុកឡើង…");
+  const r = await admin({ action: "upload_image", data: b64 });
+  if (r.error) { toast(r.error, "err"); return null; }
+  return r.data.file_id;
+}
+let BN = [];
+async function loadBanners() {
+  const { data: rows } = await supa.from("app_settings").select("key, value").in("key", ["banners", "shop_logo"]);
+  const row = k => (rows || []).find(r => r.key === k);
+  const lg = row("shop_logo") && row("shop_logo").value; if (typeof lg === "string" && lg.startsWith("tg:")) $("logo-prev").src = imgSrc(lg);
+  let v = row("banners") && row("banners").value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = []; }
+  BN = Array.isArray(v) ? v : []; renderBanners();
+}
+function renderBanners() {
+  $("bn-list").innerHTML = BN.length ? BN.map((u, i) => `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+    <img src="${esc(imgSrc(u))}" style="width:96px;height:48px;object-fit:cover;border-radius:8px;background:#e8eeec">
+    <div style="flex:1" class="muted">បដា ${i + 1}</div>
+    ${i ? `<button class="btn btn-g btn-s" data-bn="up" data-i="${i}">↑</button>` : ""}<button class="btn btn-d btn-s" data-bn="del" data-i="${i}">🗑</button></div>`).join("")
+    : '<div class="muted" style="margin-bottom:8px">មិនទាន់មានបដា — កំពុងប្រើរូបលំនាំដើម</div>';
+}
+async function saveBanners() {
+  const r = await admin({ action: "update_setting", key: "banners", value: JSON.stringify(BN) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderBanners();
+}
+$("bn-add").onclick = async () => { const id = await uploadImage(); if (id) { BN.push("tg:" + id); await saveBanners(); } };
+$("bn-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-bn]"); if (!b) return; const i = Number(b.dataset.i);
+  if (b.dataset.bn === "del") { if (!confirm("លុបបដានេះ?")) return; BN.splice(i, 1); }
+  else BN.splice(i - 1, 0, BN.splice(i, 1)[0]);
+  await saveBanners();
+});
+
+// ---- category pictures (stored in Telegram, saved as setting "category_images") ----
+const CAT_LIST = [["kuy_teav", "គុយទាវ", "🍜"], ["rice", "បាយ", "🍚"], ["other", "នំបាញ់ចុក", "🥢"], ["drinks", "ភេសជ្ជៈ", "🧋"]];
+let CATIMG = {};
+function renderCatImgs() {
+  $("cat-img-list").innerHTML = CAT_LIST.map(([k, name, ico]) => `<div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+    ${CATIMG[k] ? `<img src="${esc(imgSrc(CATIMG[k]))}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;background:#e8eeec">` : `<div style="width:48px;height:48px;border-radius:50%;background:#e8eeec;display:flex;align-items:center;justify-content:center;font-size:24px">${ico}</div>`}
+    <div style="flex:1" class="lbl">${esc(name)}</div>
+    <button class="btn btn-g btn-s" data-cat="up" data-k="${k}">📷 ប្តូរ</button>
+    ${CATIMG[k] ? `<button class="btn btn-d btn-s" data-cat="del" data-k="${k}">🗑</button>` : ""}</div>`).join("");
+}
+async function saveCatImgs() {
+  const r = await admin({ action: "update_setting", key: "category_images", value: JSON.stringify(CATIMG) });
+  toast(r.error || "បានរក្សាទុក", r.error ? "err" : "ok"); renderCatImgs();
+}
+async function loadCatImgs() {
+  const { data: rows } = await supa.from("app_settings").select("key, value").eq("key", "category_images");
+  let v = rows && rows[0] && rows[0].value; try { if (typeof v === "string") v = JSON.parse(v); } catch (e) { v = {}; }
+  CATIMG = v && typeof v === "object" && !Array.isArray(v) ? v : {}; renderCatImgs();
+}
+$("cat-img-list").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-cat]"); if (!b) return; const k = b.dataset.k;
+  if (b.dataset.cat === "del") { delete CATIMG[k]; }
+  else { const id = await uploadImage(); if (!id) return; CATIMG[k] = "tg:" + id; }
+  await saveCatImgs();
+});
+$("logo-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const r = await admin({ action: "update_setting", key: "shop_logo", value: "tg:" + id }); if (r.error) toast(r.error, "err"); else { $("logo-prev").src = imgSrc("tg:" + id); toast("បានប្តូរឡូហ្គោ", "ok"); } };
+// menu photo: the new picture becomes the cover and replaces old ./images/ (GitHub) pictures
+$("f-img-up").onclick = async () => { const id = await uploadImage(); if (!id) return; const t = $("f-img"); const keep = t.value.split("\n").map(x => x.trim()).filter(x => x && !x.startsWith("./images/")); t.value = ["tg:" + id, ...keep].join("\n"); toast("បានដាក់រូបថ្មី — សូមចុចរក្សាទុកម្ហូប", "ok"); };
+
+const u = tg?.initDataUnsafe?.user;
+$("who").textContent = u ? `${[u.first_name, u.last_name].filter(Boolean).join(" ")}${u.username ? "  @" + u.username : ""}  (ID ${u.id})` : "មិនទាន់ភ្ជាប់ Telegram";
+
+async function pwLogin() {
+  const pw = $("pw-in").value; if (!pw) return;
+  $("pw-go").disabled = true; $("pw-err").textContent = "";
+  const r = await admin({ action: "login", password: pw });
+  $("pw-go").disabled = false;
+  if (r.error) { $("pw-err").textContent = r.error; return; }
+  admToken = r.data.token || ""; try { localStorage.setItem("adm_token", admToken); } catch (e) {}
+  $("pw-in").value = ""; $("pw-gate").classList.remove("show");
+  refresh(); if (dlLoaded) loadDelivery(); loadPayouts(); pollDlBadge();
+}
+$("pw-go").onclick = pwLogin;
+$("pw-in").addEventListener("keydown", e => { if (e.key === "Enter") pwLogin(); });
+$("pw-out").onclick = () => { admToken = ""; try { localStorage.removeItem("adm_token"); } catch (e) {} showPw(); };
+if (hasTG) {   // locked by default: the dashboard stays covered until the server says yes
+  showPw(); $("pw-in").disabled = true; $("pw-go").disabled = true; $("pw-err").textContent = "កំពុងពិនិត្យ…";
+  admin({ action: "ping" }).then(r => {
+    $("pw-in").disabled = false; $("pw-go").disabled = false;
+    if (r.data && r.data.ok) { $("pw-gate").classList.remove("show"); $("pw-err").textContent = ""; loadPayouts(); pollDlBadge(); }
+    else $("pw-err").textContent = (r.error && !/ពាក្យសម្ងាត់/.test(r.error)) ? r.error : "";
+  });
+}
+
+if (!hasTG) {
+  $("gate").classList.add("show");
+  $("gate-view").onclick = () => { viewOnly = true; $("gate").classList.remove("show"); toast("របៀបមើលប៉ុណ្ណោះ"); };
+}
+refresh();
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --- SUPABASE REALTIME BROADCAST RELOAD ---
+const adminChannel = supa.channel('admin-actions', {
+  config: { broadcast: { self: false } }
+});
+
+adminChannel.subscribe(status => {
+  if (status === 'SUBSCRIBED') {
+    console.log("Connected to Realtime broadcast channel.");
+  }
+});
+
+// Function to trigger reload on all user pages
+async function triggerReloadForAllUsers() {
+  if (viewOnly || !hasTG) {
+    toast("មុខងារនេះសម្រាប់តែអ្នកគ្រប់គ្រងប៉ុណ្ណោះ", "err");
+    return;
+  }
+  
+  await adminChannel.send({
+    type: 'broadcast',
+    event: 'force_reload',
+    payload: { timestamp: Date.now() }
+  });
+  
+  toast("បានបញ្ជូនសញ្ញាផ្ទុកទំព័រឡើងវិញទៅគ្រប់អតិថិជនទាំងអស់!(Reload page)", "ok");
+  hapticN("success");
+}
+
+// Attach event listener to a button (You can place this button anywhere in your admin HTML)
+// Example: <button class="btn btn-p" id="btn-reload-all">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
+document.getElementById('btn-reload-all')?.addEventListener('click', triggerReloadForAllUsers);
+
+
+
+/* =====================================================
+   TELEGRAM LOGIN REQUIREMENT
+   ===================================================== */
+async function loadLoginSetting() {
+  const { data } = await supa.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
+  $("req-login").checked = !(data && (data.value === false || data.value === "false"));
+}
+$("req-login").addEventListener("change", async (e) => {
+  const on = e.target.checked;
+  const r = await admin({ action: "update_setting", key: "require_telegram_login", value: on });
+  if (r.error) { e.target.checked = !on; toast(r.error, "bad"); return; }
+  toast(on ? "បានបើក៖ ត្រូវចូលតាម Telegram" : "បានបិទ៖ កម្មង់បានដោយសេរី", "ok");
+});
+
+loadLoginSetting();
+
+/* ===== PAID ORDERS + TRACKING STAGE ===== */
+const ordHead = o => {
+  const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+  const u = String(o.username || "");
+  const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+  return `<div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)} <span class="muted">· ${o.order_type === "delivery" ? "ដឹក" : "ទៅយក"}</span></div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} · ${esc(String(o.paid_at || "").slice(0, 16).replace("T", " "))}</div>
+      <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>`;
+};
+async function loadOrders() {
+  const box = $("ord-list"), hbox = $("hist-list");
+  const r = await admin({ action: "list_orders" });
+  if (r.error) { box.textContent = r.error; return; }
+  const rows = r.data?.orders || [], hist = r.data?.history || [];
+  $("ord-count").textContent = rows.length ? `(${rows.length})` : "";
+  $("hist-count").textContent = hist.length ? `(${hist.length})` : "";
+
+  // ---- active orders: two statuses ----
+  box.innerHTML = rows.length ? rows.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      ${ordHead(o)}
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-p btn-s" disabled style="opacity:1">⏳ មិនទាន់ទទួល</button>
+        <button class="btn btn-g btn-s" data-id="${esc(o.tran_id)}" data-recv="1">✅ បានទទួលរួច</button>
+      </div></div>`).join("") : "មិនទាន់មានការកម្មង់ថ្មីទេ";
+  box.querySelectorAll("button[data-recv]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("អតិថិជនបានទទួលរួចមែនទេ? ការកម្មង់នឹងចូលប្រវត្តិ ហើយមិនអាចកែបានទៀតទេ។")) return;
+    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: "done" });
+    if (res.error) toast(res.error, "bad"); else { toast("បានផ្លាស់ទៅប្រវត្តិ", "ok"); loadOrders(); }
+  }));
+
+  // ---- history: locked, delete only ----
+  hbox.innerHTML = hist.length ? hist.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink);background:#f5f8f7">
+      <div style="opacity:.75">${ordHead(o)}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-g btn-s" disabled style="opacity:.6">⏳ មិនទាន់ទទួល</button>
+        <button class="btn btn-p btn-s" disabled style="opacity:1">✅ បានទទួលរួច 🔒</button>
+        <button class="btn btn-d btn-s" data-id="${esc(o.tran_id)}" data-del="1" style="margin-left:auto">🗑 លុប</button>
+      </div></div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
+  $("hist-clear").style.display = hist.length ? "" : "none";
+  hbox.querySelectorAll("button[data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("លុបការកម្មង់នេះពីប្រវត្តិជាអចិន្ត្រៃយ៍?")) return;
+    const res = await admin({ action: "delete_order", tran_id: b.dataset.id });
+    if (res.error) toast(res.error, "bad"); else { toast("បានលុប", "ok"); loadOrders(); }
+  }));
+}
+$("hist-clear").addEventListener("click", async () => {
+  if (!confirm("លុបប្រវត្តិទាំងអស់ជាអចិន្ត្រៃយ៍? មិនអាចយកមកវិញបានទេ។")) return;
+  const res = await admin({ action: "clear_history" });
+  if (res.error) toast(res.error, "bad"); else { toast("បានលុបប្រវត្តិទាំងអស់", "ok"); loadOrders(); }
+});
+$("ord-refresh").addEventListener("click", loadOrders);
+if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
+
+/* ===== DELIVERY: drivers + dispatching ===== */
+let DL = { orders: [], requests: [], drivers: [] };
+const DSTAT = { not_yet: "មិនទាន់ដឹក", delivering: "កំពុងដឹក", delivered: "បានទទួលអីវ៉ាន់" };
+const dnorm = s => !s || s === "pickup" ? "not_yet" : s === "arrived" ? "delivering" : s;   // old values -> nearest of the 3 stages
+let dlLoaded = false;;
+const drvName = id => (DL.drivers.find(d => d.id === id) || {}).name || ("#" + id);
+
+/* red number on the delivery tab = paid delivery orders that still have NO approved driver */
+let dlBadgePrev = null;
+function updateDlBadge(orders) {
+  const n = (orders || []).filter(o => o.dispatch !== "approved").length;
+  const dot = $("dl-dot"); dot.textContent = n > 99 ? "99+" : n; dot.style.display = n ? "flex" : "none";
+  if (dlBadgePrev !== null && n > dlBadgePrev) { toast("🛵 មានការកម្មង់ដឹកថ្មី " + (n - dlBadgePrev), "ok"); try { navigator.vibrate && navigator.vibrate(200); } catch (e) {} }
+  dlBadgePrev = n;
+}
+async function pollDlBadge() {   // keeps the number fresh even when the delivery tab is not open
+  if (document.hidden) return;
+  const r = await admin({ action: "list_delivery" });
+  if (!r.error && r.data) updateDlBadge(r.data.orders);
+}
+setInterval(pollDlBadge, 15000);
+async function loadDelivery() {
+  const r = await admin({ action: "list_delivery" });
+  if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
+  DL = { orders: r.data.orders || [], requests: r.data.requests || [], drivers: r.data.drivers || [] };
+  dlLoaded = true;
+  updateDlBadge(DL.orders);
+  const keep = {}; document.querySelectorAll("#dl-list select").forEach(x => { if (x.value) keep[x.id] = x.value; });
+  renderDrivers(); renderDelivery();
+  Object.keys(keep).forEach(k => { const x = $(k); if (x) x.value = keep[k]; });
+}
+function renderDrivers() {
+  const box = $("drv-list");
+  if (!DL.drivers.length) { box.textContent = "មិនទាន់មានអ្នកដឹកទេ"; return; }
+  const live = DL.drivers.filter(d => !d.blocked && d.is_active).length;
+  const off = DL.drivers.filter(d => !d.blocked && !d.is_active).length;
+  const busy = d => DL.orders.some(o => o.driver_id === d.id && o.dispatch === "approved" && dnorm(o.delivery_status) !== "delivered");
+  const seen = t => { try { return new Date(t).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } };
+  const sorted = DL.drivers.slice().sort((x, y) => (Number(!x.blocked && x.is_active) < Number(!y.blocked && y.is_active)) - (Number(!x.blocked && x.is_active) > Number(!y.blocked && y.is_active)));
+  box.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-weight:700;color:var(--ink)">
+      <span style="padding:5px 12px;border-radius:99px;background:#d9f2ee;color:#0f766e">🟢 សកម្ម ${live}</span>
+      <span style="padding:5px 12px;border-radius:99px;background:#eceff3;color:#667">⚪ បិទ ${off}</span></div>` +
+    sorted.map(d => {
+      const on = !d.blocked && d.is_active;
+      const pill = d.blocked ? ["⛔ ត្រូវបានបិទ", "#fde8e8", "#c62828"] : on ? ["🟢 សកម្ម (ON)", "#d9f2ee", "#0f766e"] : ["⚪ បិទ (OFF)", "#eceff3", "#667"];
+      return `
+    <div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:700">${esc(d.name)} <span class="muted">· ID ${esc(d.login_id)}</span></div>
+        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${pill[1]};color:${pill[2]};white-space:nowrap">${pill[0]}</span></div>
+      <div class="muted">${busy(d) ? "🛵 កំពុងមានការងារដឹក" : on ? "រង់ចាំការងារ" : ""}${d.last_seen ? " · ឃើញចុងក្រោយ " + esc(seen(d.last_seen)) : ""}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-g btn-s" data-d="${d.blocked ? "unblock" : "block"}" data-id="${d.id}">${d.blocked ? "បើកវិញ" : "បិទ"}</button>
+        <button class="btn btn-g btn-s" data-d="pw" data-id="${d.id}">ប្ដូរពាក្យសម្ងាត់</button>
+        <button class="btn btn-d btn-s" data-d="del" data-id="${d.id}">លុប</button>
+      </div></div>`;
+    }).join("");
+}
+function trackBox(o) {
+  const id = esc(o.tran_id);
+  if (!o.track_code) return `<div style="margin:6px 0">🔢 លេខតាមដាន: <span class="muted">មិនទាន់មាន</span> <button class="btn btn-p btn-s" data-a="tcnew" data-id="${id}">➕ បង្កើតលេខ</button> <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="">✏️ វាយលេខខ្លួនឯង</button></div>`;
+  return `<div style="margin:6px 0">🔢 លេខតាមដាន: <b style="font-size:15px;letter-spacing:1px">${esc(o.track_code)}</b>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-p btn-s" data-a="tccopy" data-c="${esc(o.track_code)}" data-n="${esc(o.customer_name)}">📋 ចម្លងសារផ្ញើអតិថិជន</button>
+      <button class="btn btn-g btn-s" data-a="tcedit" data-id="${id}" data-c="${esc(o.track_code)}">✏️ កែលេខ</button>
+      <button class="btn btn-d btn-s" data-a="tcdel" data-id="${id}">🗑 លុបលេខ</button></div></div>`;
+}
+function renderDelivery() {
+  const box = $("dl-list");
+  if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ"; return; }
+  const usable = DL.drivers.filter(d => !d.blocked).sort((x, y) => Number(y.is_active) - Number(x.is_active));
+  box.innerHTML = DL.orders.map(o => {
+    const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
+    const u = String(o.username || "");
+    const tg = u.startsWith("@") ? `<a href="https://t.me/${esc(u.slice(1))}" target="_blank" rel="noopener">${esc(u)}</a>` : esc(u);
+    const map = o.lat != null ? `https://www.google.com/maps?q=${o.lat},${o.lng}` : (o.location_link || "");
+    const reqs = DL.requests.filter(q => q.tran_id === o.tran_id);
+    let state = "", actions = "";
+    if (o.dispatch === "approved") {
+      const cur = dnorm(o.delivery_status);
+      state = `✅ អនុម័តទៅ <b>${esc(drvName(o.driver_id))}</b>` +
+        `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">${Object.entries(DSTAT).map(([k, l]) =>
+          `<span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${k === cur ? "var(--brand,#0f766e)" : "#eceff3"};color:${k === cur ? "#fff" : "#667"}">${k === cur ? "● " : ""}${l}</span>`).join("")}</div>` +
+        `<div class="muted" style="margin-top:4px">📡 ស្ថានភាពមកពីអ្នកដឹកចុចក្នុង app (admin មិនអាចកែបានទេ)</div>`;
+      if (cur === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
+      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — អាចលុបបាន</div>` +
+        `<button class="btn btn-d btn-s" data-a="delorder" data-id="${esc(o.tran_id)}">🗑 លុបការដឹកនេះ</button>` +
+        `<button class="btn btn-d btn-s" data-a="deldriver" data-id="${esc(o.tran_id)}" data-drv="${esc(o.driver_id)}">🗑 លុបអ្នកដឹក ${esc(drvName(o.driver_id))}</button>`;
+    } else {
+      state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
+      actions = (o.dispatch === "open"
+        ? `<button class="btn btn-g btn-s" data-a="unsend" data-id="${esc(o.tran_id)}">↩️ ដកចេញពី app</button>`
+        : `<button class="btn btn-p btn-s" data-a="send" data-id="${esc(o.tran_id)}">📤 ផ្ញើទៅ Delivery app</button>`);
+      actions += `<div style="display:flex;gap:6px;width:100%;margin-top:6px"><select id="sel-${esc(o.tran_id)}" style="flex:1;${"border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface);color:var(--ink)"}">
+          <option value="">— ជ្រើសអ្នកដឹក —</option>${usable.map(d => `<option value="${d.id}">${d.is_active ? "🟢" : "⚪"} ${esc(d.name)}</option>`).join("")}</select>
+          <button class="btn btn-p btn-s" data-a="approve" data-id="${esc(o.tran_id)}">✅ អនុម័ត</button></div>`;
+    }
+    const reqHtml = reqs.length ? `<div style="margin-top:6px"><div class="muted">🙋 អ្នកស្នើសុំ:</div>${reqs.map(q =>
+      `<button class="btn btn-g btn-s" style="margin:3px 4px 0 0" data-a="approve" data-id="${esc(o.tran_id)}" data-drv="${q.driver_id}">✅ ${esc(drvName(q.driver_id))}</button>`).join("")}</div>` : "";
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="font-weight:700">${esc(o.customer_name)} · $${Number(o.total).toFixed(2)}</div>
+      <div class="muted">${tg} · 📞 ${esc(o.phone)} <button class="btn btn-g btn-s" style="padding:2px 8px" data-a="phone" data-id="${esc(o.tran_id)}" data-p="${esc(o.phone)}">✏️ កែលេខ</button></div>
+      <div style="font-size:12.5px;margin:4px 0">${items}</div>
+      <div class="muted">📍 ${esc(o.address || "—")} ${map ? `· <a href="${esc(map)}" target="_blank" rel="noopener">🗺️ មើលផែនទី (Pin)</a>` : ""}</div>
+      ${trackBox(o)}
+      <div style="margin:6px 0">${state}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div>${reqHtml}</div>`;
+  }).join("");
+}
+async function dlAct(body, okMsg) {
+  const r = await admin(body);
+  if (r.error) toast(r.error, "bad"); else { toast(okMsg || "បានរក្សាទុក", "ok"); loadDelivery(); }
+}
+$("dl-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const id = b.dataset.id, act = b.dataset.a;
+  if (act === "phone") { const p = prompt("លេខទូរស័ព្ទថ្មី (សម្រាប់ទាក់ទងអ្នកទទួល):", b.dataset.p || ""); if (p) dlAct({ action: "edit_order_phone", tran_id: id, phone: p }); }
+  else if (act === "send") dlAct({ action: "dispatch_order", tran_id: id, open: true }, "បានផ្ញើទៅ Delivery app");
+  else if (act === "unsend") dlAct({ action: "dispatch_order", tran_id: id, open: false });
+  else if (act === "unassign") dlAct({ action: "unassign_driver", tran_id: id });
+  else if (act === "tcnew") dlAct({ action: "set_track_code", tran_id: id }, "បានបង្កើតលេខតាមដាន");
+  else if (act === "tcedit") { const v = prompt("លេខតាមដាន (៤-១២ តួ អក្សរ ឬលេខ):", b.dataset.c || ""); if (v) dlAct({ action: "set_track_code", tran_id: id, code: v }, "បានរក្សាទុកលេខ"); }
+  else if (act === "tcdel") { if (confirm("លុបលេខតាមដាននេះ? អតិថិជននឹងមិនអាចមើលតាមលេខនេះបានទៀតទេ")) dlAct({ action: "set_track_code", tran_id: id, clear: true }, "បានលុបលេខ"); }
+  else if (act === "tccopy") {
+    const msg = `សួស្តី ${b.dataset.n || ""}! លេខតាមដានការកម្មង់របស់អ្នកក្នុង Epheap app គឺ ${b.dataset.c}\nសូមបញ្ចូលវាក្នុង «🔎 តាមដានអីវ៉ាន់» ដើម្បីមើលស្ថានភាព។ អរគុណ!`;
+    (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(() => toast("បានចម្លងសារ", "ok")).catch(() => prompt("ចម្លងសារនេះ:", msg));
+  }
+  else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
+  else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
+  else if (act === "approve") {
+    const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
+    if (!drv) { toast("សូមជ្រើសអ្នកដឹកជាមុន", "bad"); return; }
+    if (confirm("អនុម័តអ្នកដឹកនេះសម្រាប់កញ្ចប់នេះ?")) dlAct({ action: "approve_driver", tran_id: id, driver_id: Number(drv) }, "បានអនុម័ត");
+  }
+});
+setInterval(() => {   // live refresh of what the drivers are doing
+  if (dlLoaded && !document.hidden && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#dl-list"))) loadDelivery();
+}, 10000);
+$("drv-list").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-d]"); if (!b) return;
+  const id = Number(b.dataset.id), act = b.dataset.d;
+  if (act === "block" || act === "unblock") dlAct({ action: "set_driver", id, blocked: act === "block" });
+  else if (act === "pw") { const p = prompt("ពាក្យសម្ងាត់ថ្មី (យ៉ាងតិច ៦ តួ):"); if (p) dlAct({ action: "set_driver", id, password: p }); }
+  else if (act === "del" && confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id, delete: true });
+});
+$("drv-add").addEventListener("click", async () => {
+  const r = await admin({ action: "create_driver", name: $("drv-name").value.trim(), login_id: $("drv-id").value.trim(), password: $("drv-pw").value });
+  if (r.error) { toast(r.error, "bad"); return; }
+  $("drv-name").value = $("drv-id").value = $("drv-pw").value = ""; toast("បានបន្ថែមអ្នកដឹក", "ok"); loadDelivery();
+});
+$("dl-refresh").addEventListener("click", loadDelivery);
+document.querySelector('.tab[data-tab="delivery"]').addEventListener("click", loadDelivery);
+
+/* ===== DRIVER MONEY REQUESTS ===== */
+const pmoney = n => "$" + Number(n || 0).toFixed(2);
+const fmtT = t => String(t || "").slice(0, 16).replace("T", " ");
+async function loadPayouts() {
+  const r = await admin({ action: "list_payouts" });
+  if (r.error || !r.data) { $("pay-pending").textContent = r.error || ""; return; }
+  const pays = r.data.payouts || [], drivers = r.data.drivers || [], bal = r.data.unrequested || {};
+  const dn = id => { const d = drivers.find(x => String(x.id) === String(id)); return d ? `${esc(d.name)} <span class="muted">· ${esc(d.login_id)}</span>` : "—"; };
+  const pend = pays.filter(p => p.status === "pending");
+  const dot = $("pay-dot"); dot.textContent = pend.length; dot.style.display = pend.length ? "flex" : "none";
+  $("pay-count").textContent = pend.length ? `(${pend.length})` : "";
+  $("pay-pending").innerHTML = pend.length ? pend.map(p => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><div style="font-weight:700">${dn(p.driver_id)}</div><div style="font-weight:800;font-size:20px;color:var(--brand)">${pmoney(p.amount)}</div></div>
+      <div class="muted">ស្នើសុំនៅ ${esc(fmtT(p.requested_at))}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-p btn-s" data-pid="${p.id}" data-dec="paid" data-amt="${esc(p.amount)}">✅ បានបង់រួច</button>
+        <button class="btn btn-d btn-s" data-pid="${p.id}" data-dec="rejected">❌ បដិសេធ</button>
+      </div></div>`).join("") : "មិនមានសំណើកំពុងរង់ចាំទេ";
+  $("pay-pending").querySelectorAll("button[data-pid]").forEach(b => b.addEventListener("click", async () => {
+    const paid = b.dataset.dec === "paid";
+    if (!confirm(paid ? `បានបង់ប្រាក់ ${pmoney(b.dataset.amt)} ឱ្យអ្នកដឹករួចមែនទេ?` : "បដិសេធសំណើនេះ? ប្រាក់នឹងត្រឡប់ទៅគណនីអ្នកដឹកវិញ។")) return;
+    const res = await admin({ action: "decide_payout", id: Number(b.dataset.pid), decision: b.dataset.dec });
+    if (res.error) toast(res.error, "bad"); else { toast(paid ? "បានកត់ត្រាថាបង់រួច" : "បានបដិសេធ", "ok"); loadPayouts(); }
+  }));
+  const rows = drivers.filter(d => bal[d.id] > 0);
+  $("pay-bal").innerHTML = rows.length ? rows.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)"><span>${dn(d.id)}</span><b>${pmoney(bal[d.id])}</b></div>`).join("") : "គ្មាន";
+  const done = pays.filter(p => p.status !== "pending");
+  $("pay-hist").innerHTML = done.length ? done.map(p => `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)">
+      <span>${dn(p.driver_id)}<div class="muted">${esc(fmtT(p.decided_at || p.requested_at))}</div></span>
+      <span style="text-align:right"><b>${pmoney(p.amount)}</b><div class="muted">${p.status === "paid" ? "✅ បានបង់" : "❌ បដិសេធ"}</div></span></div>`).join("") : "មិនទាន់មានប្រវត្តិ";
+}
+$("pay-refresh").addEventListener("click", loadPayouts);
+document.querySelector('.tab[data-tab="pay"]').addEventListener("click", loadPayouts);
+setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
 </script>
 </body>
 </html>
