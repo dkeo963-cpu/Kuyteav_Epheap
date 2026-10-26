@@ -451,7 +451,11 @@
     .tbtn { flex:1; padding:10px 6px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--sub); font:inherit; font-weight:700; font-size:13px; }
     .tbtn.on { background:var(--brand); border-color:var(--brand); color:#fff; }
     .tbtn.go { cursor:pointer; } .tbtn:disabled { opacity:.55; }
-    #live-map { height:240px; border-radius:12px; margin-top:10px; }
+    #live-map { height:300px; border-radius:12px; margin-top:10px; }
+    .live-wrap { position:relative; }
+    .live-lyr { position:absolute; top:18px; left:8px; z-index:500; background:#fff; border:0; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; box-shadow:0 1px 5px rgba(0,0,0,.4); cursor:pointer; }
+    .moto-ic { width:22px; height:22px; border-radius:50%; background:#fff; border:2px solid #0f766e; box-shadow:0 1px 4px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; font-size:13px; line-height:1; }
+    .home-pin { font-size:26px; line-height:1; filter:drop-shadow(0 2px 2px rgba(0,0,0,.5)); transform:translate(-50%,-100%); }
     .tl { margin:10px 0 2px; padding:0; list-style:none; }
     .tl li { display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px; color:var(--sub); }
     .tl .d { width:22px; height:22px; border-radius:50%; background:#dde1e6; color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -1029,7 +1033,7 @@
       <div id="track-results"></div>
       <div id="live-box" style="display:none">
         <div id="live-info" class="pay-sub" style="margin-top:12px;font-weight:700"></div>
-        <div id="live-map"></div>
+        <div class="live-wrap"><button type="button" class="live-lyr" id="live-lyr" onclick="cycleLiveLook()"></button><div id="live-map"></div></div>
       </div>
     </div>
   </div>
@@ -2144,7 +2148,7 @@
     }
 
     /* ===== Tracking your order: look up by phone, then watch the driver live ===== */
-    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null, trackTimer = null;
+    let liveMap = null, liveMarker = null, liveTimer = null, liveId = null, trackTimer = null, liveDest = null, liveGroup = null, liveLookIdx = 0, liveFitted = false, liveLast = null, liveAnim = null, liveCode = '';
     const FULFIL = { new: 'បានទទួលការកម្មង់', preparing: 'កំពុងរៀបចំ', ready: 'រួចរាល់', done: 'ប្រគល់ហើយ' };
     function openTrackModal() {
       const el = document.getElementById('track-code');
@@ -2155,7 +2159,7 @@
       clearInterval(trackTimer); trackTimer = setInterval(() => { if (document.getElementById('track-modal').style.display === 'flex') lookupOrders(true); }, 10000);   // status follows the driver's taps
     }
     function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; clearInterval(trackTimer); stopLive(); }
-    function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; document.getElementById('live-box').style.display = 'none'; }
+    function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; cancelAnimationFrame(liveAnim); if (liveMap) { if (liveMarker) liveMap.removeLayer(liveMarker); if (liveDest) liveMap.removeLayer(liveDest); } liveMarker = liveDest = null; liveFitted = false; liveLast = null; document.getElementById('live-box').style.display = 'none'; }
     async function lookupOrders(silent) {
       const box = document.getElementById('track-results');
       const code = document.getElementById('track-code').value.replace(/\s/g, '').toUpperCase();
@@ -2217,34 +2221,81 @@
       }
       if (isDel && rank === 1) {
         const b = el('button', '🗺️ មើលទីតាំងអ្នកដឹក (Live)'); b.type = 'button'; b.className = 'tbtn go on'; b.style.cssText = 'width:100%;margin-top:8px';
-        b.onclick = () => showLive(o.tran_id); c.append(b);
+        b.onclick = () => showLive(o.tran_id, o.track_code); c.append(b);
       }
       return c;
     }
-    function showLive(id) {
-      liveId = id;
+    function setLiveLook(i) {
+      liveLookIdx = i;
+      if (liveGroup) liveMap.removeLayer(liveGroup);
+      liveGroup = L.layerGroup(MAP_LOOKS[i][1]()).addTo(liveMap);
+      const b = document.getElementById('live-lyr'); if (b) b.textContent = MAP_LOOKS[i][0];
+      try { localStorage.setItem('cust_map2', String(i)); } catch (e) {}
+    }
+    function cycleLiveLook() { setLiveLook((liveLookIdx + 1) % MAP_LOOKS.length); }
+
+    // Put the moto exactly on the road: ask OSRM for the nearest road point (falls back to the raw GPS point).
+    async function snapToRoad(lat, lng) {
+      try {
+        const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 3500);
+        const r = await fetch('https://router.project-osrm.org/nearest/v1/driving/' + lng + ',' + lat + '?number=1', { signal: ctl.signal });
+        clearTimeout(t);
+        const j = await r.json();
+        const w = j && j.waypoints && j.waypoints[0];
+        if (w && w.location && w.distance <= 60) return [w.location[1], w.location[0]];   // only trust a road within 60 m
+      } catch (e) {}
+      return [lat, lng];
+    }
+    // glide the icon to the new point instead of jumping
+    function glideTo(marker, to) {
+      cancelAnimationFrame(liveAnim);
+      const from = marker.getLatLng(), t0 = performance.now(), D = 1500;
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / D), e = k * (2 - k);
+        marker.setLatLng([from.lat + (to[0] - from.lat) * e, from.lng + (to[1] - from.lng) * e]);
+        if (k < 1) liveAnim = requestAnimationFrame(step);
+      };
+      liveAnim = requestAnimationFrame(step);
+    }
+
+    function showLive(id, code) {
+      liveId = id; liveCode = code || document.getElementById('track-code').value.replace(/\s/g, '').toUpperCase();
       document.getElementById('live-box').style.display = 'block';
       if (!liveMap) {
-        liveMap = L.map('live-map', { zoomControl: true, attributionControl: false }).setView([11.55, 104.9], 15);
-        L.tileLayer(MAPTILER_KEY ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}` : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(liveMap);
-        L.control.attribution({ prefix: false, position: 'bottomleft' }).addAttribution(MAPTILER_KEY ? '© MapTiler © OpenStreetMap contributors' : '© OpenStreetMap contributors').addTo(liveMap);
+        liveMap = L.map('live-map', { zoomControl: true, attributionControl: false }).setView([11.55, 104.9], 16);
+        L.control.attribution({ prefix: false, position: 'bottomleft' }).addTo(liveMap);
+        let v = 0; try { const n = parseInt(localStorage.getItem('cust_map2'), 10); if (!isNaN(n)) v = ((n % MAP_LOOKS.length) + MAP_LOOKS.length) % MAP_LOOKS.length; } catch (e) {}
+        setLiveLook(v);
       }
       setTimeout(() => liveMap.invalidateSize(), 150);
       pollLive();
-      clearInterval(liveTimer); liveTimer = setInterval(pollLive, 6000);
+      clearInterval(liveTimer); liveTimer = setInterval(pollLive, 5000);
     }
     async function pollLive() {
       if (!liveId) return;
       const info = document.getElementById('live-info');
-      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'live', tran_id: liveId } });
+      const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'live', tran_id: liveId, code: liveCode } });
       if (error || !data) { info.textContent = 'មិនអាចភ្ជាប់បានទេ…'; return; }
       if (data.delivery_status === 'delivered') { stopLive(); lookupOrders(true); return; }
       if (!data.live) { info.textContent = 'រង់ចាំទីតាំងរបស់អ្នកដឹក…'; return; }
       info.textContent = '🛵 ' + (data.driver || 'អ្នកដឹក') + (data.distance_km != null ? ' · នៅឆ្ងាយ ~' + data.distance_km + ' km' : '') + (data.eta_min != null ? ' · ប្រហែល ' + data.eta_min + ' នាទី' : '');
-      const pos = [data.lat, data.lng];
-      if (!liveMarker) liveMarker = L.marker(pos, { icon: L.divIcon({ className: '', html: '<div style="font-size:30px;line-height:30px">🛵</div>', iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(liveMap);
-      else liveMarker.setLatLng(pos);
-      liveMap.panTo(pos, { animate: true });
+
+      // exact delivery spot the customer chose
+      if (data.dest && !liveDest) liveDest = L.marker([data.dest.lat, data.dest.lng], { icon: L.divIcon({ className: '', html: '<div class="home-pin">📍</div>', iconSize: [0, 0] }), zIndexOffset: 500 }).addTo(liveMap);
+
+      const pos = await snapToRoad(Number(data.lat), Number(data.lng));
+      if (!liveId) return;
+      if (!liveMarker) liveMarker = L.marker(pos, { icon: L.divIcon({ className: '', html: '<div class="moto-ic">🛵</div>', iconSize: [22, 22], iconAnchor: [11, 11] }), zIndexOffset: 1000 }).addTo(liveMap);
+      else glideTo(liveMarker, pos);
+      liveLast = pos;
+
+      if (!liveFitted) {   // first time: show driver + customer together
+        liveFitted = true;
+        if (data.dest) liveMap.fitBounds(L.latLngBounds([pos, [data.dest.lat, data.dest.lng]]), { padding: [40, 40], maxZoom: 18 });
+        else liveMap.setView(pos, 17);
+      } else if (!liveMap.getBounds().contains(pos)) {
+        liveMap.panTo(pos, { animate: true });
+      }
     }
 
     async function sendOrder() {
