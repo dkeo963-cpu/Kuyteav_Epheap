@@ -202,7 +202,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (locked) { try { history.pushState({ lock: 1 }, ''); } catch (e) {} toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); }
   });
 
-  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(function () { if (!document.hidden) refresh(); }, 3000); }
+  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); var rbusy = false; timer = setInterval(function () { if (document.hidden || rbusy) return; rbusy = true; var done = function () { rbusy = false; }; try { Promise.resolve(refresh()).then(done, done); } catch (e) { done(); } }, 1500); }
 
   function itemsHtml(items) {
     return '<div class="items">' + (items || []).map(function (i) {
@@ -240,7 +240,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   function badge(id, n) { var e = $(id); e.textContent = n; e.classList.toggle('hide', !n); }
 
   function refresh() {
-    call({ action: 'list' }).then(function (j) {
+    return call({ action: 'list' }).then(function (j) {
       if (j.code === 'LOGIN') { logout(); return; }
       if (j.error) return;
       active = j.is_active; me = j.driver;
