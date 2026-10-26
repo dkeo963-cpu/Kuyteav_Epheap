@@ -2156,8 +2156,23 @@
       if (!el.value) el.value = saved;
       document.getElementById('track-modal').style.display = 'flex';
       if (el.value) lookupOrders();
-      clearInterval(trackTimer); trackTimer = setInterval(() => { if (document.getElementById('track-modal').style.display === 'flex') lookupOrders(true); }, 10000);   // status follows the driver's taps
+      startFastTrack();   // status follows the driver's taps within ~2 seconds
     }
+    /* ---- fast status watcher: asks a tiny endpoint every 2s, redraws the cards only when the stage changed ---- */
+    let trackSig = '', trackBusy = false;
+    const sigOf = (list) => (list || []).map(o => (o.delivery_status || 'not_yet') + '|' + (o.fulfillment || 'new')).sort().join(',');
+    function startFastTrack() { clearInterval(trackTimer); trackBusy = false; trackTimer = setInterval(checkTrackStatus, 2000); }
+    async function checkTrackStatus() {
+      if (trackBusy || document.hidden || document.getElementById('track-modal').style.display !== 'flex') return;
+      const code = document.getElementById('track-code').value.replace(/\s/g, '').toUpperCase();
+      if (!/^[A-Z0-9]{4,12}$/.test(code)) return;
+      trackBusy = true;
+      try {
+        const { data, error } = await supabaseClient.functions.invoke('payment-status', { body: { action: 'status', code } });
+        if (!error && data && typeof data.sig === 'string' && data.sig !== trackSig) await lookupOrders(true);
+      } catch (e) {} finally { trackBusy = false; }
+    }
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) checkTrackStatus(); });
     function closeTrackModal() { document.getElementById('track-modal').style.display = 'none'; clearInterval(trackTimer); stopLive(); }
     function stopLive() { clearInterval(liveTimer); liveTimer = null; liveId = null; cancelAnimationFrame(liveAnim); if (liveMap) { if (liveMarker) liveMap.removeLayer(liveMarker); if (liveDest) liveMap.removeLayer(liveDest); } liveMarker = liveDest = null; liveFitted = false; liveLast = null; document.getElementById('live-box').style.display = 'none'; }
     async function lookupOrders(silent) {
@@ -2170,6 +2185,7 @@
       if (silent && (error || !data || data.error)) return;   // keep what is on screen if a background refresh fails
       box.innerHTML = '';
       if (error || !data || data.error) { box.textContent = (data && data.error) || 'មិនអាចភ្ជាប់បានទេ'; return; }
+      trackSig = sigOf(data.orders);
       if (!data.orders.length) { box.textContent = 'រកមិនឃើញលេខតាមដាននេះទេ។ សូមពិនិត្យលេខ ឬសួរហាង។'; return; }
       data.orders.forEach(o => box.appendChild(orderCard(o)));
     }
