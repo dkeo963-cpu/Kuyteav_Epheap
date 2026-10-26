@@ -419,12 +419,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="btn btn-g btn-s" id="pw-out" style="margin-top:8px">🔒 ចាកចេញ (Admin)</button>
     </div>
     <div class="card" style="margin-top:12px">
-      <h2 class="h2">🧾 ការកម្មង់ទាំងអស់ <span id="ord-count" class="muted"></span></h2>
-      <p class="muted" style="margin:4px 0 10px">⏳ មិនទាន់ទទួល · ✅ បានទទួលរួច។ ពេលចុច ✅ ការកម្មង់នឹងចូលប្រវត្តិ ហើយកែលែងបាន។</p>
-      <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
-      <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
-    </div>
-    <div class="card" style="margin-top:12px">
       <h2 class="h2">📜 ប្រវត្តិការកម្មង់ <span id="his-count" class="muted"></span></h2>
       <p class="muted" style="margin:4px 0 10px">ការកម្មង់ដែលបានទទួលរួច និងការដឹកដែលបានបញ្ចប់។ មើលបានតែប៉ុណ្ណោះ មិនអាចកែ ឬលុបបានទេ។</p>
       <div id="his-list" class="muted">កំពុងផ្ទុក…</div>
@@ -1290,24 +1284,9 @@ const ordHead = o => {
       <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>`;
 };
 async function loadOrders() {
-  const box = $("ord-list");
   const r = await admin({ action: "list_orders" });
-  if (r.error) { box.textContent = r.error; return; }
-  const rows = r.data?.orders || [], hist = r.data?.history || [];
-  $("ord-count").textContent = rows.length ? `(${rows.length})` : "";
-
-  // ---- active orders: two statuses ----
-  box.innerHTML = rows.length ? rows.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
-      ${ordHead(o)}
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn btn-p btn-s" disabled style="opacity:1">⏳ មិនទាន់ទទួល</button>
-        <button class="btn btn-g btn-s" data-id="${esc(o.tran_id)}" data-recv="1">✅ បានទទួលរួច</button>
-      </div></div>`).join("") : "មិនទាន់មានការកម្មង់ថ្មីទេ";
-  box.querySelectorAll("button[data-recv]").forEach(b => b.addEventListener("click", async () => {
-    if (!confirm("អតិថិជនបានទទួលរួចមែនទេ? ការកម្មង់នឹងចូលប្រវត្តិ ហើយមិនអាចកែបានទៀតទេ។")) return;
-    const res = await admin({ action: "set_fulfillment", tran_id: b.dataset.id, fulfillment: "done" });
-    if (res.error) toast(res.error, "bad"); else { toast("បានផ្លាស់ទៅប្រវត្តិ", "ok"); loadOrders(); }
-  }));
+  if (r.error) { $("his-list").textContent = r.error; return; }
+  const hist = r.data?.history || [];
 
   // ---- history: READ-ONLY (no buttons) ----
   $("his-count").textContent = hist.length ? `(${hist.length})` : "";
@@ -1318,9 +1297,8 @@ async function loadOrders() {
     </div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
 
 }
-$("ord-refresh").addEventListener("click", loadOrders);
 document.querySelector('.tab[data-tab="more"]').addEventListener("click", loadOrders);
-if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
+if (hasTG) loadOrders(); else $("his-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
 
 /* ===== DELIVERY: drivers + dispatching ===== */
 let DL = { orders: [], requests: [], drivers: [] };
