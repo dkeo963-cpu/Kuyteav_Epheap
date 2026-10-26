@@ -202,7 +202,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (locked) { try { history.pushState({ lock: 1 }, ''); } catch (e) {} toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); }
   });
 
-  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(refresh, 8000); }
+  function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); timer = setInterval(function () { if (!document.hidden) refresh(); }, 3000); }
 
   function itemsHtml(items) {
     return '<div class="items">' + (items || []).map(function (i) {
@@ -453,6 +453,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (tab === 'map') ensureMapWatch();   // keep the blue dot moving after the delivery is finished
   }
   document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && typeof refresh === 'function' && $('app') && !$('app').classList.contains('hide')) refresh();
     if (!trackingId && !locked) return;
     if (document.visibilityState === 'hidden') { wasHidden = true; return; }
     if (locked) { keepAwake(); refresh(); }
