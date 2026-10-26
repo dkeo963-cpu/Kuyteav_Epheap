@@ -252,11 +252,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
   <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
 </div>
-<div class="card" style="margin-top:12px">
-  <h2 class="h2">💰 សមតុល្យអ្នកដឹក <span id="drv-bal-total" class="muted"></span></h2>
-  <p class="muted" style="margin:4px 0 8px">ប្រាក់ដែលហាងត្រូវបង់ឱ្យអ្នកដឹកម្នាក់ៗ (មិនទាន់ស្នើ + កំពុងរង់ចាំ)</p>
-  <div id="drv-bal" class="muted">កំពុងផ្ទុក…</div>
-</div>
 <main class="wrap">
   <!-- ========== HOME ========== -->
   <section id="page-home" class="page on">
@@ -406,8 +401,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="btn btn-g btn-s" id="pay-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
     </div>
     <div class="card">
-      <h2 class="h2">👥 ប្រាក់ដែលអ្នកដឹកមាន (មិនទាន់ស្នើ)</h2>
-      <div id="pay-bal" class="muted">…</div>
+      <h2 class="h2">💰 សមតុល្យអ្នកដឹក <span id="drv-bal-total" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 8px">ប្រាក់ដែលហាងត្រូវបង់ឱ្យអ្នកដឹកម្នាក់ៗ (មិនទាន់ស្នើ + កំពុងរង់ចាំ)</p>
+      <div id="drv-bal" class="muted">កំពុងផ្ទុក…</div>
     </div>
     <div class="card">
       <h2 class="h2">📜 ប្រវត្តិ</h2>
@@ -427,6 +423,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <p class="muted" style="margin:4px 0 10px">⏳ មិនទាន់ទទួល · ✅ បានទទួលរួច។ ពេលចុច ✅ ការកម្មង់នឹងចូលប្រវត្តិ ហើយកែលែងបាន។</p>
       <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
       <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <h2 class="h2">📜 ប្រវត្តិការកម្មង់ <span id="his-count" class="muted"></span></h2>
+      <p class="muted" style="margin:4px 0 10px">ការកម្មង់ដែលបានទទួលរួច និងការដឹកដែលបានបញ្ចប់។ មើលបានតែប៉ុណ្ណោះ មិនអាចកែ ឬលុបបានទេ។</p>
+      <div id="his-list" class="muted">កំពុងផ្ទុក…</div>
     </div>
   </section>
 
@@ -1308,8 +1309,17 @@ async function loadOrders() {
     if (res.error) toast(res.error, "bad"); else { toast("បានផ្លាស់ទៅប្រវត្តិ", "ok"); loadOrders(); }
   }));
 
+  // ---- history: READ-ONLY (no buttons) ----
+  $("his-count").textContent = hist.length ? `(${hist.length})` : "";
+  $("his-list").innerHTML = hist.length ? hist.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink);background:#fafcfb">
+      ${ordHead(o)}
+      ${o.order_type === "delivery" ? `<div class="muted" style="margin-bottom:6px">📍 ${esc(o.address || "—")}${o.driver_name ? ` · 🛵 ${esc(o.driver_name)}` : ""}</div>` : ""}
+      <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#d9f2ee;color:#0f766e">✅ ${o.order_type === "delivery" ? "បានដឹកដល់" : "បានទទួលរួច"}</span>
+    </div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
+
 }
 $("ord-refresh").addEventListener("click", loadOrders);
+document.querySelector('.tab[data-tab="more"]').addEventListener("click", loadOrders);
 if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
 
 /* ===== DELIVERY: drivers + dispatching ===== */
@@ -1380,7 +1390,7 @@ function trackBox(o) {
 }
 function renderDelivery() {
   const box = $("dl-list");
-  if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ"; return; }
+  if (!DL.orders.length) { box.textContent = "មិនទាន់មានការដឹកជញ្ជូនទេ (ការដឹកដែលបានបញ្ចប់ មើលក្នុងប្រវត្តិ នៅផ្ទាំង «ផ្សេងៗ»)"; return; }
   const usable = DL.drivers.filter(d => !d.blocked).sort((x, y) => Number(y.is_active) - Number(x.is_active));
   box.innerHTML = DL.orders.map(o => {
     const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
@@ -1396,9 +1406,7 @@ function renderDelivery() {
           `<span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${k === cur ? "var(--brand,#0f766e)" : "#eceff3"};color:${k === cur ? "#fff" : "#667"}">${k === cur ? "● " : ""}${l}</span>`).join("")}</div>` +
         `<div class="muted" style="margin-top:4px">📡 ស្ថានភាពមកពីអ្នកដឹកចុចក្នុង app (admin មិនអាចកែបានទេ)</div>`;
       if (cur === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
-      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — អាចលុបបាន</div>` +
-        `<button class="btn btn-d btn-s" data-a="delorder" data-id="${esc(o.tran_id)}">🗑 លុបការដឹកនេះ</button>` +
-        `<button class="btn btn-d btn-s" data-a="deldriver" data-id="${esc(o.tran_id)}" data-drv="${esc(o.driver_id)}">🗑 លុបអ្នកដឹក ${esc(drvName(o.driver_id))}</button>`;
+      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — នឹងបាត់ពីបញ្ជីនេះក្រោយ ៣០ នាទី ហើយចូលប្រវត្តិនៅផ្ទាំង «ផ្សេងៗ»</div>`;
     } else {
       state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
       actions = (o.dispatch === "open"
@@ -1488,9 +1496,7 @@ async function loadPayouts() {
     const res = await admin({ action: "decide_payout", id: Number(b.dataset.pid), decision: b.dataset.dec });
     if (res.error) toast(res.error, "bad"); else { toast(paid ? "បានកត់ត្រាថាបង់រួច" : "បានបដិសេធ", "ok"); loadPayouts(); }
   }));
-  const rows = drivers.filter(d => bal[d.id] > 0);
-  $("pay-bal").innerHTML = rows.length ? rows.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)"><span>${dn(d.id)}</span><b>${pmoney(bal[d.id])}</b></div>`).join("") : "គ្មាន";
-  // balance of EVERY driver (shown at the top of the page): not yet requested + waiting for admin to pay
+  // balance of EVERY driver (shown only in this tab): not yet requested + waiting for admin to pay
   const pendBy = {}; pend.forEach(p => { pendBy[p.driver_id] = Math.round(((pendBy[p.driver_id] || 0) + Number(p.amount || 0)) * 100) / 100; });
   const all = drivers.map(d => ({ d, free: Number(bal[d.id] || 0), wait: pendBy[d.id] || 0 })).map(x => ({ ...x, sum: Math.round((x.free + x.wait) * 100) / 100 })).sort((a, b) => b.sum - a.sum);
   const grand = all.reduce((t, x) => t + x.sum, 0);
