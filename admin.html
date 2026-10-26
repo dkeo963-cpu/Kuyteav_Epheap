@@ -1327,7 +1327,7 @@ async function pollDlBadge() {   // keeps the number fresh even when the deliver
   const r = await admin({ action: "list_delivery" });
   if (!r.error && r.data) updateDlBadge(r.data.orders);
 }
-setInterval(pollDlBadge, 5000);
+setInterval(pollDlBadge, 3000);
 async function loadDelivery() {
   const r = await admin({ action: "list_delivery" });
   if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
@@ -1441,9 +1441,10 @@ $("dl-list").addEventListener("click", async (e) => {
     if (confirm("អនុម័តអ្នកដឹកនេះសម្រាប់កញ្ចប់នេះ?")) dlAct({ action: "approve_driver", tran_id: id, driver_id: Number(drv) }, "បានអនុម័ត");
   }
 });
+let dlBusy = false;
 setInterval(() => {   // live refresh of what the drivers are doing
-  if (dlLoaded && !document.hidden && $("page-delivery").classList.contains("on") && !(document.activeElement && /^(SELECT|INPUT|TEXTAREA)$/.test(document.activeElement.tagName))) loadDelivery();
-}, 3000);
+  if (dlLoaded && !dlBusy && !document.hidden && $("page-delivery").classList.contains("on") && !(document.activeElement && /^(SELECT|INPUT|TEXTAREA)$/.test(document.activeElement.tagName))) { dlBusy = true; loadDelivery().finally(() => { dlBusy = false; }); }
+}, 1500);
 $("drv-list").addEventListener("click", async (e) => {
   const b = e.target.closest("button[data-d]"); if (!b) return;
   const id = Number(b.dataset.id), act = b.dataset.d;
