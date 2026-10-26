@@ -165,7 +165,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
     window.scrollTo(0, 0);
     if (t === 'me') loadEarnings();
-    if (t === 'map') { if (curMap) { ensureMapWatch(); setTimeout(function () { if (lmap) lmap.invalidateSize(); }, 60); } }
+    if (t === 'map') { if (curMap && !mineData.some(function (x) { return x.tran_id === curMap.tran_id; })) clearMap(); if (curMap) { ensureMapWatch(); setTimeout(function () { if (lmap) lmap.invalidateSize(); }, 60); } }
     else if (!trackingId) stopMapWatch();   // save battery when the map is not on screen
   }
   document.querySelectorAll('nav button').forEach(function (b) { b.onclick = function () { setTab(b.dataset.t); }; });
@@ -253,6 +253,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       mineData = m;
       setLock(m.length > 0);
       if (curMap && !m.some(function (x) { return x.tran_id === curMap.tran_id; })) clearMap();
+      else if (!m.length && curMap) clearMap();
       badge('b-mine', m.length);
       var lockNote = m.length ? '<div class="trk bad" style="display:block;margin-bottom:10px">🔒 អ្នកមានការងារដែលត្រូវបានអនុម័ត — មិនអាចបិទ ឬចាកចេញពី app បានទេ រហូតដល់អតិថិជនបានទទួលអីវ៉ាន់។ សូមទុកទូរស័ព្ទបើក និងអេក្រង់ភ្លឺ។</div>' : '';
       $('mine').innerHTML = m.length ? lockNote + m.map(function (o) {
@@ -297,7 +298,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   /* in-app LIVE map (Leaflet + OpenStreetMap): the blue dot moves with the phone's GPS, like Google Maps.
      It is part of this page, so the driver never leaves the app and live sharing to the customer keeps running. */
   var mineData = [], curMap = null, lmap = null, meMarker = null, accCircle = null, destMarker = null, routeLine = null, routeCase = null, layerGroup = null, layerIdx = 0;
-  var mapWatchId = null, follow = true, mapFitted = false, routeBusy = false, routeFrom = null, routeAt = 0;
+  var mapGen = 0, mapWatchId = null, follow = true, mapFitted = false, routeBusy = false, routeFrom = null, routeAt = 0;
   function hav(a1, o1, a2, o2) { var R = 6371, r = Math.PI / 180, dA = (a2 - a1) * r, dO = (o2 - o1) * r; var x = Math.sin(dA / 2) * Math.sin(dA / 2) + Math.cos(a1 * r) * Math.cos(a2 * r) * Math.sin(dO / 2) * Math.sin(dO / 2); return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)); }
   function mapExt(o) {
     if (o.lat != null && o.lng != null) return 'https://www.google.com/maps/dir/?api=1&destination=' + o.lat + ',' + o.lng;
@@ -338,21 +339,23 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       function () { toast('មិនអាចរកទីតាំងរបស់អ្នកបានទេ — សូមបើក GPS'); }, { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 });
   }
   function drawRoute(ll, dest) {
-    if (routeBusy) return; routeBusy = true; routeFrom = ll; routeAt = Date.now();
+    if (routeBusy) return; routeBusy = true; routeFrom = ll; routeAt = Date.now(); var gen = mapGen;
     var url = 'https://router.project-osrm.org/route/v1/driving/' + ll[1] + ',' + ll[0] + ';' + dest[1] + ',' + dest[0] + '?overview=full&geometries=geojson';
     fetch(url).then(function (r) { return r.json(); }).then(function (j) {
+      if (gen !== mapGen || !curMap) return;
       var rt = j && j.routes && j.routes[0]; if (!rt) throw 0;
       var pts = rt.geometry.coordinates.map(function (c) { return [c[1], c[0]]; });
       if (routeLine) { routeLine.setLatLngs(pts); routeCase.setLatLngs(pts); } else { routeCase = L.polyline(pts, { color: '#fff', weight: 12, opacity: .95 }).addTo(lmap); routeLine = L.polyline(pts, { color: '#1a73e8', weight: 7 }).addTo(lmap); }
       $('map-stat').textContent = '🛣️ ' + (rt.distance / 1000).toFixed(1) + ' គម · ⏱ ~' + Math.max(1, Math.round(rt.duration / 60)) + ' នាទី';
     }).catch(function () {
+      if (gen !== mapGen || !curMap) return;
       var pts = [ll, dest];
       if (routeLine) { routeLine.setLatLngs(pts); routeCase.setLatLngs(pts); } else { routeCase = L.polyline(pts, { color: '#fff', weight: 10, opacity: .95 }).addTo(lmap); routeLine = L.polyline(pts, { color: '#1a73e8', weight: 5, dashArray: '8 8' }).addTo(lmap); }
       $('map-stat').textContent = '📏 ចម្ងាយត្រង់ ' + hav(ll[0], ll[1], dest[0], dest[1]).toFixed(1) + ' គម';
     }).then(function () { routeBusy = false; });
   }
   function onPos(c) {   // called on EVERY GPS update: this is what makes the blue dot move
-    if (!lmap || !c) return;
+    if (!lmap || !c || !curMap) return;
     var ll = [c.latitude, c.longitude];
     if (meMarker) meMarker.setLatLng(ll); else meMarker = L.marker(ll, { icon: L.divIcon({ className: '', html: '<div class="me-dot"></div>', iconSize: [20, 20], iconAnchor: [10, 10] }), zIndexOffset: 1000 }).addTo(lmap);
     if (accCircle) { accCircle.setLatLng(ll).setRadius(Math.min(c.accuracy || 0, 200)); } else accCircle = L.circle(ll, { radius: Math.min(c.accuracy || 0, 200), color: '#1a73e8', weight: 1, fillOpacity: .1 }).addTo(lmap);
@@ -368,7 +371,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     $('map-ext').href = mapExt(curMap);
     if (!initLeaflet()) return;
     setTimeout(function () { lmap.invalidateSize(); }, 60);
-    mapFitted = false; follow = true; routeFrom = null; $('map-stat').textContent = '';
+    mapGen++; routeBusy = false; mapFitted = false; follow = true; routeFrom = null; $('map-stat').textContent = '';
     if (routeLine) { lmap.removeLayer(routeLine); lmap.removeLayer(routeCase); routeLine = routeCase = null; }
     if (destMarker) { lmap.removeLayer(destMarker); destMarker = null; }
     if (curMap.lat != null && curMap.lng != null) {
@@ -379,7 +382,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (lastPos) onPos(lastPos);
   }
   function clearMap() {   // delivery finished: wipe everything from the map tab
-    curMap = null; stopMapWatch(); routeFrom = null; mapFitted = false; follow = true;
+    curMap = null; mapGen++; routeBusy = false; stopMapWatch(); routeFrom = null; mapFitted = false; follow = true;
     if (lmap) {
       [routeLine, routeCase, destMarker, meMarker, accCircle].forEach(function (x) { if (x) lmap.removeLayer(x); });
       routeLine = routeCase = destMarker = meMarker = accCircle = null;
