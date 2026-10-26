@@ -252,6 +252,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <p class="muted" style="margin:4px 0 12px">ចុចដើម្បីបញ្ជាឱ្យទំព័ររបស់អតិថិជនទាំងអស់ផ្ទុកទិន្នន័យថ្មីឡើងវិញ</p>
   <button class="btn btn-p" id="btn-reload-all" style="width:100%;">🔄 ផ្ទុកទំព័រអ្នកប្រើប្រាស់ទាំងអស់ឡើងវិញ</button>
 </div>
+<div class="card" style="margin-top:12px">
+  <h2 class="h2">💰 សមតុល្យអ្នកដឹក <span id="drv-bal-total" class="muted"></span></h2>
+  <p class="muted" style="margin:4px 0 8px">ប្រាក់ដែលហាងត្រូវបង់ឱ្យអ្នកដឹកម្នាក់ៗ (មិនទាន់ស្នើ + កំពុងរង់ចាំ)</p>
+  <div id="drv-bal" class="muted">កំពុងផ្ទុក…</div>
+</div>
 <main class="wrap">
   <!-- ========== HOME ========== -->
   <section id="page-home" class="page on">
@@ -407,6 +412,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <div class="card">
       <h2 class="h2">📜 ប្រវត្តិ</h2>
       <div id="pay-hist" class="muted">…</div>
+      <button class="btn btn-d btn-s" id="pay-hist-clear" style="margin-top:8px;display:none">🗑 លុបប្រវត្តិទាំងអស់</button>
     </div>
   </section>
 
@@ -417,34 +423,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="btn btn-g btn-s" id="pw-out" style="margin-top:8px">🔒 ចាកចេញ (Admin)</button>
     </div>
     <div class="card" style="margin-top:12px">
-      <h2 class="h2">🧰 អាប់ដេត រហ័ស</h2>
-      <p class="muted" style="margin:4px 0 12px">សកម្មភាពលើមុខម្ហូបទាំងអស់ក្នុងពេលតែមួយ</p>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn btn-g" id="bulk-enable">✅ បើកលក់មុខម្ហូបទាំងអស់ដែលមានស្តុក</button>
-        <button class="btn btn-g" id="bulk-disable-zero">⛔ បិទមុខម្ហូបដែលអស់ស្តុក (0)</button>
-      </div>
-    </div>
-    <div class="card" style="margin-top:12px">
       <h2 class="h2">🧾 ការកម្មង់ទាំងអស់ <span id="ord-count" class="muted"></span></h2>
       <p class="muted" style="margin:4px 0 10px">⏳ មិនទាន់ទទួល · ✅ បានទទួលរួច។ ពេលចុច ✅ ការកម្មង់នឹងចូលប្រវត្តិ ហើយកែលែងបាន។</p>
       <div id="ord-list" class="muted">កំពុងផ្ទុក…</div>
       <button class="btn btn-g btn-s" id="ord-refresh" style="margin-top:8px">🔄 ផ្ទុកឡើងវិញ</button>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <h2 class="h2">📜 ប្រវត្តិ (បានទទួលរួច) <span id="hist-count" class="muted"></span></h2>
-      <p class="muted" style="margin:4px 0 10px">🔒 ចាក់សោ មិនអាចកែបានទេ · Admin អាចលុបបាន។</p>
-      <div id="hist-list" class="muted">…</div>
-      <button class="btn btn-d btn-s" id="hist-clear" style="margin-top:8px;display:none">🗑 លុបប្រវត្តិទាំងអស់</button>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <h2 class="h2">🔐 ការចូលតាម Telegram</h2>
-      <p class="muted" style="margin:4px 0 10px">បើក: អតិថិជនត្រូវចូលតាម Telegram (ក្នុង browser) ហើយត្រូវមាន Username ។ បិទ: កម្មង់បានដោយសេរី។</p>
-      <div class="switch-row"><span>តម្រូវឱ្យចូលតាម Telegram និងមាន Username</span>
-        <label class="sw"><input type="checkbox" id="req-login"><span></span></label></div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <h2 class="h2">ℹ️ ព័ត៌មាន</h2>
-      <p class="muted" style="margin:6px 0 0">ការកែប្រែទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ដោយ Telegram (initData) ។ មានតែអ្នកគ្រប់គ្រងដែលមានសិទ្ធិប៉ុណ្ណោះដែលអាចរក្សាទុកបាន(កែវ ដាវីន_Davin_keo)។</p>
     </div>
   </section>
 
@@ -1122,8 +1104,6 @@ async function bulk(list, updates, okMsg) {
   if (!fail) toast(`${okMsg} (${list.length})`, "ok");
   loadMenu();
 }
-$("bulk-enable").onclick = () => bulk(items.filter(i => !isOn(i) && stockOf(i) > 0), { is_available: true }, "បានបើកលក់");
-$("bulk-disable-zero").onclick = () => bulk(items.filter(i => isOn(i) && stockOf(i) <= 0), { is_available: false }, "បានបិទលក់");
 
 /* =====================================================
    BOOT
@@ -1299,22 +1279,6 @@ document.getElementById('btn-reload-all')?.addEventListener('click', triggerRelo
 
 
 
-/* =====================================================
-   TELEGRAM LOGIN REQUIREMENT
-   ===================================================== */
-async function loadLoginSetting() {
-  const { data } = await supa.from('app_settings').select('value').eq('key', 'require_telegram_login').maybeSingle();
-  $("req-login").checked = !(data && (data.value === false || data.value === "false"));
-}
-$("req-login").addEventListener("change", async (e) => {
-  const on = e.target.checked;
-  const r = await admin({ action: "update_setting", key: "require_telegram_login", value: on });
-  if (r.error) { e.target.checked = !on; toast(r.error, "bad"); return; }
-  toast(on ? "បានបើក៖ ត្រូវចូលតាម Telegram" : "បានបិទ៖ កម្មង់បានដោយសេរី", "ok");
-});
-
-loadLoginSetting();
-
 /* ===== PAID ORDERS + TRACKING STAGE ===== */
 const ordHead = o => {
   const items = (o.cart || []).map(i => `${esc(i.name_kh)} ×${esc(i.quantity)}${i.options?.sugar ? ` (${esc(i.options.sugar)}, ${esc(i.options.ice)})` : ""}`).join(", ");
@@ -1325,12 +1289,11 @@ const ordHead = o => {
       <div style="font-size:12.5px;margin:4px 0 8px">${items}</div>`;
 };
 async function loadOrders() {
-  const box = $("ord-list"), hbox = $("hist-list");
+  const box = $("ord-list");
   const r = await admin({ action: "list_orders" });
   if (r.error) { box.textContent = r.error; return; }
   const rows = r.data?.orders || [], hist = r.data?.history || [];
   $("ord-count").textContent = rows.length ? `(${rows.length})` : "";
-  $("hist-count").textContent = hist.length ? `(${hist.length})` : "";
 
   // ---- active orders: two statuses ----
   box.innerHTML = rows.length ? rows.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink)">
@@ -1345,26 +1308,7 @@ async function loadOrders() {
     if (res.error) toast(res.error, "bad"); else { toast("បានផ្លាស់ទៅប្រវត្តិ", "ok"); loadOrders(); }
   }));
 
-  // ---- history: locked, delete only ----
-  hbox.innerHTML = hist.length ? hist.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink);background:#f5f8f7">
-      <div style="opacity:.75">${ordHead(o)}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-g btn-s" disabled style="opacity:.6">⏳ មិនទាន់ទទួល</button>
-        <button class="btn btn-p btn-s" disabled style="opacity:1">✅ បានទទួលរួច 🔒</button>
-        <button class="btn btn-d btn-s" data-id="${esc(o.tran_id)}" data-del="1" style="margin-left:auto">🗑 លុប</button>
-      </div></div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
-  $("hist-clear").style.display = hist.length ? "" : "none";
-  hbox.querySelectorAll("button[data-del]").forEach(b => b.addEventListener("click", async () => {
-    if (!confirm("លុបការកម្មង់នេះពីប្រវត្តិជាអចិន្ត្រៃយ៍?")) return;
-    const res = await admin({ action: "delete_order", tran_id: b.dataset.id });
-    if (res.error) toast(res.error, "bad"); else { toast("បានលុប", "ok"); loadOrders(); }
-  }));
 }
-$("hist-clear").addEventListener("click", async () => {
-  if (!confirm("លុបប្រវត្តិទាំងអស់ជាអចិន្ត្រៃយ៍? មិនអាចយកមកវិញបានទេ។")) return;
-  const res = await admin({ action: "clear_history" });
-  if (res.error) toast(res.error, "bad"); else { toast("បានលុបប្រវត្តិទាំងអស់", "ok"); loadOrders(); }
-});
 $("ord-refresh").addEventListener("click", loadOrders);
 if (hasTG) loadOrders(); else $("ord-list").textContent = "សូមបើកតាម Telegram ដើម្បីមើល";
 
@@ -1525,7 +1469,7 @@ const pmoney = n => "$" + Number(n || 0).toFixed(2);
 const fmtT = t => String(t || "").slice(0, 16).replace("T", " ");
 async function loadPayouts() {
   const r = await admin({ action: "list_payouts" });
-  if (r.error || !r.data) { $("pay-pending").textContent = r.error || ""; return; }
+  if (r.error || !r.data) { $("pay-pending").textContent = r.error || ""; $("drv-bal").textContent = r.error || ""; return; }
   const pays = r.data.payouts || [], drivers = r.data.drivers || [], bal = r.data.unrequested || {};
   const dn = id => { const d = drivers.find(x => String(x.id) === String(id)); return d ? `${esc(d.name)} <span class="muted">· ${esc(d.login_id)}</span>` : "—"; };
   const pend = pays.filter(p => p.status === "pending");
@@ -1546,12 +1490,27 @@ async function loadPayouts() {
   }));
   const rows = drivers.filter(d => bal[d.id] > 0);
   $("pay-bal").innerHTML = rows.length ? rows.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)"><span>${dn(d.id)}</span><b>${pmoney(bal[d.id])}</b></div>`).join("") : "គ្មាន";
+  // balance of EVERY driver (shown at the top of the page): not yet requested + waiting for admin to pay
+  const pendBy = {}; pend.forEach(p => { pendBy[p.driver_id] = Math.round(((pendBy[p.driver_id] || 0) + Number(p.amount || 0)) * 100) / 100; });
+  const all = drivers.map(d => ({ d, free: Number(bal[d.id] || 0), wait: pendBy[d.id] || 0 })).map(x => ({ ...x, sum: Math.round((x.free + x.wait) * 100) / 100 })).sort((a, b) => b.sum - a.sum);
+  const grand = all.reduce((t, x) => t + x.sum, 0);
+  $("drv-bal-total").textContent = all.length ? `· សរុប ${pmoney(grand)}` : "";
+  $("drv-bal").innerHTML = all.length ? all.map(x => `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line);color:var(--ink)">
+      <span>${dn(x.d.id)}<div class="muted">មិនទាន់ស្នើ ${pmoney(x.free)} · រង់ចាំបង់ ${pmoney(x.wait)}</div></span>
+      <b style="font-size:17px;color:${x.sum > 0 ? "var(--brand)" : "var(--sub)"}">${pmoney(x.sum)}</b></div>`).join("") : "មិនទាន់មានអ្នកដឹកទេ";
   const done = pays.filter(p => p.status !== "pending");
+  $("pay-hist-clear").style.display = done.length ? "" : "none";
   $("pay-hist").innerHTML = done.length ? done.map(p => `<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);color:var(--ink)">
       <span>${dn(p.driver_id)}<div class="muted">${esc(fmtT(p.decided_at || p.requested_at))}</div></span>
       <span style="text-align:right"><b>${pmoney(p.amount)}</b><div class="muted">${p.status === "paid" ? "✅ បានបង់" : "❌ បដិសេធ"}</div></span></div>`).join("") : "មិនទាន់មានប្រវត្តិ";
 }
+$("pay-hist-clear").addEventListener("click", async () => {
+  if (!confirm("លុបប្រវត្តិប្រាក់ដែលបានបង់ / បដិសេធទាំងអស់?\n(សំណើកំពុងរង់ចាំ និងប្រាក់មិនទាន់ស្នើ មិនត្រូវបានលុបទេ។ ប្រវត្តិរបស់អ្នកដឹកក៏ត្រូវបានលុបដែរ។ មិនអាចយកមកវិញបានទេ។)")) return;
+  const res = await admin({ action: "clear_payout_history" });
+  if (res.error) toast(res.error, "bad"); else { toast("បានលុបប្រវត្តិ", "ok"); loadPayouts(); }
+});
 $("pay-refresh").addEventListener("click", loadPayouts);
+setInterval(() => { if (admToken && !document.hidden) loadPayouts(); }, 20000);
 document.querySelector('.tab[data-tab="pay"]').addEventListener("click", loadPayouts);
 setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
 </script>
