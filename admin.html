@@ -1327,7 +1327,7 @@ async function pollDlBadge() {   // keeps the number fresh even when the deliver
   const r = await admin({ action: "list_delivery" });
   if (!r.error && r.data) updateDlBadge(r.data.orders);
 }
-setInterval(pollDlBadge, 15000);
+setInterval(pollDlBadge, 5000);
 async function loadDelivery() {
   const r = await admin({ action: "list_delivery" });
   if (r.error) { $("dl-list").textContent = $("drv-list").textContent = r.error; return; }
@@ -1442,8 +1442,8 @@ $("dl-list").addEventListener("click", async (e) => {
   }
 });
 setInterval(() => {   // live refresh of what the drivers are doing
-  if (dlLoaded && !document.hidden && !(document.activeElement && document.activeElement.closest && document.activeElement.closest("#dl-list"))) loadDelivery();
-}, 10000);
+  if (dlLoaded && !document.hidden && $("page-delivery").classList.contains("on") && !(document.activeElement && /^(SELECT|INPUT|TEXTAREA)$/.test(document.activeElement.tagName))) loadDelivery();
+}, 3000);
 $("drv-list").addEventListener("click", async (e) => {
   const b = e.target.closest("button[data-d]"); if (!b) return;
   const id = Number(b.dataset.id), act = b.dataset.d;
@@ -1505,7 +1505,6 @@ $("pay-hist-clear").addEventListener("click", async () => {
 $("pay-refresh").addEventListener("click", loadPayouts);
 setInterval(() => { if (admToken && !document.hidden) loadPayouts(); }, 20000);
 document.querySelector('.tab[data-tab="pay"]').addEventListener("click", loadPayouts);
-setInterval(() => { if ($("page-delivery").classList.contains("on")) loadDelivery(); }, 15000);
 </script>
 </body>
 </html>
