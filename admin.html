@@ -420,7 +420,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     </div>
     <div class="card" style="margin-top:12px">
       <h2 class="h2">📜 ប្រវត្តិការកម្មង់ <span id="his-count" class="muted"></span></h2>
-      <p class="muted" style="margin:4px 0 10px">ការកម្មង់ដែលបានទទួលរួច និងការដឹកដែលបានបញ្ចប់។ មើលបានតែប៉ុណ្ណោះ មិនអាចកែ ឬលុបបានទេ។</p>
+      <p class="muted" style="margin:4px 0 10px">ការកម្មង់ដែលបានទទួលរួច និងការដឹកដែលបានបញ្ចប់។ មើលបានតែប៉ុណ្ណោះ មិនអាចកែបានទេ។ អាចចុច «លុប» ដើម្បីលុបចេញជាអចិន្ត្រៃយ៍។</p>
       <div id="his-list" class="muted">កំពុងផ្ទុក…</div>
     </div>
   </section>
@@ -1293,8 +1293,15 @@ async function loadOrders() {
   $("his-list").innerHTML = hist.length ? hist.map(o => `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;color:var(--ink);background:#fafcfb">
       ${ordHead(o)}
       ${o.order_type === "delivery" ? `<div class="muted" style="margin-bottom:6px">📍 ${esc(o.address || "—")}${o.driver_name ? ` · 🛵 ${esc(o.driver_name)}` : ""}</div>` : ""}
-      <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#d9f2ee;color:#0f766e">✅ ${o.order_type === "delivery" ? "បានដឹកដល់" : "បានទទួលរួច"}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#d9f2ee;color:#0f766e">✅ ${o.order_type === "delivery" ? "បានដឹកដល់" : "បានទទួលរួច"}</span>
+        <button class="btn btn-d btn-s" data-hdel="${esc(o.tran_id)}">🗑 លុប</button></div>
     </div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
+  $("his-list").querySelectorAll("button[data-hdel]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("លុបការកម្មង់នេះចេញពីប្រវត្តិជាអចិន្ត្រៃយ៍? មិនអាចយកមកវិញបានទេ។")) return;
+    const res = await admin({ action: "delete_order", tran_id: b.dataset.hdel });
+    if (res.error) toast(res.error, "bad"); else { toast("បានលុប", "ok"); loadOrders(); }
+  }));
 
 }
 document.querySelector('.tab[data-tab="more"]').addEventListener("click", loadOrders);
@@ -1384,7 +1391,8 @@ function renderDelivery() {
           `<span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:${k === cur ? "var(--brand,#0f766e)" : "#eceff3"};color:${k === cur ? "#fff" : "#667"}">${k === cur ? "● " : ""}${l}</span>`).join("")}</div>` +
         `<div class="muted" style="margin-top:4px">📡 ស្ថានភាពមកពីអ្នកដឹកចុចក្នុង app (admin មិនអាចកែបានទេ)</div>`;
       if (cur === "not_yet") actions = `<button class="btn btn-g btn-s" data-a="unassign" data-id="${esc(o.tran_id)}">↩️ ដកអ្នកដឹក</button>`;
-      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — នឹងបាត់ពីបញ្ជីនេះក្រោយ ៣០ នាទី ហើយចូលប្រវត្តិនៅផ្ទាំង «ផ្សេងៗ»</div>`;
+      if (cur === "delivered") actions = `<div class="muted" style="width:100%">✅ ការដឹកបានបញ្ចប់ — នឹងបាត់ពីបញ្ជីនេះក្រោយ ៣០ នាទី ហើយចូលប្រវត្តិនៅផ្ទាំង «ផ្សេងៗ»</div>` +
+        `<button class="btn btn-d btn-s" data-a="archive" data-id="${esc(o.tran_id)}">🗑 លុបចេញពីបញ្ជីឥឡូវនេះ (ចូលប្រវត្តិ)</button>`;
     } else {
       state = o.dispatch === "open" ? "📡 នៅក្នុង Delivery app (អ្នកដឹកអាចស្នើ)" : "⏸ មិនទាន់ផ្ញើ";
       actions = (o.dispatch === "open"
@@ -1424,6 +1432,7 @@ $("dl-list").addEventListener("click", async (e) => {
     const msg = `សួស្តី ${b.dataset.n || ""}! លេខតាមដានការកម្មង់របស់អ្នកក្នុង Epheap app គឺ ${b.dataset.c}\nសូមបញ្ចូលវាក្នុង «🔎 តាមដានអីវ៉ាន់» ដើម្បីមើលស្ថានភាព។ អរគុណ!`;
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(() => toast("បានចម្លងសារ", "ok")).catch(() => prompt("ចម្លងសារនេះ:", msg));
   }
+  else if (act === "archive") { if (confirm("លុបចេញពីបញ្ជីឥឡូវនេះ? ការកម្មង់នឹងចូលប្រវត្តិនៅផ្ទាំង «ផ្សេងៗ» (មើលបានតែប៉ុណ្ណោះ)")) dlAct({ action: "archive_delivery", tran_id: id }, "បានផ្លាស់ទៅប្រវត្តិ"); }
   else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
   else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
   else if (act === "approve") {
