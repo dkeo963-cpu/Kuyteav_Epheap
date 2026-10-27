@@ -1294,8 +1294,14 @@ async function loadOrders() {
       ${ordHead(o)}
       ${o.order_type === "delivery" ? `<div class="muted" style="margin-bottom:6px">📍 ${esc(o.address || "—")}${o.driver_name ? ` · 🛵 ${esc(o.driver_name)}` : ""}</div>` : ""}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#d9f2ee;color:#0f766e">✅ ${o.order_type === "delivery" ? "បានដឹកដល់" : "បានទទួលរួច"}</span></div>
+        <span style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#d9f2ee;color:#0f766e">✅ ${o.order_type === "delivery" ? "បានដឹកដល់" : "បានទទួលរួច"}</span>
+        <button class="btn btn-d btn-s" data-hdel="${esc(o.tran_id)}">🗑 លុប</button></div>
     </div>`).join("") : "មិនទាន់មានប្រវត្តិទេ";
+  $("his-list").querySelectorAll("button[data-hdel]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirm("លុបការកម្មង់នេះចេញពីប្រវត្តិជាអចិន្ត្រៃយ៍? មិនអាចយកមកវិញបានទេ។")) return;
+    const res = await admin({ action: "delete_order", tran_id: b.dataset.hdel });
+    if (res.error) toast(res.error, "bad"); else { toast("បានលុប", "ok"); loadOrders(); }
+  }));
 
 }
 document.querySelector('.tab[data-tab="more"]').addEventListener("click", loadOrders);
@@ -1427,6 +1433,7 @@ $("dl-list").addEventListener("click", async (e) => {
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(() => toast("បានចម្លងសារ", "ok")).catch(() => prompt("ចម្លងសារនេះ:", msg));
   }
   else if (act === "archive") { if (confirm("លុបចេញពីបញ្ជីឥឡូវនេះ? ការកម្មង់នឹងចូលប្រវត្តិនៅផ្ទាំង «ផ្សេងៗ» (មើលបានតែប៉ុណ្ណោះ)")) dlAct({ action: "archive_delivery", tran_id: id }, "បានផ្លាស់ទៅប្រវត្តិ"); }
+  else if (act === "delorder") { if (confirm("លុបការដឹកនេះជាអចិន្ត្រៃយ៍? (កំណត់ត្រាការកម្មង់នឹងបាត់)")) dlAct({ action: "delete_delivery", tran_id: id }, "បានលុប"); }
   else if (act === "deldriver") { if (confirm("លុបអ្នកដឹកនេះ?")) dlAct({ action: "set_driver", id: Number(b.dataset.drv), delete: true }, "បានលុបអ្នកដឹក"); }
   else if (act === "approve") {
     const drv = b.dataset.drv || ($("sel-" + id) || {}).value;
