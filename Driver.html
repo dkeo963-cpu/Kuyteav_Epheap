@@ -197,18 +197,16 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (v) { keepAwake(); ensureTrap(); }
     else if (wake && !trackingId) { try { wake.release(); } catch (e) {} wake = null; }
   }
-  window.addEventListener('beforeunload', function (e) { if (locked || active) { e.preventDefault(); e.returnValue = ''; return ''; } });
-  function ensureTrap() { if (!trapped) { try { history.pushState({ trap: 1 }, ''); trapped = true; } catch (e) {} } }
-  window.addEventListener('popstate', function () {   // Back button / swipe-back: ask before leaving
-    trapped = false;
-    if (locked) { ensureTrap(); toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); return; }
-    if (active) {
-      ensureTrap();   // stay in the app while the question is open
-      if (confirm('ចង់ចាកចេញពី app មែនទេ?\n\nត្រូវបិទ «សកម្ម» ជាមុនសិន។ ចុច OK ដើម្បីបិទ «សកម្ម» ហើយចាកចេញ។')) {
-        active = false;
-        call({ action: 'set_active', active: false }).then(function () { try { history.go(-2); } catch (e) {} try { window.close(); } catch (e) {} refresh(); });
-      }
+  window.addEventListener('beforeunload', function (e) {   // clicking the tab's X / closing the window: the browser asks "Leave site?  Cancel | Leave"
+    if (token && $('app') && !$('app').classList.contains('hide')) {
+      var msg = locked ? 'អ្នកមានការងារដឹកជញ្ជូន! សូមកុំចាកចេញ។' : 'ចង់ចាកចេញមែនទេ? សូមបិទ «សកម្ម» ជាមុន។';
+      e.preventDefault(); e.returnValue = msg; return msg;
     }
+  });
+  function ensureTrap() { if (!trapped) { try { history.pushState({ trap: 1 }, ''); trapped = true; } catch (e) {} } }
+  window.addEventListener('popstate', function () {   // Back button: only blocked while a delivery job is approved
+    trapped = false;
+    if (locked) { ensureTrap(); toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); }
   });
 
   /* ---- ACTIVE (not yet on a job): remind the driver to switch OFF before leaving ---- */
@@ -221,7 +219,6 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       h.parentNode.insertBefore(n, h.nextSibling);
     }
     n.style.display = (active && !locked) ? 'block' : 'none';
-    if (active || locked) ensureTrap();
   }
   window.addEventListener('pagehide', function () {   // closing the page: switch OFF right away (best effort)
     if (active && !locked && token) {
