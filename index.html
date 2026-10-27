@@ -630,8 +630,6 @@
     .promo-run { flex: 1; min-width: 0; overflow: hidden; }
     .top-promo-banner .top-promo-content { padding-right: 36px; font-size: 13.5px; font-weight: 600; }
     .promo-cta { flex-shrink: 0; }
-    /* button row: OUTSIDE the coloured banner, on the page background, aligned to the start */
-    .promo-cta-row { display: none; padding: 8px 14px 0; text-align: left; }
 
     .category-grid { gap: 10px; padding: 2px 14px 8px; }
     .category-card { flex: 1 0 78px; width: auto; }
@@ -735,10 +733,8 @@
         </div>
       </div>
     </div>
-    <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'; document.getElementById('promo-cta-row').style.display='none'">✕</button>
-  </div>
-  <div id="promo-cta-row" class="promo-cta-row">
-    <button type="button" id="promo-cta-btn" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
+    <button type="button" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
+    <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
   </div>
 
   <header class="top">
@@ -1292,7 +1288,7 @@
         const { data, error } = await supabaseClient
           .from('app_settings')
           .select('key, value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color', 'promo_cta_active']);
+          .in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
         
         if (!error && data) {
           const activeItem = data.find(i => i.key === 'promo_active');
@@ -1312,11 +1308,6 @@
           const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
           if (isActive && bannerEl) {
             bannerEl.style.display = 'flex';
-            // "កម្មង់ឥឡូវ" button: shown unless the admin switched it off (not set yet = shown)
-            const ctaItem = data.find(i => i.key === 'promo_cta_active');
-            const ctaRow = document.getElementById('promo-cta-row');
-            const ctaOn = !ctaItem || !(ctaItem.value === false || ctaItem.value === 'false');
-            if (ctaRow) ctaRow.style.display = ctaOn ? 'block' : 'none';
             const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
             const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
 
@@ -1333,7 +1324,6 @@
             });
           } else if (bannerEl) {
             bannerEl.style.display = 'none';
-            const r = document.getElementById('promo-cta-row'); if (r) r.style.display = 'none';
           }
         }
       } catch (e) {
