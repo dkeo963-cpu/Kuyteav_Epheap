@@ -148,7 +148,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs';
   var $ = function (id) { return document.getElementById(id); };
   var token = localStorage.getItem('drv_token') || '';
-  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine', locked = false, hiddenAt = 0, leftActive = false;
+  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine', locked = false, hiddenAt = 0, leftActive = false, trapped = false;
 
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
   function toast(m) { var t = $('toast'); t.textContent = m; t.classList.remove('hide'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.add('hide'); }, 3000); }
@@ -194,12 +194,21 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     var out = $('out'), tg = $('tgl');
     if (out) { out.disabled = v; out.style.opacity = v ? '.45' : ''; out.textContent = v ? '🔒 មិនអាចចាកចេញ (មានការងារ)' : 'ចាកចេញ'; }
     if (tg) tg.style.opacity = v ? '.5' : '';
-    if (v) { keepAwake(); try { history.pushState({ lock: 1 }, ''); } catch (e) {} }
+    if (v) { keepAwake(); ensureTrap(); }
     else if (wake && !trackingId) { try { wake.release(); } catch (e) {} wake = null; }
   }
   window.addEventListener('beforeunload', function (e) { if (locked || active) { e.preventDefault(); e.returnValue = ''; return ''; } });
-  window.addEventListener('popstate', function () {   // Back button: stay in the app
-    if (locked) { try { history.pushState({ lock: 1 }, ''); } catch (e) {} toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); }
+  function ensureTrap() { if (!trapped) { try { history.pushState({ trap: 1 }, ''); trapped = true; } catch (e) {} } }
+  window.addEventListener('popstate', function () {   // Back button / swipe-back: ask before leaving
+    trapped = false;
+    if (locked) { ensureTrap(); toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); return; }
+    if (active) {
+      ensureTrap();   // stay in the app while the question is open
+      if (confirm('ចង់ចាកចេញពី app មែនទេ?\n\nត្រូវបិទ «សកម្ម» ជាមុនសិន។ ចុច OK ដើម្បីបិទ «សកម្ម» ហើយចាកចេញ។')) {
+        active = false;
+        call({ action: 'set_active', active: false }).then(function () { try { history.go(-2); } catch (e) {} try { window.close(); } catch (e) {} refresh(); });
+      }
+    }
   });
 
   /* ---- ACTIVE (not yet on a job): remind the driver to switch OFF before leaving ---- */
@@ -212,6 +221,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       h.parentNode.insertBefore(n, h.nextSibling);
     }
     n.style.display = (active && !locked) ? 'block' : 'none';
+    if (active || locked) ensureTrap();
   }
   window.addEventListener('pagehide', function () {   // closing the page: switch OFF right away (best effort)
     if (active && !locked && token) {
@@ -476,8 +486,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     else if (leftActive) {
       leftActive = false;
       if (Date.now() - hiddenAt > 3000) Promise.resolve(refresh()).then(function () {
-        alert(active ? '⚠️ អ្នកបានចេញពី app ទាំងនៅ «សកម្ម»! សូមបិទ «សកម្ម» ជាមុន មុនចេញពី app ឬបិទទូរស័ព្ទ។'
-                     : '⚠️ អ្នកបានចេញពី app — «សកម្ម» ត្រូវបានបិទដោយស្វ័យប្រវត្តិ។ សូមបើកវាម្ដងទៀតពេលត្រៀមខ្លួន។');
+        toast(active ? '⚠️ សូមបិទ «សកម្ម» មុនចេញពី app ឬបិទទូរស័ព្ទ' : '⚠️ «សកម្ម» ត្រូវបានបិទដោយស្វ័យប្រវត្តិ ព្រោះអ្នកបានចេញពី app');
       });
     }
     if (document.visibilityState === 'visible' && typeof refresh === 'function' && $('app') && !$('app').classList.contains('hide')) refresh();
