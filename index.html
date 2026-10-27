@@ -626,10 +626,10 @@
     .sec-head span { font-size: 13px; color: var(--sub); font-weight: 600; }
 
     /* ===== Menu rows (like the reference) + categories with photos ===== */
-    .top-promo-banner { display: flex; align-items: center; gap: 10px; padding: 8px 40px 8px 12px; overflow: hidden; position: relative; text-align: left; }
-    .promo-run { flex: 1; min-width: 0; overflow: hidden; }
+    .top-promo-banner { display: flex; flex-direction: column; align-items: stretch; gap: 8px; padding: 8px 40px 10px 12px; overflow: hidden; position: relative; text-align: left; }
+    .promo-run { width: 100%; min-width: 0; overflow: hidden; }
     .top-promo-banner .top-promo-content { padding-right: 36px; font-size: 13.5px; font-weight: 600; }
-    .promo-cta { flex-shrink: 0; }
+    .promo-cta { flex-shrink: 0; align-self: center; }
 
     .category-grid { gap: 10px; padding: 2px 14px 8px; }
     .category-card { flex: 1 0 78px; width: auto; }
@@ -733,7 +733,7 @@
         </div>
       </div>
     </div>
-    <button type="button" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
+    <button type="button" id="promo-cta-btn" class="promo-cta" onclick="goPromo()">កម្មង់ឥឡូវ</button>
     <button type="button" class="promo-x" aria-label="Close" onclick="this.parentElement.style.display='none'">✕</button>
   </div>
 
@@ -1288,7 +1288,7 @@
         const { data, error } = await supabaseClient
           .from('app_settings')
           .select('key, value')
-          .in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
+          .in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color', 'promo_cta_active']);
         
         if (!error && data) {
           const activeItem = data.find(i => i.key === 'promo_active');
@@ -1308,6 +1308,11 @@
           const isActive = activeItem && (activeItem.value === true || activeItem.value === 'true');
           if (isActive && bannerEl) {
             bannerEl.style.display = 'flex';
+            // "កម្មង់ឥឡូវ" button: shown unless the admin switched it off (not set yet = shown)
+            const ctaItem = data.find(i => i.key === 'promo_cta_active');
+            const ctaEl = document.getElementById('promo-cta-btn');
+            const ctaOn = !ctaItem || !(ctaItem.value === false || ctaItem.value === 'false');
+            if (ctaEl) ctaEl.style.display = ctaOn ? '' : 'none';
             const msgText = cleanVal(textItem?.value, "we will free delivery for more than 10 items for you");
             const badgeText = cleanVal(badgeItem?.value, "Free Delivery");
 
