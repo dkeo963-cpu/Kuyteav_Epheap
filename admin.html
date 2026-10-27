@@ -296,6 +296,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         </div>
         <label class="sw"><input type="checkbox" id="promo-toggle"><span></span></label>
       </div>
+      <div class="ctl" style="margin-bottom: 12px;">
+        <div>
+          <div class="lbl">ប៊ូតុង «កម្មង់ឥឡូវ» (Order Now button)</div>
+          <div id="promo-cta-status-text" class="val">…</div>
+          <div class="muted">បង្ហាញ ឬលាក់ប៊ូតុងនៅក្រោមអក្សរដែលរត់</div>
+        </div>
+        <label class="sw"><input type="checkbox" id="promo-cta-toggle"><span></span></label>
+      </div>
       <div class="wait-row" style="flex-direction: column; align-items: stretch; gap: 8px;">
         <div>
           <label style="font-size: 11px; font-weight: 700; color: var(--sub);">អត្ថបទផ្លាកសញ្ញា (Badge Text):</label>
@@ -614,7 +622,7 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
    PROMOTIONAL BANNER
    ===================================================== */
 async function loadPromoBanner() {
-  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
+  const { data } = await supa.from('app_settings').select('key, value').in('key', ['promo_active', 'promo_cta_active', 'promo_text', 'promo_badge', 'promo_bg', 'promo_color', 'promo_badge_bg', 'promo_badge_color']);
   if (data) {
     const activeItem = data.find(i => i.key === 'promo_active');
     const textItem = data.find(i => i.key === 'promo_text');
@@ -635,6 +643,10 @@ async function loadPromoBanner() {
 
     $("promo-toggle").checked = active;
     setText($("promo-status-text"), active ? "កំពុងបើកបង្ហាញ" : "បានបិទ", active ? "ok" : "bad");
+    const ctaItem = data.find(i => i.key === 'promo_cta_active');
+    const ctaOn = !ctaItem || !(ctaItem.value === false || ctaItem.value === 'false');
+    $("promo-cta-toggle").checked = ctaOn;
+    setText($("promo-cta-status-text"), ctaOn ? "កំពុងបើកបង្ហាញ" : "បានបិទ", ctaOn ? "ok" : "bad");
     $("promo-badge-input").value = badge;
     $("promo-msg-input").value = text;
 
@@ -672,6 +684,14 @@ $("promo-toggle").addEventListener("change", async e => {
   setText($("promo-status-text"), "កំពុងរក្សាទុក…", "");
   const { error } = await admin({ action: "update_setting", key: "promo_active", value: want });
   if (error) toast(error, "err"); else toast(want ? "បានបើកប្រូម៉ូសិនបដា" : "បានបិទប្រូម៉ូសិនបដា", "ok");
+  loadPromoBanner();
+});
+
+$("promo-cta-toggle").addEventListener("change", async e => {
+  const want = e.target.checked;
+  setText($("promo-cta-status-text"), "កំពុងរក្សាទុក…", "");
+  const { error } = await admin({ action: "update_setting", key: "promo_cta_active", value: want });
+  if (error) toast(error, "err"); else toast(want ? "បានបើកប៊ូតុងកម្មង់ឥឡូវ" : "បានបិទប៊ូតុងកម្មង់ឥឡូវ", "ok");
   loadPromoBanner();
 });
 
