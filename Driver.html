@@ -148,7 +148,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
   var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5a2d3dHRsaHFlZHlya3hmb2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3NTc1MjAsImV4cCI6MjEwNjMzMzUyMH0.vQy4Yni6uVu9LvhJqvK2QMFXjvzZX7sUhooOJPgpWPs';
   var $ = function (id) { return document.getElementById(id); };
   var token = localStorage.getItem('drv_token') || '';
-  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine', locked = false;
+  var me = null, active = false, timer = null, watchId = null, postTimer = null, lastPos = null, trackingId = null, wake = null, tab = 'mine', locked = false, hiddenAt = 0, leftActive = false;
 
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
   function toast(m) { var t = $('toast'); t.textContent = m; t.classList.remove('hide'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.add('hide'); }, 3000); }
@@ -197,9 +197,26 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (v) { keepAwake(); try { history.pushState({ lock: 1 }, ''); } catch (e) {} }
     else if (wake && !trackingId) { try { wake.release(); } catch (e) {} wake = null; }
   }
-  window.addEventListener('beforeunload', function (e) { if (locked) { e.preventDefault(); e.returnValue = ''; return ''; } });
+  window.addEventListener('beforeunload', function (e) { if (locked || active) { e.preventDefault(); e.returnValue = ''; return ''; } });
   window.addEventListener('popstate', function () {   // Back button: stay in the app
     if (locked) { try { history.pushState({ lock: 1 }, ''); } catch (e) {} toast('🔒 សូមបញ្ចប់ការដឹកជាមុនសិន មុនចេញពី app'); }
+  });
+
+  /* ---- ACTIVE (not yet on a job): remind the driver to switch OFF before leaving ---- */
+  function leaveNote() {
+    var n = $('leave-note');
+    if (!n) {
+      var h = document.querySelector('#app header.top'); if (!h) return;
+      n = document.createElement('div'); n.id = 'leave-note'; n.className = 'trk bad'; n.style.cssText = 'display:none;margin:8px 12px';
+      n.textContent = '⚠️ អ្នកកំពុង «សកម្ម» — មុនចេញពី app, ប្តូរ tab ឬបិទទូរស័ព្ទ សូមបិទ «សកម្ម» ជាមុនសិន។ បើមិនដូច្នេះទេ ប្រព័ន្ធនឹងបិទឱ្យដោយស្វ័យប្រវត្តិក្រោយ ២ នាទី។';
+      h.parentNode.insertBefore(n, h.nextSibling);
+    }
+    n.style.display = (active && !locked) ? 'block' : 'none';
+  }
+  window.addEventListener('pagehide', function () {   // closing the page: switch OFF right away (best effort)
+    if (active && !locked && token) {
+      try { fetch(API, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }, body: JSON.stringify({ action: 'set_active', active: false, token: token }) }); } catch (e) {}
+    }
   });
 
   function start() { $('login').classList.add('hide'); $('app').classList.remove('hide'); refresh(); clearInterval(timer); var rbusy = false; timer = setInterval(function () { if (document.hidden || rbusy) return; rbusy = true; var done = function () { rbusy = false; }; try { Promise.resolve(refresh()).then(done, done); } catch (e) { done(); } }, 1500); }
@@ -247,6 +264,7 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
       if (tab === 'me') loadEarnings();
       $('dname').textContent = me.name; $('did').textContent = me.login_id; $('mname').textContent = me.name; $('mid').textContent = me.login_id;
       $('tgl').classList.toggle('on', active); $('tgl').setAttribute('aria-checked', active); $('swl').textContent = active ? 'សកម្ម' : 'បិទ';
+      leaveNote();
       $('mstate').textContent = active ? '🟢 កំពុងសកម្ម' : '⚪ បិទ';
 
       var m = j.mine || [];
@@ -453,6 +471,15 @@ nav em{position:absolute;top:2px;left:calc(50% + 6px);min-width:18px;height:18px
     if (tab === 'map') ensureMapWatch();   // keep the blue dot moving after the delivery is finished
   }
   document.addEventListener('visibilitychange', function () {
+    // left the app while ACTIVE (and no job): remember it, and alert when the driver comes back
+    if (document.visibilityState === 'hidden') { if (active && !locked) { hiddenAt = Date.now(); leftActive = true; } }
+    else if (leftActive) {
+      leftActive = false;
+      if (Date.now() - hiddenAt > 3000) Promise.resolve(refresh()).then(function () {
+        alert(active ? '⚠️ អ្នកបានចេញពី app ទាំងនៅ «សកម្ម»! សូមបិទ «សកម្ម» ជាមុន មុនចេញពី app ឬបិទទូរស័ព្ទ។'
+                     : '⚠️ អ្នកបានចេញពី app — «សកម្ម» ត្រូវបានបិទដោយស្វ័យប្រវត្តិ។ សូមបើកវាម្ដងទៀតពេលត្រៀមខ្លួន។');
+      });
+    }
     if (document.visibilityState === 'visible' && typeof refresh === 'function' && $('app') && !$('app').classList.contains('hide')) refresh();
     if (!trackingId && !locked) return;
     if (document.visibilityState === 'hidden') { wasHidden = true; return; }
